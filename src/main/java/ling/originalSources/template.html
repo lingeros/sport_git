@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>运动轨迹</title>
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"/>
+    <style>
+        html, body, #container {
+            height: 100%;
+            width: 100%;
+        }
+
+        .btn-box {
+            position: absolute;
+            right: 5rem;
+            top: 5rem;
+        }
+
+        .btn {
+
+            width: 14em;
+            margin-left: 3.2rem;
+            margin-top: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<div class="input-card" style="width:18rem">
+    <h4>欢迎使用高德地图</h4>
+</div>
+
+<script type="text/javascript"
+        src="https://webapi.amap.com/maps?v=1.4.14&key=56452020d32767c0bd1ac3da6446a19f&plugin=AMap.Geocoder"></script>
+<script type="text/javascript">
+
+
+    var $ = function (elementId) {
+        return document.getElementById(elementId);
+    };
+
+
+    // 创建包含4个节点的折线及文字标注
+    var path = [${points}];
+    var map = new AMap.Map("container", {
+        resizeEnable: true,
+        <!--center: [113.35933,23.15718166],-->
+        center: path[0],
+        zoom: 16
+    });
+
+    // 坐标转换
+    AMap.convertFrom(path, 'gps', function (status, result) {
+        if (result.info === 'ok') {
+            var path2 = result.locations;
+            polyline2 = new AMap.Polyline({
+                path: path2,
+                borderWeight: 2, // 线条宽度，默认为 1
+                strokeColor: 'blue', // 线条颜色
+                lineJoin: 'round' // 折线拐点连接处样式
+            });
+            map.add(polyline2);
+            text2 = new AMap.Text({
+                position: result.locations[0],
+                text: '运动轨迹',
+                offset: new AMap.Pixel(-20, -20)
+            });
+            map.add(text2);
+
+        }
+    });
+
+
+</script>
+</body>
+</html>
