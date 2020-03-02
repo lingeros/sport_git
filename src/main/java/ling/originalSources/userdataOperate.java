@@ -19,7 +19,7 @@ public class userdataOperate {
 			conn=d.getconn();
 			ps = conn.prepareStatement(sql);
 			rs = ps.executeQuery();
-			sql="CREATE TABLE  userdata(\r\n" + 
+			sql="CREATE TABLE if not exists userdata(\r\n" +
 					"	user_id varchar(16) PRIMARY KEY ,\r\n" + 
 					"	user_name varchar(16),\r\n" + 
 					"	user_sex varchar(4),\r\n" + 
@@ -67,7 +67,7 @@ public class userdataOperate {
 			 ps.setString(4,user_phone);
 			int i= ps.executeUpdate();			
 			 if(i!=0){
-					DebugPrint.DPrint("��ӳɹ�");
+					DebugPrint.DPrint("userdataOperate add success");
 				}
 			
 		}catch(Exception e)
@@ -78,17 +78,19 @@ public class userdataOperate {
 	    }
 		
 	}
-	public void update(String uid,String uname ,String usex,String uphone)//����user_id�޸�������Ϣ
+	public void update(String uid,String uname ,String usex,String uphone)
 	{
 		try {
 			conn=d.getconn();
-			sql="UPDATE userdata set user_name="+"'"+uname+"'"+
-					",user_sex="+"'"+usex+"'"+",user_phone="+"'"+uphone+"'"
-					+ " where user_id="+"'"+uid+"'";
+			sql="UPDATE userdata set user_name=?,user_sex=? ,user_phone=? where user_id=?";
 			ps = conn.prepareStatement(sql);
+			ps.setString(1,uname);
+			ps.setString(2,usex);
+			ps.setString(3,uphone);
+			ps.setString(4,uid);
 			int i =ps.executeUpdate();
 			if(i!=0){
-				DebugPrint.DPrint("�޸ĳɹ�");
+				DebugPrint.DPrint("userdataOperate update success");
 			}
 		
 		
@@ -100,10 +102,10 @@ public class userdataOperate {
 	    	d.close(conn, ps, rs);
 	    }
 		}
-	public void select(ArrayList<String>array) {//������񣬲������д������
+	public void select(ArrayList<String>array) {
 		try {
 		conn=d.getconn();
-		sql="select*from userdata";
+		sql="select * from userdata";
 		ps = conn.prepareStatement(sql);
 		rs = ps.executeQuery();
 		
@@ -122,15 +124,15 @@ public class userdataOperate {
     	d.close(conn, ps, rs);
     }
 }
-	public void delete(String uid) {//����idɾ���û���Ϣ
+	public void delete(String uid) {
 	try {	
 		conn=d.getconn();
-		sql="DELETE FROM userdata\r\n" + 
-				"WHERE user_id="+"'"+uid+"'";			
+		sql="DELETE FROM userdata WHERE user_id= ?" ;
 		ps = conn.prepareStatement(sql);
+		ps.setString(1,uid);
 		int i =ps.executeUpdate();
 		if(i!=0){
-			DebugPrint.DPrint("ɾ���ɹ�");
+			DebugPrint.DPrint("userdataOperate delete success");
 		}
 		}catch(Exception e)
 	    {
@@ -139,14 +141,14 @@ public class userdataOperate {
 	    	d.close(conn, ps, rs);
 	    }
 	}
-	public void deleteAll() {//����idɾ���û���Ϣ
+	public void deleteAll() {
 		try {
 			conn=d.getconn();
 			sql="DELETE FROM userdata";
 			ps = conn.prepareStatement(sql);
 			int i =ps.executeUpdate();
 			if(i!=0){
-				DebugPrint.DPrint("ɾ���ɹ�");
+				DebugPrint.DPrint("userdataOperate delete all success");
 			}
 		}catch(Exception e)
 		{

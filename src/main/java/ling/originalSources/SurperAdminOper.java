@@ -92,9 +92,7 @@ public class SurperAdminOper {
     public void set_surperadmin() {
         try {
             conn = databaseInformation.getconn();
-            sql = "create table surperadmin(			\r\n" +
-                    "admin_key varchar(64)PRIMARY KEY\r\n" +
-                    ")";
+            sql = "create table if not exists surperadmin(admin_key varchar(64) PRIMARY KEY)";
             ps = conn.prepareStatement(sql);
             ps.executeUpdate();
             int t = ps.executeUpdate();

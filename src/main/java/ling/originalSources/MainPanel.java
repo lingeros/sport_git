@@ -5,6 +5,8 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
+import ling.CustomFrame.RemindFrame;
+import ling.CustomFrame.SelectFrame;
 import ling.utils.CalculateUtils;
 import ling.utils.UIFontUtil;
 
@@ -22,6 +24,7 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 
 public class MainPanel {
     static InputStream inputStream;
@@ -42,18 +45,18 @@ public class MainPanel {
     private int AST = 1;
     static boolean exists = true;
     private static String sql;
-    DatabaseInformation d = new DatabaseInformation();
-    private static MainPanel p = new MainPanel();
-    private static userdataOperate up = new userdataOperate();
-    private static EquiOperater ep = new EquiOperater();
+    DatabaseInformation databaseInformation = new DatabaseInformation();
+    private static MainPanel mainPanel = new MainPanel();
+    private static userdataOperate userdataOperate = new userdataOperate();
+    private static EquiOperater equiOperater = new EquiOperater();
     private static CurrentbdOper currentbdOper = new CurrentbdOper();
-    private static AbnormalOper abp = new AbnormalOper();
-    private static HistorybdOper hp = new HistorybdOper();
-    private static detailPane dP = new detailPane();
-    private static warnPane wp = new warnPane();
-    private static ExportEX xp = new ExportEX();
+    private static AbnormalOper abnormalOper = new AbnormalOper();
+    private static HistorybdOper historybdOper = new HistorybdOper();
+    private static detailPane detailPane = new detailPane();
+    private static warnPane warnPane = new warnPane();
+    private static ExportEX exportEX = new ExportEX();
     private static SurperAdminOper surperAdminOper = SurperAdminOper.getInstance();
-    private static AdminOper ap = new AdminOper();
+    private static AdminOper adminOper = new AdminOper();
     private static ArrayList<String> Sarray = new ArrayList();
     private static ArrayList<String> DTarray = new ArrayList();
     private static ArrayList<String> SDTarray = new ArrayList();
@@ -72,15 +75,17 @@ public class MainPanel {
     private static int track_point = 80;
     private static long startTime;
     private static String all = "";
-
+    private static Font font15 = new Font("微软雅黑", Font.PLAIN, 15);
+    private static Font font12 = new Font("微软雅黑", Font.PLAIN, 12);
+    private static Font font16 = new Font("微软雅黑", Font.PLAIN, 16);
 
     void mainpane() {
         //设置字体格式
-        p.setUIFont();
+        mainPanel.setUIFont();
         //获取串口
         ArrayList<String> portList = SerialTool.findPort();
-        for (String portName:portList
-             ) {
+        for (String portName : portList
+        ) {
             System.out.println(portName);
         }
         //串口设置 这里需要改
@@ -114,7 +119,6 @@ public class MainPanel {
         JButton redClose = new JButton();
         JButton redSmallest = new JButton();
         JButton redBiggest = new JButton();
-        JButton test = new JButton();
         final JLabel User_num = new JLabel("用户编号：");
         final JLabel User_name = new JLabel("用户姓名：");
         final JLabel phone_num = new JLabel("联系方式：");
@@ -222,8 +226,8 @@ public class MainPanel {
         final MainPanel p = new MainPanel();
         ArrayList<String> array1 = new ArrayList<>();
         ArrayList<String> array2 = new ArrayList<>();
-        up.selectID(array1);//获取user_id数组
-        ep.select(array2);  //获取eid数组
+        userdataOperate.selectID(array1);//获取user_id数组
+        equiOperater.select(array2);  //获取eid数组
         p.dbBox(bdUBox, array1);
         p.dbBox(bdEBox, array2);
         // *****************************************************thirdPane UI
@@ -262,11 +266,7 @@ public class MainPanel {
         p.setbdUserT(bdUserT_rowData, bdUserPgNum);
         bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
         thirdPane.add(bdUserJP);
-        secondPane.add(bdUser);
-        secondPane.add(bdUBox);
-        secondPane.add(bdequipment);
-        secondPane.add(bdEBox);
-        secondPane.add(bd);
+        panelAlls(secondPane, bdUser, bdUBox, bdequipment, bdEBox, bd);
         p.bdUserTB_clear(bdUserT_rowData);
         p.setbdUserT(bdUserT_rowData, bdUserPgNum);
         TableColumn column8 = bdUserT.getColumnModel().getColumn(8);
@@ -274,17 +274,13 @@ public class MainPanel {
         TableColumn column9 = bdUserT.getColumnModel().getColumn(9);
         column9.setPreferredWidth(160);
         bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-        thirdPane.add(bdUserPgupJB);
-        thirdPane.add(bdUserPgdownJB);
-        thirdPane.add(bdUserSelectLabel);
-        thirdPane.add(bdUserPgSelectTF);
-        thirdPane.add(bdUserPgSelectJB);
-        thirdPane.add(bdUserJP);
+        //添加多个控件
+        panelAlls(thirdPane, bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
         secondPane.repaint();
         thirdPane.repaint();
         // 添加设备表格
         final MyAbstractTableModel2 t2 = new MyAbstractTableModel2();
-        t2.setObject(ep.getNum());
+        t2.setObject(equiOperater.getNum());
         final JTable addequipmentT = new JTable(t2);
         final JScrollPane addequipmentJP = new JScrollPane();
         addequipmentJP.setBounds(5, 1, 990, 563);
@@ -321,32 +317,32 @@ public class MainPanel {
         datadelectJB.setBounds(850, 10, 80, 25);
         dataExporttJB.setBounds(850, 40, 80, 25);
         MyAbstractTableModel1 myModel = new MyAbstractTableModel1();
-        final JTable dataT = new JTable(myModel);
-        TableColumn tc1 = dataT.getColumnModel().getColumn(0);
+        final JTable dataTable = new JTable(myModel);
+        TableColumn tc1 = dataTable.getColumnModel().getColumn(0);
         JCheckBox ckb = new JCheckBox();
         tc1.setCellEditor(new DefaultCellEditor(ckb));
-        dataT.setRowHeight(25);
+        dataTable.setRowHeight(25);
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
         renderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
-        dataT.setDefaultRenderer(Object.class, renderer);
-        final JScrollPane dataJP = new JScrollPane(dataT);
-        dataJP.setViewportView(dataT);
-        TableColumn column1 = dataT.getColumnModel().getColumn(1);
-        TableColumn column0 = dataT.getColumnModel().getColumn(0);
-        TableColumn column10 = dataT.getColumnModel().getColumn(10);
+        dataTable.setDefaultRenderer(Object.class, renderer);
+        final JScrollPane jScrollPane = new JScrollPane(dataTable);
+        jScrollPane.setViewportView(dataTable);
+        TableColumn column1 = dataTable.getColumnModel().getColumn(1);
+        TableColumn column0 = dataTable.getColumnModel().getColumn(0);
+        TableColumn column10 = dataTable.getColumnModel().getColumn(10);
         column0.setPreferredWidth(10);
         column1.setPreferredWidth(100);
         column10.setPreferredWidth(150);
-        dataJP.setBounds(5, 1, 990, 525);
+        jScrollPane.setBounds(5, 1, 990, 525);
         final JButton addDataPgdownJB = new JButton("下一页");
         final JButton addDataPgupJB = new JButton("上一页");
         final JButton addDataPgSelectJB = new JButton("确定");
-        final JLabel ckBJL = new JLabel("全选");
-        final JCheckBox ckB = new JCheckBox();
+        final JLabel checkBoxForAllLabel = new JLabel("全选");
+        final JCheckBox jCheckBox = new JCheckBox();
         final JLabel addDataPgSelectLabel = new JLabel();
         final JTextField addDataPgSelectTF = new JTextField();
-        ckB.setBounds(60, 530, 18, 15);
-        ckBJL.setBounds(80, 525, 60, 25);
+        jCheckBox.setBounds(60, 530, 18, 15);
+        checkBoxForAllLabel.setBounds(80, 525, 60, 25);
         addDataPgupJB.setBounds(150, 526, 80, 25);
         addDataPgdownJB.setBounds(240, 526, 80, 25);
         addDataPgSelectLabel.setBounds(360, 526, 80, 25);
@@ -380,202 +376,124 @@ public class MainPanel {
         new_Cnum.setBackground(ngray);
         new_Cnum.setOpaque(true);
         new_admin.setBounds(20, 35, 140, 35);
-        new_admin.setFont(new Font("微软雅黑", Font.PLAIN, 16));
+        new_admin.setFont(font16);
         surAdminJL.setBounds(180, 40, 140, 30);
-        surAdminJL.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        surAdminJL.setFont(font15);
         surAdminJF.setBounds(325, 45, 240, 25);
         nameJL.setBounds(185, 10, 180, 20);
-        nameJL.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        nameJL.setFont(font15);
         nameJF.setBounds(330, 10, 240, 25);
-        confirmJB.setFont(new Font("微软雅黑", Font.PLAIN, 12));
+        confirmJB.setFont(font12);
         confirmJB.setBounds(700, 45, 85, 22);
-        deleteJB.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        deleteJB.setFont(font15);
         deleteJB.setBounds(615, 300, 300, 25);
-        updateJB.setFont(new Font("微软雅黑", Font.PLAIN, 12));
+        updateJB.setFont(font12);
         updateJB.setBounds(700, 85, 85, 20);
         adminJL.setBounds(185, 45, 180, 20);
-        adminJL.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        adminJL.setFont(font15);
         adminJF.setBounds(330, 45, 240, 25);
         RadminJL.setBounds(185, 80, 180, 20);
-        RadminJL.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        RadminJL.setFont(font15);
         RadminJF.setBounds(330, 80, 240, 25);
         HeartJL.setBounds(185, 160, 180, 20);
-        HeartJL.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        HeartJL.setFont(font15);
         HeartJF.setBounds(330, 160, 240, 25);
         new_Cnum.setBounds(25, 185, 140, 35);
         new_Cnum.setFont(new Font("微软雅黑", Font.PLAIN, 16));
         CnumJL.setBounds(185, 195, 180, 20);
-        CnumJL.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        CnumJL.setFont(font15);
         CnumJF.setBounds(330, 195, 240, 25);
         AbnormalJL.setBounds(185, 230, 180, 20);
-        AbnormalJL.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        AbnormalJL.setFont(font15);
         AbnormalJF.setBounds(330, 230, 240, 25);
-        confirmCJB.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        confirmCJB.setFont(font15);
         confirmCJB.setBounds(700, 160, 80, 25);
-        confirmCJB2.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        confirmCJB2.setFont(font15);
         confirmCJB2.setBounds(700, 195, 80, 25);
-        confirmCJB3.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        confirmCJB3.setFont(font15);
         confirmCJB3.setBounds(700, 230, 80, 25);//
         // 边界jlabel
-        final JLabel bor1 = new JLabel();
-        final JLabel bor2 = new JLabel();
-        final JLabel bor3 = new JLabel();
-        final JLabel bor4 = new JLabel();
-        bor1.setOpaque(true);
-        bor2.setOpaque(true);
-        bor3.setOpaque(true);
-        bor4.setOpaque(true);
-        bor1.setBackground(Color.white);
-        bor2.setBackground(nblue);
-        bor3.setBackground(nblue);
-        bor4.setBackground(nblue);
-        bor1.setBounds(0, 65, 990, 55);
-        bor2.setBounds(0, 0, 5, 9000);
-        bor3.setBounds(995, 0, 5, 600);
-        bor4.setBounds(0, 556, 995, 5);
-        secondPane.add(bor1);
-        thirdPane.add(bor2);
-        thirdPane.add(bor3);
-        thirdPane.add(bor4);
+        JLabel[] borders = new JLabel[4];
+        for (int i = 0; i < 4; i++) {
+            borders[i] = new JLabel();
+            borders[i].setOpaque(true);
+            borders[i].setBackground(nblue);
+        }
+        borders[0].setBackground(Color.white);
+        borders[0].setBounds(0, 65, 990, 55);
+        borders[1].setBounds(0, 0, 5, 9000);
+        borders[2].setBounds(995, 0, 5, 600);
+        borders[3].setBounds(0, 556, 995, 5);
+        secondPane.add(borders[0]);
+        for (int i = 1; i < 4; i++) {
+            thirdPane.add(borders[i]);
+        }
         secondPane.setBackground(Color.WHITE);
         thirdPane.setBackground(Color.WHITE);
-        mainPane.add(addUser);
-        mainPane.add(addequipment);
-        mainPane.add(bindingJB);
-        mainPane.add(dataJB);
-        mainPane.add(warningJB);
-        mainPane.add(ALLstartJB);
-        mainPane.add(AllcloseJB);
-        mainPane.add(closeJB);
-        mainPane.add(setJB);
-        mainPane.add(redClose);
-        mainPane.add(redSmallest);
-        mainPane.add(redBiggest);
-        mainframe.repaint();
-        mainframe.add(mainPane);
-        mainframe.add(secondPane);
-        mainframe.add(thirdPane);
-        mainframe.add(backColorPane);
-        mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainframe.setLocationRelativeTo(null);
-        mainframe.setResizable(false);
-        mainframe.setUndecorated(true);
-        mainframe.setVisible(true);
-        redClose.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                mainframe.dispose();
-                System.exit(0);
-            }
-        });
-        redSmallest.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                mainframe.setExtendedState(JFrame.ICONIFIED);
+        panelAlls(mainPane, addUser, addequipment, bindingJB, dataJB, warningJB, ALLstartJB, AllcloseJB, closeJB, setJB, redClose, redSmallest, redBiggest);
 
-            }
+        mainframe.repaint();
+        panelAlls(mainframe, mainPane, secondPane, thirdPane, backColorPane);
+        frameInit(mainframe);
+        redClose.addActionListener(e -> {
+            mainframe.dispose();
+            System.exit(0);
         });
+        redSmallest.addActionListener(e -> mainframe.setExtendedState(JFrame.ICONIFIED));
         // 用户添加相关
-        addUser.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                up.create();
-                secondPane.removeAll();
-                thirdPane.removeAll();
-                addUserPgSelectLabel.setText("跳转/共" + up.getPgNum() + "页");
-                MainPanel p = new MainPanel();
-                p.addUserTB_clear(addUser_rowData);
-                p.setAddUT(addUser_rowData, addUserPgNum);
-                p.Box(bdUBox, bdEBox);
-                secondPane.add(addnewUser);
-                secondPane.add(sex);
-                secondPane.add(Box);
-                secondPane.add(phone_numTF);
-                secondPane.add(phone_num);
-                secondPane.add(User_name);
-                secondPane.add(User_nameTF);
-                secondPane.add(User_num);
-                secondPane.add(User_numTF);
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                thirdPane.add(addUserJP);
-                thirdPane.add(saveAllJB);
-                thirdPane.add(addUserPgdownJB);
-                thirdPane.add(addUserPgSelectLabel);
-                thirdPane.add(addUserPgupJB);
-                thirdPane.add(addUserPgSelectJB);
-                thirdPane.add(addUserPgSelectTF);
-                secondPane.repaint();
-                thirdPane.repaint();
-            }
+        addUser.addActionListener(e -> {
+            userdataOperate.create();
+            secondPane.removeAll();
+            thirdPane.removeAll();
+            addUserPgSelectLabel.setText("跳转/共" + userdataOperate.getPgNum() + "页");
+            MainPanel p12 = new MainPanel();
+            p12.addUserTB_clear(addUser_rowData);
+            p12.setAddUT(addUser_rowData, addUserPgNum);
+            p12.Box(bdUBox, bdEBox);
+            panelAlls(secondPane,addnewUser,sex,Box,phone_numTF,phone_num,User_name,User_nameTF,User_num,User_numTF,borders[0]);
+            secondPane.repaint();
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],addUserJP,saveAllJB,addUserPgdownJB,addUserPgSelectLabel,addUserPgupJB,addUserPgSelectJB,addUserPgSelectTF);
+            thirdPane.repaint();
         });
-        addnewUser.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                MainPanel p = new MainPanel();
-                String U_num = User_numTF.getText();
-                String P_num = phone_numTF.getText();
-                String U_name = User_nameTF.getText();
-                String sex_ = (String) Box.getSelectedItem();
-                if (up.jduge(U_num))
-                    p.RemindPgSelect("  添加失败，该用户编号已存在");
-                else {
-                    if (!U_num.equals("") && !P_num.equals("") && !U_name.equals("") && !sex_.equals("")) {
-                        up.add(U_num, U_name, sex_, P_num);
-                        p.RemindSucess();
-                    } else {
-                        p.Remindfail();
-                    }
+        addnewUser.addActionListener(e -> {
+            MainPanel p1 = new MainPanel();
+            String U_num = User_numTF.getText();
+            String P_num = phone_numTF.getText();
+            String U_name = User_nameTF.getText();
+            String sex_ = (String) Box.getSelectedItem();
+            if (userdataOperate.jduge(U_num))
+                p1.RemindPgSelect("添加失败，该用户编号已存在");
+            else {
+                if (!U_num.equals("") && !P_num.equals("") && !U_name.equals("") && !sex_.equals("")) {
+                    userdataOperate.add(U_num, U_name, sex_, P_num);
+                    p1.RemindSucess();
+                } else {
+                    p1.Remindfail();
                 }
-                p.Box(bdUBox, bdEBox);
-                p.addUserTB_clear(addUser_rowData);
-                p.setAddUT(addUser_rowData, addUserPgNum);
-                phone_numTF.setText(null);
-                User_nameTF.setText(null);
-                User_numTF.setText(null);
-                secondPane.add(addnewUser);
-                secondPane.add(sex);
-                secondPane.add(Box);
-                secondPane.add(phone_numTF);
-                secondPane.add(phone_num);
-                secondPane.add(User_name);
-                secondPane.add(User_nameTF);
-                secondPane.add(User_num);
-                secondPane.add(User_numTF);
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                secondPane.repaint();
-                addUserPgSelectLabel.setText("跳转/共" + up.getPgNum() + "页");
-                thirdPane.add(addUserJP);
-                thirdPane.add(saveAllJB);
-                thirdPane.add(addUserJP);
-                thirdPane.add(addUserPgdownJB);
-                thirdPane.add(addUserPgSelectLabel);
-                thirdPane.add(addUserPgupJB);
-                thirdPane.add(addUserPgSelectJB);
-                thirdPane.add(addUserPgSelectTF);
-                thirdPane.repaint();
             }
+            p1.Box(bdUBox, bdEBox);
+            p1.addUserTB_clear(addUser_rowData);
+            p1.setAddUT(addUser_rowData, addUserPgNum);
+            phone_numTF.setText(null);
+            User_nameTF.setText(null);
+            User_numTF.setText(null);
+            panelAlls(secondPane,addnewUser,sex,Box,phone_numTF,phone_num,User_name,User_nameTF,User_num,User_numTF,borders[0]);
+            secondPane.repaint();
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],addUserJP,saveAllJB,addUserPgdownJB,addUserPgSelectLabel,addUserPgupJB,addUserPgSelectJB,addUserPgSelectTF);
+            addUserPgSelectLabel.setText("跳转/共" + userdataOperate.getPgNum() + "页");
+            thirdPane.repaint();
+
         });
         addUserPgdownJB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 thirdPane.removeAll();
                 addUserPgNum++;
-                if (addUserPgNum >= up.getPgNum())
-                    addUserPgNum = up.getPgNum();
+                if (addUserPgNum >= userdataOperate.getPgNum())
+                    addUserPgNum = userdataOperate.getPgNum();
                 MainPanel p = new MainPanel();
                 p.addUserTB_clear(addUser_rowData);
                 p.setAddUT(addUser_rowData, addUserPgNum);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                thirdPane.add(addUserJP);
-                thirdPane.add(saveAllJB);
-                thirdPane.add(addUserPgdownJB);
-                thirdPane.add(addUserPgSelectLabel);
-                thirdPane.add(addUserPgupJB);
-                thirdPane.add(addUserPgSelectJB);
-                thirdPane.add(addUserPgSelectTF);
+                panelAlls(thirdPane,borders[1],borders[2],borders[3],addUserJP,saveAllJB,addUserPgdownJB,addUserPgSelectLabel,addUserPgupJB,addUserPgSelectJB,addUserPgSelectTF);
                 thirdPane.repaint();
             }
         });
@@ -587,321 +505,186 @@ public class MainPanel {
                 MainPanel p = new MainPanel();
                 p.addUserTB_clear(addUser_rowData);
                 p.setAddUT(addUser_rowData, addUserPgNum);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                thirdPane.add(addUserJP);
-                thirdPane.add(saveAllJB);
-                thirdPane.add(addUserPgdownJB);
-                thirdPane.add(addUserPgSelectLabel);
-                thirdPane.add(addUserPgupJB);
-                thirdPane.add(addUserPgSelectJB);
-                thirdPane.add(addUserPgSelectTF);
+                panelAlls(thirdPane,borders[1],borders[2],borders[3],addUserJP,saveAllJB,addUserPgdownJB,addUserPgSelectLabel,addUserPgupJB,addUserPgSelectJB,addUserPgSelectTF);
                 thirdPane.repaint();
             }
         });
-        addUserPgSelectJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                MainPanel p = new MainPanel();
-                int s = Integer.valueOf(addUserPgSelectTF.getText());
-                addUserPgNum = s;
-                if (addUserPgNum <= 0 || addUserPgNum > up.getPgNum())
-                    p.RemindPgSelect(" 请根据总页数输入跳转页");
-                p.addUserTB_clear(addUser_rowData);
-                p.setAddUT(addUser_rowData, addUserPgNum);
-                thirdPane.add(addUserJP);
-                thirdPane.add(saveAllJB);
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                thirdPane.add(addUserPgdownJB);
-                thirdPane.add(addUserPgSelectLabel);
-                thirdPane.add(addUserPgupJB);
-                thirdPane.add(addUserPgSelectJB);
-                thirdPane.add(addUserPgSelectTF);
-                thirdPane.repaint();
-            }
+        addUserPgSelectJB.addActionListener(e -> {
+            MainPanel p14 = new MainPanel();
+            int s = Integer.valueOf(addUserPgSelectTF.getText());
+            addUserPgNum = s;
+            if (addUserPgNum <= 0 || addUserPgNum > userdataOperate.getPgNum())
+                p14.RemindPgSelect(" 请根据总页数输入跳转页");
+            p14.addUserTB_clear(addUser_rowData);
+            p14.setAddUT(addUser_rowData, addUserPgNum);
+            secondPane.add(borders[0]);
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],addUserJP,saveAllJB,addUserPgdownJB,addUserPgSelectLabel,addUserPgupJB,addUserPgSelectJB,addUserPgSelectTF);
+            thirdPane.repaint();
         });
-        saveAllJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                MainPanel p = new MainPanel();
-                p.Update_addUserT(addUserT);
-                p.addUserTB_clear(addUser_rowData);
-                p.setAddUT(addUser_rowData, addUserPgNum);
-                thirdPane.removeAll();
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                thirdPane.add(addUserJP);
-                thirdPane.add(saveAllJB);
-                thirdPane.add(addUserPgdownJB);
-                thirdPane.add(addUserPgSelectLabel);
-                thirdPane.add(addUserPgupJB);
-                thirdPane.add(addUserPgSelectJB);
-                thirdPane.add(addUserPgSelectTF);
-                thirdPane.repaint();
+        saveAllJB.addActionListener(e -> {
+            MainPanel p13 = new MainPanel();
+            p13.Update_addUserT(addUserT);
+            p13.addUserTB_clear(addUser_rowData);
+            p13.setAddUT(addUser_rowData, addUserPgNum);
+            thirdPane.removeAll();
+            secondPane.add(borders[0]);
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],addUserJP,saveAllJB,addUserPgdownJB,addUserPgSelectLabel,addUserPgupJB,addUserPgSelectJB,addUserPgSelectTF);
+            thirdPane.repaint();
 
-            }
         });
         addUserT.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int c = e.getButton();
                 if (c == MouseEvent.BUTTON3) {
-                    final JFrame delectJF = new JFrame("删除");
-                    JPanel delectJP = new JPanel();
-                    JLabel delect_JL = new JLabel("    确定删除此行?");
-                    JButton Y = new JButton("是");
-                    JButton N = new JButton("否");
-                    Y.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            int r = addUserT.getSelectedRow();
-                            // int c= addUserT.getSelectedColumn();
-                            String delect_row = String.valueOf(addUserT.getValueAt(r, 0));
-                            up.delete(delect_row);
-                            MainPanel p = new MainPanel();
-                            p.addUserTB_clear(addUser_rowData);
-                            p.setAddUT(addUser_rowData, addUserPgNum);
-                            thirdPane.removeAll();
-                            addUserPgSelectLabel.setText("跳转/共" + up.getPgNum() + "页");
-                            thirdPane.add(addUserJP);
-                            thirdPane.add(saveAllJB);
-                            thirdPane.add(addUserPgdownJB);
-                            thirdPane.add(addUserPgSelectLabel);
-                            thirdPane.add(addUserPgupJB);
-                            thirdPane.add(addUserPgSelectJB);
-                            thirdPane.add(addUserPgSelectTF);
-                            thirdPane.repaint();
-                            delectJF.dispose();
-                        }
+                    final SelectFrame deleteFrame = new SelectFrame("删除");
+                    deleteFrame.setjLabelTitle("确定删除此行?");
+
+                    deleteFrame.centainButton.addActionListener(e1 -> {
+                        int r = addUserT.getSelectedRow();
+                        String delect_row = String.valueOf(addUserT.getValueAt(r, 0));
+                        userdataOperate.delete(delect_row);
+                        MainPanel p15 = new MainPanel();
+                        p15.addUserTB_clear(addUser_rowData);
+                        p15.setAddUT(addUser_rowData, addUserPgNum);
+                        thirdPane.removeAll();
+                        addUserPgSelectLabel.setText("跳转/共" + userdataOperate.getPgNum() + "页");
+                        panelAlls(thirdPane,addUserJP,saveAllJB,addUserPgdownJB,addUserPgSelectLabel,addUserPgupJB,addUserPgSelectJB,addUserPgSelectTF);
+                        thirdPane.repaint();
+                        deleteFrame.dispose();
                     });
-                    N.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            delectJF.dispose();
-                        }
-                    });
-                    delectJF.setLayout(null);
-                    delectJP.setLayout(null);
-                    delectJF.setBounds(0, 0, 300, 200);
-                    delectJP.setBounds(10, 0, 300, 200);
-                    delect_JL.setBounds(80, 30, 200, 20);
-                    Y.setBounds(40, 100, 60, 30);
-                    N.setBounds(160, 100, 60, 30);
-                    delectJP.add(delect_JL);
-                    delectJP.add(Y);
-                    delectJP.add(N);
-                    delectJF.add(delectJP);
-                    delectJF.setLocationRelativeTo(null);
-                    delectJF.setResizable(true);
-                    delectJF.setVisible(true);
+                    deleteFrame.cancelButton.addActionListener(e12 -> deleteFrame.dispose());
                 }
             }
         });
         // 设备添加相关
-        addequipment.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                thirdPane.removeAll();
-                secondPane.removeAll();
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                MainPanel p = new MainPanel();
-                p.addequipmentTB_clear(addequipmentT);
-                t2.setObject(ep.getNum());
-                addequipmentT.setModel(t2);
-                p.setAddequipment(addequipmentT);
-                thirdPane.add(addequipmentJP);
-                secondPane.add(addnewequipmentNum);
-                secondPane.add(addnewequipment);
-                secondPane.add(addnewequipmentTF);
-                secondPane.repaint();
-                thirdPane.repaint();
-            }
+        addequipment.addActionListener(e -> {
+            thirdPane.removeAll();
+            secondPane.removeAll();
+            MainPanel p16 = new MainPanel();
+            p16.addequipmentTB_clear(addequipmentT);
+            t2.setObject(equiOperater.getNum());
+            addequipmentT.setModel(t2);
+            p16.setAddequipment(addequipmentT);
+            panelAlls(secondPane,borders[0],addnewequipmentNum,addnewequipment,addnewequipmentTF);
+            secondPane.repaint();
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],addequipmentJP);
+            thirdPane.repaint();
         });
-        addnewequipment.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                MainPanel p = new MainPanel();
-                String s = addnewequipmentTF.getText();
-                if (!s.equals("")) {
-                    if (ep.jdugeE(s))
-                        p.RemindPgSelect("   添加失败，该设备号已存在");
-                    else {
-                        ep.add(s);
-                        p.RemindSucess();
-                        p.Box(bdUBox, bdEBox);
-                    }
-                    addnewequipmentTF.setText("");
-                } else {
-                    p.RemindPgSelect("          请填完信息");
+        addnewequipment.addActionListener(e -> {
+            MainPanel p17 = new MainPanel();
+            String s = addnewequipmentTF.getText();
+            if (!s.equals("")) {
+                if (equiOperater.jdugeE(s))
+                    p17.RemindPgSelect("添加失败，该设备号已存在");
+                else {
+                    equiOperater.add(s);
+                    p17.RemindSucess();
+                    p17.Box(bdUBox, bdEBox);
                 }
-                thirdPane.removeAll();
-                p.addequipmentTB_clear(addequipmentT);
-                t2.setObject(ep.getNum());
-                addequipmentT.setModel(t2);
-                p.setAddequipment(addequipmentT);
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                thirdPane.add(addequipmentJP);
-                thirdPane.repaint();
-                secondPane.repaint();
+                addnewequipmentTF.setText("");
+            } else {
+                p17.RemindPgSelect("请填完信息");
             }
+            thirdPane.removeAll();
+            p17.addequipmentTB_clear(addequipmentT);
+            t2.setObject(equiOperater.getNum());
+            addequipmentT.setModel(t2);
+            p17.setAddequipment(addequipmentT);
+            secondPane.add(borders[0]);
+            secondPane.repaint();
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],addequipmentJP);
+            thirdPane.repaint();
         });
         addequipmentT.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 final MainPanel p = new MainPanel();
                 int c = e.getButton();
                 if (c == MouseEvent.BUTTON3) {
-                    final JFrame delectJF = new JFrame("删除");
-                    JPanel delectJP = new JPanel();
-                    JLabel delect_JL = new JLabel("    确定删除此行?");
-                    JButton Y = new JButton("是");
-                    JButton N = new JButton("否");
-                    Y.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            int r = addequipmentT.getSelectedRow();
-                            int c = addequipmentT.getSelectedColumn();
-                            DebugPrint.DPrint(r);
-                            String delect_row = String.valueOf(addequipmentT.getValueAt(r, c));
-                            ep.delete(delect_row);
-                            p.addequipmentTB_clear(addequipmentT);
-                            t2.setObject(ep.getNum());
-                            addequipmentT.setModel(t2);
-                            p.setAddequipment(addequipmentT);
-                            String s = "            操作成功";
-                            p.RemindPgSelect(s);
-                            delectJF.dispose();
-                            thirdPane.removeAll();
-                            thirdPane.add(addequipmentJP);
-                            secondPane.add(bor1);
-                            thirdPane.add(bor2);
-                            thirdPane.add(bor3);
-                            thirdPane.add(bor4);
-                            thirdPane.repaint();
-                        }
-
+                    final SelectFrame deleteFrame = new SelectFrame("删除");
+                    deleteFrame.setjLabelTitle("确定删除此行?");
+                    deleteFrame.init();
+                    deleteFrame.centainButton.addActionListener(e13 -> {
+                        int r = addequipmentT.getSelectedRow();
+                        int c1 = addequipmentT.getSelectedColumn();
+                        DebugPrint.DPrint(r);
+                        String delect_row = String.valueOf(addequipmentT.getValueAt(r, c1));
+                        equiOperater.delete(delect_row);
+                        p.addequipmentTB_clear(addequipmentT);
+                        t2.setObject(equiOperater.getNum());
+                        addequipmentT.setModel(t2);
+                        p.setAddequipment(addequipmentT);
+                        String s = "            操作成功";
+                        p.RemindPgSelect(s);
+                        deleteFrame.dispose();
+                        thirdPane.removeAll();
+                        secondPane.add(borders[0]);
+                        panelAlls(thirdPane,borders[1],borders[2],borders[3],addequipmentJP);
+                        thirdPane.repaint();
                     });
-                    N.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            delectJF.dispose();
-                        }
-                    });
-                    delectJF.setLayout(null);
-                    delectJP.setLayout(null);
-                    delectJF.setBounds(0, 0, 300, 200);
-                    delectJP.setBounds(10, 0, 300, 200);
-                    delect_JL.setBounds(80, 30, 200, 20);
-                    Y.setBounds(40, 100, 60, 30);
-                    N.setBounds(160, 100, 60, 30);
-                    delectJP.add(delect_JL);
-                    delectJP.add(Y);
-                    delectJP.add(N);
-                    delectJF.add(delectJP);
-                    delectJF.setLocationRelativeTo(null);
-                    delectJF.setResizable(true);
-                    delectJF.setVisible(true);
-                    secondPane.add(bor1);
-                    thirdPane.add(bor2);
-                    thirdPane.add(bor3);
-                    thirdPane.add(bor4);
-                    thirdPane.add(addequipmentJP);
-                    thirdPane.repaint();
+                    deleteFrame.cancelButton.addActionListener(e18 -> deleteFrame.dispose());
+                    secondPane.add(borders[0]);
+                    panelAlls(thirdPane,borders[1],borders[2],borders[3],addequipmentJP);
                     secondPane.repaint();
+                    thirdPane.repaint();
                 }
             }
 
         });
         // 用户绑定相关
-        bindingJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                secondPane.removeAll();
-                thirdPane.removeAll();
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                secondPane.repaint();
-                secondPane.add(bdUser);
-                secondPane.add(bdUBox);
-                secondPane.add(bdequipment);
-                secondPane.add(bdEBox);
-                secondPane.add(bd);
-                MainPanel p = new MainPanel();
-                p.Box(bdUBox, bdEBox);
-                p.bdUserTB_clear(bdUserT_rowData);
-                p.setbdUserT(bdUserT_rowData, bdUserPgNum);
-                bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-                thirdPane.add(bdUserPgupJB);
-                thirdPane.add(bdUserPgdownJB);
-                thirdPane.add(bdUserSelectLabel);
-                thirdPane.add(bdUserPgSelectTF);
-                thirdPane.add(bdUserPgSelectJB);
-                thirdPane.add(bdUserJP);
-                thirdPane.repaint();
-                secondPane.repaint();
-            }
-        });
-        bd.addActionListener(new java.awt.event.ActionListener() {  //监听点击"确定"绑定用户和设备
-            public void actionPerformed(ActionEvent e) {
-                String bdUnum = (String) bdUBox.getSelectedItem();
-                String bdEnum = (String) bdEBox.getSelectedItem();
-                bdUnum = bdUnum.replace(" ", "");
-                bdEnum = bdEnum.replace(" ", "");//除空
-                if (!currentbdOper.jdugeU(bdUnum) && !currentbdOper.jdugeE(bdEnum)) {
-                    if (Double.parseDouble(settingCycle) < 1 || settingCycle == null) {
-                        p.RemindPgSelect("    请设置圈数后绑定");
-                    } else {
-                        Date now = new Date();
-                        String id = String.valueOf(now.getTime());
-                        currentbdOper.add(id, bdUnum, up.selectName(bdUnum), bdEnum, settingCycle);
-                    }
+        bindingJB.addActionListener(e -> {
+            secondPane.removeAll();
+            thirdPane.removeAll();
+            panelAlls(secondPane,borders[0],bdUser,bdUBox,bdequipment,bdEBox,bd);
+            secondPane.repaint();
+            MainPanel p18 = new MainPanel();
+            p18.Box(bdUBox, bdEBox);
+            p18.bdUserTB_clear(bdUserT_rowData);
+            p18.setbdUserT(bdUserT_rowData, bdUserPgNum);
+            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],bdUserPgupJB,bdUserPgdownJB,bdUserSelectLabel,bdUserPgSelectTF,bdUserPgSelectJB,bdUserJP);
+            thirdPane.repaint();
 
-                } else {
-                    if (currentbdOper.jdugeU(bdUnum) || currentbdOper.jdugeE(bdEnum))
-                        p.RemindPgSelect("    用户或设备已被绑定");
-                }
-                thirdPane.removeAll();
-                MainPanel p = new MainPanel();
-                p.bdUserTB_clear(bdUserT_rowData);
-                p.setbdUserT(bdUserT_rowData, bdUserPgNum);
-                bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-                thirdPane.add(bdUserPgupJB);
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                thirdPane.add(bdUserPgdownJB);
-                thirdPane.add(bdUserSelectLabel);
-                thirdPane.add(bdUserPgSelectTF);
-                thirdPane.add(bdUserPgSelectJB);
-                thirdPane.add(bdUserJP);
-                thirdPane.repaint();
-            }
         });
-        bdUserPgupJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                bdUserPgNum--;
-                if (bdUserPgNum <= 0)
-                    bdUserPgNum = 1;
-                MainPanel p = new MainPanel();
-                p.bdUserTB_clear(bdUserT_rowData);
-                p.setbdUserT(bdUserT_rowData, bdUserPgNum);
-                bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-                thirdPane.add(bdUserPgupJB);
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                thirdPane.add(bdUserPgdownJB);
-                thirdPane.add(bdUserSelectLabel);
-                thirdPane.add(bdUserPgSelectTF);
-                thirdPane.add(bdUserPgSelectJB);
-                thirdPane.add(bdUserJP);
-                thirdPane.repaint();
+        //监听点击"确定"绑定用户和设备
+        bd.addActionListener(e -> {
+            String bdUnum = (String) bdUBox.getSelectedItem();
+            String bdEnum = (String) bdEBox.getSelectedItem();
+            bdUnum = bdUnum.replace(" ", "");
+            bdEnum = bdEnum.replace(" ", "");//除空
+            if (!currentbdOper.jdugeU(bdUnum) && !currentbdOper.jdugeE(bdEnum)) {
+                if (Double.parseDouble(settingCycle) < 1 || settingCycle == null) {
+                    p.RemindPgSelect("    请设置圈数后绑定");
+                } else {
+                    Date now = new Date();
+                    String id = String.valueOf(now.getTime());
+                    currentbdOper.add(id, bdUnum, userdataOperate.selectName(bdUnum), bdEnum, settingCycle);
+                }
+
+            } else {
+                if (currentbdOper.jdugeU(bdUnum) || currentbdOper.jdugeE(bdEnum))
+                    p.RemindPgSelect("    用户或设备已被绑定");
             }
+            thirdPane.removeAll();
+            MainPanel p19 = new MainPanel();
+            p19.bdUserTB_clear(bdUserT_rowData);
+            p19.setbdUserT(bdUserT_rowData, bdUserPgNum);
+            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            secondPane.add(borders[0]);
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],bdUserPgupJB,bdUserPgdownJB,bdUserSelectLabel,bdUserPgSelectTF,bdUserPgSelectJB,bdUserJP);
+            thirdPane.repaint();
+        });
+
+        bdUserPgupJB.addActionListener(e -> {
+            bdUserPgNum--;
+            if (bdUserPgNum <= 0)
+                bdUserPgNum = 1;
+            MainPanel p110 = new MainPanel();
+            p110.bdUserTB_clear(bdUserT_rowData);
+            p110.setbdUserT(bdUserT_rowData, bdUserPgNum);
+            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            secondPane.add(borders[0]);
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],bdUserPgupJB,bdUserPgdownJB,bdUserSelectLabel,bdUserPgSelectTF,bdUserPgSelectJB,bdUserJP);
+            thirdPane.repaint();
         });
         bdUserPgdownJB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -912,44 +695,28 @@ public class MainPanel {
                 p.bdUserTB_clear(bdUserT_rowData);
                 p.setbdUserT(bdUserT_rowData, bdUserPgNum);
                 bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-                thirdPane.add(bdUserPgupJB);
-                thirdPane.add(bdUserPgdownJB);
-                thirdPane.add(bdUserSelectLabel);
-                thirdPane.add(bdUserPgSelectTF);
-                thirdPane.add(bdUserPgSelectJB);
-                thirdPane.add(bdUserJP);
+                panelAlls(thirdPane,bdUserPgupJB,bdUserPgdownJB,bdUserSelectLabel,bdUserPgSelectTF,bdUserPgSelectJB,bdUserJP);
                 thirdPane.repaint();
             }
         });
-        bdUserPgSelectJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int n = Integer.valueOf(bdUserPgSelectTF.getText());
-                    if (n <= 0 || n > currentbdOper.getPgNum())
-                        p.RemindPgSelect(" 请根据总页数输入跳转页");
-                    else {
-                        bdUserPgNum = n;
-                    }
-                } catch (NumberFormatException q) {
-                    q.printStackTrace();
+        bdUserPgSelectJB.addActionListener(e -> {
+            try {
+                int n = Integer.valueOf(bdUserPgSelectTF.getText());
+                if (n <= 0 || n > currentbdOper.getPgNum())
+                    p.RemindPgSelect(" 请根据总页数输入跳转页");
+                else {
+                    bdUserPgNum = n;
                 }
-                MainPanel p = new MainPanel();
-                p.bdUserTB_clear(bdUserT_rowData);
-                p.setbdUserT(bdUserT_rowData, bdUserPgNum);
-                bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-                thirdPane.add(bdUserPgupJB);
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                thirdPane.add(bdUserPgdownJB);
-                thirdPane.add(bdUserSelectLabel);
-                thirdPane.add(bdUserPgSelectTF);
-                thirdPane.add(bdUserPgSelectJB);
-                thirdPane.add(bdUserJP);
-                thirdPane.repaint();
+            } catch (NumberFormatException q) {
+                q.printStackTrace();
             }
-
+            MainPanel p111 = new MainPanel();
+            p111.bdUserTB_clear(bdUserT_rowData);
+            p111.setbdUserT(bdUserT_rowData, bdUserPgNum);
+            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            secondPane.add(borders[0]);
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],bdUserPgupJB,bdUserPgdownJB,bdUserSelectLabel,bdUserPgSelectTF,bdUserPgSelectJB,bdUserJP);
+            thirdPane.repaint();
         });
         bdUserT.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -975,11 +742,11 @@ public class MainPanel {
                         String[] recodeArray = recode.split(",");
                         String eid = recodeArray[2];                           //这里点击需要获取行的eid
                         DebugPrint.DPrint("eid是" + eid);
-                        hp.select(aaa, bbb, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
+                        historybdOper.select(aaa, bbb, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
                         DebugPrint.DPrint("aaa:" + aaa);
                         DebugPrint.DPrint("bbb:" + bbb);
                         StringBuilder points = new StringBuilder();
-                        if((aaa.size() > 0) && bbb.size()> 0){
+                        if ((aaa.size() > 0) && bbb.size() > 0) {
                             points = new StringBuilder("new AMap.LngLat(" + aaa.get(0) + "," + bbb.get(0) + ")"); // 原点
                             for (int i = 1; i < aaa.size() && i < bbb.size(); i++) {
                                 points.append("," + "new AMap.LngLat(").append(aaa.get(i)).append(",").append(bbb.get(i)).append(")");
@@ -988,8 +755,8 @@ public class MainPanel {
 
                         HashMap<String, Object> map1 = new HashMap<>();
                         map1.put("points", points.toString());
-                        String message = map.processTemplate(map.readToString("src/main/java/ling/watch/template.html"), map1);
-                        map.paintMap(message);
+                        String message = ShowMap.processTemplate(ShowMap.readToString("src/ima/map_show.html"), map1);
+                        ShowMap.paintMap(message);
                     }
                     if (col == 10 && bdUserT_rowData[row][0] != null) {
                         dbjduge = "false";
@@ -1006,26 +773,26 @@ public class MainPanel {
                 }
             }
         });
-        wp.warnTB.addMouseListener(new java.awt.event.MouseAdapter() {
+        warnPane.warnTB.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int c = e.getButton();
-                int row = wp.warnTB.getSelectedRow();
+                int row = warnPane.warnTB.getSelectedRow();
                 DebugPrint.DPrint("点击的是哪一行" + row);
-                int col = wp.warnTB.getSelectedColumn();
+                int col = warnPane.warnTB.getSelectedColumn();
                 String dbjduge = "true";
                 if (c == MouseEvent.BUTTON1) {//左键点击
                     if (col == 2) {//第3列，即"心率异常"列
                         ArrayList<String> aaa = new ArrayList();
                         ArrayList<String> bbb = new ArrayList();
                         ArrayList<String> array = new ArrayList(200);
-                        abp.selectAll(array);  //获取所有wp表的数据，存储在array里
+                        abnormalOper.selectAll(array);  //获取所有wp表的数据，存储在array里
                         DebugPrint.DPrint("获取报警的数组是" + array);
-                        String recode = array.get((abp.getPgNum() - 1) * 20 + row);    //根据点击的行，返回那行数据
+                        String recode = array.get((abnormalOper.getPgNum() - 1) * 20 + row);    //根据点击的行，返回那行数据
                         DebugPrint.DPrint("报警表相应的记录是：" + recode);
                         String[] recodeArray = recode.split(",");
                         String eid = recodeArray[0];                           //这里点击需要获取行的eid
                         DebugPrint.DPrint("报警表eid是" + eid);
-                        hp.select(aaa, bbb, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
+                        historybdOper.select(aaa, bbb, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
                         DebugPrint.DPrint("报警表aaa:" + aaa);
                         DebugPrint.DPrint("报警表bbb:" + bbb);
                         StringBuilder points = new StringBuilder("new AMap.LngLat(" + aaa.get(0) + "," + bbb.get(0) + ")"); // 原点
@@ -1034,49 +801,30 @@ public class MainPanel {
                         }
                         HashMap<String, Object> map1 = new HashMap<>();
                         map1.put("points", points.toString());
-                        String message = map.processTemplate(map.readToString("src/sport_2/template.html"), map1);
-                        map.paintMap(message);
+                        String message = ShowMap.processTemplate(ShowMap.readToString("src/ima/map_show.html"), map1);
+                        ShowMap.paintMap(message);
                     }
                 }
             }
         });
         // 数据处理相关
-        dataJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                hp.create();
-                jduge = 1;
-                dataPgNum = 1;
-                secondPane.removeAll();
-                thirdPane.removeAll();
-                secondPane.add(bor1);
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
-                secondPane.add(dataSelectJB);
-                secondPane.add(datadelectJB);
-                secondPane.add(dataExporttJB);
-                secondPane.add(dataUidJF);
-                secondPane.add(dataEidJF);
-                secondPane.add(U_numJL);
-                secondPane.add(E_numJL);
-                thirdPane.add(dataJP);
-                thirdPane.add(ckBJL);
-                thirdPane.add(ckB);
-                thirdPane.add(addDataPgupJB);
-                thirdPane.add(addDataPgdownJB);
-                thirdPane.add(addDataPgSelectLabel);
-                thirdPane.add(addDataPgSelectTF);
-                thirdPane.add(addDataPgSelectJB);
-                thirdPane.repaint();
-                secondPane.repaint();
-                int se = 20 * (dataPgNum - 1);
-                int sa = 20;
-                sql = " SELECT * FROM  currentbd where run='false' limit " + se + "," + sa;
-                ArrayList<String> DataArray = new ArrayList();
-                currentbdOper.command(sql, DataArray);
-                p.BindTable(dataT, DataArray);
-                addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-            }
+        dataJB.addActionListener(e -> {
+            historybdOper.create();
+            jduge = 1;
+            dataPgNum = 1;
+            secondPane.removeAll();
+            thirdPane.removeAll();
+            panelAlls(secondPane,borders[0],dataSelectJB,datadelectJB,dataExporttJB,dataUidJF,dataEidJF,U_numJL,E_numJL);
+            secondPane.repaint();
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],jScrollPane,checkBoxForAllLabel,jCheckBox,addDataPgupJB,addDataPgdownJB,addDataPgSelectLabel,addDataPgSelectTF,addDataPgSelectJB);
+            thirdPane.repaint();
+            int se = 20 * (dataPgNum - 1);
+            int sa = 20;
+            sql = " SELECT * FROM  currentbd where run='false' limit " + se + "," + sa;
+            ArrayList<String> DataArray = new ArrayList();
+            currentbdOper.command(sql, DataArray);
+            p.BindTable(dataTable, DataArray);
+            addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
         });
         dataSelectJB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -1102,57 +850,53 @@ public class MainPanel {
                 currentbdOper.command(sql, Sarray);
                 addDataPgSelectLabel.setText("跳转/共" + p.getPgNumArray(Sarray) + "页");
                 dataPgNum = 1;
-                p.BindTable(dataT, Sarray);
-                ckB.setSelected(false);
+                p.BindTable(dataTable, Sarray);
+                jCheckBox.setSelected(false);
             }
         });
-        addDataPgdownJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dataPgNum++;
-                if (jduge == 1) {
-                    if (dataPgNum >= currentbdOper.getPgNumF())
-                        dataPgNum = currentbdOper.getPgNumF();
-                    int se = 20 * (dataPgNum - 1);
-                    int sa = 20;
-                    sql = " SELECT * FROM  currentbd where run='false' limit " + se + "," + sa;
-                    Sarray.clear();
-                    currentbdOper.command(sql, Sarray);
-                    addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-                    p.BindTable(dataT, Sarray);
-                }
-                if (jduge == 2) {
-                    if (dataPgNum >= p.getPgNumArray(Sarray))
-                        dataPgNum = p.getPgNumArray(Sarray);
-                    addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-                    p.DataT_clear(dataT);
-                    p.setDataT_starT(dataT, Sarray, dataPgNum);
-                }
-                ckB.setSelected(false);
+        addDataPgdownJB.addActionListener(e -> {
+            dataPgNum++;
+            if (jduge == 1) {
+                if (dataPgNum >= currentbdOper.getPgNumF())
+                    dataPgNum = currentbdOper.getPgNumF();
+                int se = 20 * (dataPgNum - 1);
+                int sa = 20;
+                sql = " SELECT * FROM  currentbd where run='false' limit " + se + "," + sa;
+                Sarray.clear();
+                currentbdOper.command(sql, Sarray);
+                addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
+                p.BindTable(dataTable, Sarray);
             }
+            if (jduge == 2) {
+                if (dataPgNum >= p.getPgNumArray(Sarray))
+                    dataPgNum = p.getPgNumArray(Sarray);
+                addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+                p.DataT_clear(dataTable);
+                p.setDataT_starT(dataTable, Sarray, dataPgNum);
+            }
+            jCheckBox.setSelected(false);
         });
-        addDataPgupJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dataPgNum--;
-                if (dataPgNum <= 0)
-                    dataPgNum = 1;
-                if (jduge == 1) {
-                    if (dataPgNum >= currentbdOper.getPgNumF())
-                        dataPgNum = currentbdOper.getPgNumF();
-                    int se = 20 * (dataPgNum - 1);
-                    int sa = 20;
-                    sql = " SELECT * FROM  currentbd  limit " + se + "," + sa;
-                    Sarray.clear();
-                    currentbdOper.command(sql, Sarray);
-                    addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-                    p.BindTable(dataT, Sarray);
-                }
-                if (jduge == 2) {
-                    addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-                    p.DataT_clear(dataT);
-                    p.setDataT_starT(dataT, Sarray, dataPgNum);
-                }
-                ckB.setSelected(false);
+        addDataPgupJB.addActionListener(e -> {
+            dataPgNum--;
+            if (dataPgNum <= 0)
+                dataPgNum = 1;
+            if (jduge == 1) {
+                if (dataPgNum >= currentbdOper.getPgNumF())
+                    dataPgNum = currentbdOper.getPgNumF();
+                int se = 20 * (dataPgNum - 1);
+                int sa = 20;
+                sql = " SELECT * FROM  currentbd  limit " + se + "," + sa;
+                Sarray.clear();
+                currentbdOper.command(sql, Sarray);
+                addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
+                p.BindTable(dataTable, Sarray);
             }
+            if (jduge == 2) {
+                addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
+                p.DataT_clear(dataTable);
+                p.setDataT_starT(dataTable, Sarray, dataPgNum);
+            }
+            jCheckBox.setSelected(false);
         });
         addDataPgSelectJB.addActionListener(new java.awt.event.ActionListener() {   //根据输入的页码，跳转至目标页
             public void actionPerformed(ActionEvent e) {
@@ -1169,7 +913,7 @@ public class MainPanel {
                     Sarray.clear();
                     currentbdOper.command(sql, Sarray);
                     addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-                    p.BindTable(dataT, Sarray);
+                    p.BindTable(dataTable, Sarray);
                 }
 
                 if (jduge == 2) {
@@ -1178,28 +922,28 @@ public class MainPanel {
                     else {
                         dataPgNum = i;
                         addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-                        p.DataT_clear(dataT);
-                        p.setDataT_starT(dataT, Sarray, dataPgNum);
+                        p.DataT_clear(dataTable);
+                        p.setDataT_starT(dataTable, Sarray, dataPgNum);
 
                     }
                 }
-                ckB.setSelected(false);
+                jCheckBox.setSelected(false);
                 thirdPane.repaint();
             }
 
         });
 
-        dataT.addMouseListener(new java.awt.event.MouseAdapter() {
+        dataTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int c = e.getButton();
                 if (c == MouseEvent.BUTTON1) {
-                    int row = dataT.getSelectedRow();
-                    int col = dataT.getSelectedColumn();
-                    String id = String.valueOf(dataT.getValueAt(row, 1));
+                    int row = dataTable.getSelectedRow();
+                    int col = dataTable.getSelectedColumn();
+                    String id = String.valueOf(dataTable.getValueAt(row, 1));
                     if (col != 0 && id != null) {
-                        dP.pane(id);
+                        detailPane.pane(id);
                     }
-                    if (col == 0 && id != null && "true".equals(String.valueOf(dataT.getValueAt(row, 0)))) {
+                    if (col == 0 && id != null && "true".equals(String.valueOf(dataTable.getValueAt(row, 0)))) {
 
                         String sql = "select *from currentbd where run='false' and id =" + "'" + id + "'";
                         currentbdOper.command(sql, DTarray);
@@ -1209,7 +953,7 @@ public class MainPanel {
                         }
                     }
                     if (col == 0 && id != null && DTarray.size() != 0
-                            && "false".equals(String.valueOf(dataT.getValueAt(row, 0)))) {
+                            && "false".equals(String.valueOf(dataTable.getValueAt(row, 0)))) {
                         for (int i = 0; i < DTarray.size(); i++) {
                             String[] b = DTarray.get(i).split(",");
                             if (b[0].equals(id))
@@ -1219,221 +963,175 @@ public class MainPanel {
                 }
             }
         });
-        dataExporttJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                final JFrame DelectJF = new JFrame();
-                JPanel DelectJP = new JPanel();
-                DelectJF.setLayout(null);
-                DelectJP.setLayout(null);
-
-                DelectJF.setBounds(0, 0, 300, 200);
-                DelectJP.setBounds(0, 0, 300, 200);
-                JLabel remaindJL = new JLabel("是否导出所选序列的所有子信息？");
-                JButton Y = new JButton("是");
-                JButton N = new JButton("否");
-                remaindJL.setBounds(70, 20, 200, 80);
-                Y.setBounds(70, 100, 60, 30);
-                N.setBounds(160, 100, 60, 30);
-                DelectJP.add(remaindJL);
-                DelectJP.add(Y);
-                DelectJP.add(N);
-                DelectJF.add(DelectJP);
-                DelectJF.setLocationRelativeTo(null);
-                DelectJF.setResizable(false);
-                DelectJF.setVisible(true);
-                N.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        String[] a = {"序列号", "用户编号", "姓名", "设备号", "佩戴状态", "剩余圈数", "心跳", "电量", "经纬度", "用时"};
-                        xp.wExcel(DTarray, a);
-                        DTarray.clear();
-                        for (int i = 0; i < 20; i++)
-                            dataT.setValueAt(false, i, 0);
-                        Sarray.clear();
-                        DelectJF.dispose();
-                    }
-                });
-                Y.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        String[] a = {"序列号", "用户编号", "姓名", "设备号", "佩戴状态", "剩余圈数", "心跳", "电量", "经纬度", "录入时间"};
-                        for (int i = 0; i < DTarray.size(); i++) {
-                            String[] b = DTarray.get(i).split(",");
-                            String sql = "select *from historybd where id =" + "'" + b[0] + "'";
-                            hp.command(sql, SDTarray);
-                        }
-                        xp.wExcel(SDTarray, a);
-                        for (int i = 0; i < 20; i++)
-                            dataT.setValueAt(false, i, 0);
-                        DTarray.clear();
-                        SDTarray.clear();
-                        DelectJF.dispose();
-                    }
-                });
-
-                ckB.setSelected(false);
-                thirdPane.repaint();
-            }
+        dataExporttJB.addActionListener(e -> {
+            final SelectFrame selectFrame = new SelectFrame();
+            selectFrame.setjLabelTitle("是否导出所选序列的所有子信息?");
+            selectFrame.init();
+            selectFrame.cancelButton.addActionListener(e14 -> {
+                String[] a = {"序列号", "用户编号", "姓名", "设备号", "佩戴状态", "剩余圈数", "心跳", "电量", "经纬度", "用时"};
+                exportEX.wExcel(DTarray, a);
+                DTarray.clear();
+                for (int i = 0; i < 20; i++)
+                    dataTable.setValueAt(false, i, 0);
+                Sarray.clear();
+                selectFrame.dispose();
+            });
+            selectFrame.centainButton.addActionListener(e15 -> {
+                String[] a = {"序列号", "用户编号", "姓名", "设备号", "佩戴状态", "剩余圈数", "心跳", "电量", "经纬度", "录入时间"};
+                for (int i = 0; i < DTarray.size(); i++) {
+                    String[] b = DTarray.get(i).split(",");
+                    String sql = "select *from historybd where id =" + "'" + b[0] + "'";
+                    historybdOper.command(sql, SDTarray);
+                }
+                exportEX.wExcel(SDTarray, a);
+                for (int i = 0; i < 20; i++)
+                    dataTable.setValueAt(false, i, 0);
+                DTarray.clear();
+                SDTarray.clear();
+                selectFrame.dispose();
+            });
+            jCheckBox.setSelected(false);
+            thirdPane.repaint();
         });
-        datadelectJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        datadelectJB.addActionListener(e -> {
+            final SelectFrame selectFrame = new SelectFrame();
+            selectFrame.setjLabelTitle("删除不可恢复，是否继续?");
+            selectFrame.init();
 
-                final JFrame DelectJF = new JFrame();
-                JPanel DelectJP = new JPanel();
-                DelectJF.setLayout(null);
-                DelectJP.setLayout(null);
-                DelectJF.setBounds(0, 0, 300, 200);
-                DelectJP.setBounds(0, 0, 300, 200);
-                JLabel remaindJL = new JLabel("删除不可恢复，是否继续？");
-                JButton Yes = new JButton("是");
-                JButton No = new JButton("否");
-                remaindJL.setBounds(70, 30, 160, 80);
-                Yes.setBounds(70, 100, 60, 30);
-                No.setBounds(160, 100, 60, 30);
-                DelectJP.add(remaindJL);
-                DelectJP.add(Yes);
-                DelectJP.add(No);
-                DelectJF.add(DelectJP);
-                DelectJF.setLocationRelativeTo(null);
-                DelectJF.setResizable(false);
-                DelectJF.setVisible(true);
-                No.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        DelectJF.dispose();
-                    }
-                });
-                Yes.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        for (int i = 0; i < DTarray.size(); i++) {
-                            String a[] = DTarray.get(i).split(",");
-                            currentbdOper.delete(a[0]);
-                        }
-                        DelectJF.dispose();
-                        if (jduge == 1) {
-                            int se = 20 * (dataPgNum - 1);
-                            int sa = 20;
-                            sql = " SELECT * FROM  currentbd limit " + se + "," + sa;
-                            ArrayList<String> DataArray = new ArrayList();
-                            currentbdOper.command(sql, DataArray);
-                            p.BindTable(dataT, DataArray);
-                            addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-                        } else if (jduge == 2) {
-                            p.BindTable(dataT, Sarray);
-                        }
-                    }
-                });
-                ckB.setSelected(false);
-
-            }
+            selectFrame.cancelButton.addActionListener(e16 -> selectFrame.dispose());
+            selectFrame.centainButton.addActionListener(e17 -> {
+                for (int i = 0; i < DTarray.size(); i++) {
+                    String a[] = DTarray.get(i).split(",");
+                    currentbdOper.delete(a[0]);
+                }
+                selectFrame.dispose();
+                if (jduge == 1) {
+                    int se = 20 * (dataPgNum - 1);
+                    int sa = 20;
+                    sql = " SELECT * FROM  currentbd limit " + se + "," + sa;
+                    ArrayList<String> DataArray = new ArrayList();
+                    currentbdOper.command(sql, DataArray);
+                    p.BindTable(dataTable, DataArray);
+                    addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
+                } else if (jduge == 2) {
+                    p.BindTable(dataTable, Sarray);
+                }
+            });
+            jCheckBox.setSelected(false);
 
         });
-        ckB.addMouseListener(new java.awt.event.MouseAdapter() {
+        jCheckBox.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int c = e.getButton();
-                if (c == MouseEvent.BUTTON1 && ckB.isSelected()) {
+                if (c == MouseEvent.BUTTON1 && jCheckBox.isSelected()) {
                     for (int i = 0; i < 20; i++)
-                        dataT.setValueAt(true, i, 0);
+                        dataTable.setValueAt(true, i, 0);
                     for (int i = 0; i < 20; i++) {
-                        String id = String.valueOf(dataT.getValueAt(i, 1));
+                        String id = String.valueOf(dataTable.getValueAt(i, 1));
                         sql = "select* from currentbd where id=" + "'" + id + "'";
                         currentbdOper.command(sql, DTarray);
                     }
                 }
-                if (c == MouseEvent.BUTTON1 && !ckB.isSelected()) {
+                if (c == MouseEvent.BUTTON1 && !jCheckBox.isSelected()) {
                     for (int i = 0; i < 20; i++)
-                        dataT.setValueAt(false, i, 0);
+                        dataTable.setValueAt(false, i, 0);
                 }
                 thirdPane.repaint();
             }
         });
         // 报警提示相关
 
-        warningJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int a = 1;
-                exists = true;
-                wp.Pane(mainframe);
-            }
+        warningJB.addActionListener(e -> {
+            int a = 1;
+            exists = true;
+            warnPane.Pane(mainframe);
         });
         // 一键准备相关
-        ALLstartJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        ALLstartJB.addActionListener(e -> {
 
-                if (ASR == 1) {
-                    ASR = 2;
-                    ImageIcon ii3 = new ImageIcon("src/ima/start.png");
-                    Image temp3 = ii3.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),
-                            ii3.getImage().SCALE_DEFAULT);
-                    ii3 = new ImageIcon(temp3);
-                    ALLstartJB.setIcon(ii3);
-                } else if (ASR == 2) {
-                    ImageIcon ii0 = new ImageIcon("src/ima/doing.png");
-                    Image temp0 = ii0.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),
-                            ii0.getImage().SCALE_DEFAULT);
-                    ii0 = new ImageIcon(temp0);
-                    ALLstartJB.setIcon(ii0);
-                    try {
-                        String str = "B";
-                        byte[] sb = str.getBytes();//转换成字节数组
-                        //TODO
-                        SerialTool.sendToPort(serialPort01, sb);//发送数据
-                        startTime = System.currentTimeMillis();
-                        DebugPrint.DPrint("开始用时：" + startTime);
-                    } catch (Exception ee) {
-                        JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
-                    }
+            if (ASR == 1) {
+                ASR = 2;
+                ImageIcon ii31 = new ImageIcon("src/ima/start.png");
+                Image temp31 = ii31.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),
+                        ii31.getImage().SCALE_DEFAULT);
+                ii31 = new ImageIcon(temp31);
+                ALLstartJB.setIcon(ii31);
+            } else if (ASR == 2) {
+                ImageIcon ii0 = new ImageIcon("src/ima/doing.png");
+                Image temp0 = ii0.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),
+                        ii0.getImage().SCALE_DEFAULT);
+                ii0 = new ImageIcon(temp0);
+                ALLstartJB.setIcon(ii0);
+                try {
+                    String str = "B";
+                    byte[] sb = str.getBytes();//转换成字节数组
+                    //TODO
+                    SerialTool.sendToPort(serialPort01, sb);//发送数据
+                    startTime = System.currentTimeMillis();
+                    DebugPrint.DPrint("开始用时：" + startTime);
+                } catch (Exception ee) {
+                    JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         });
         // 一键停止相关
-        AllcloseJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (AST == 1) {
-                    AST = 2;
-                    try {
-                        String str = "E";
-                        byte[] sb = str.getBytes();
-                        //TODO
-                        SerialTool.sendToPort(serialPort01, sb);
-                    } catch (Exception ee) {
-                        JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                    ImageIcon ii1 = new ImageIcon("src/ima/prepare.png");
-                    Image temp1 = ii1.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),
-                            ii1.getImage().SCALE_DEFAULT);
-                    ii1 = new ImageIcon(temp1);
-                    ALLstartJB.setIcon(ii1);
+        AllcloseJB.addActionListener(e -> {
+            if (AST == 1) {
+                AST = 2;
+                try {
+                    String str = "E";
+                    byte[] sb = str.getBytes();
+                    //TODO
+                    SerialTool.sendToPort(serialPort01, sb);
+                } catch (Exception ee) {
+                    JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
+                }
+                ImageIcon ii13 = new ImageIcon("src/ima/prepare.png");
+                Image temp13 = ii13.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),
+                        ii13.getImage().SCALE_DEFAULT);
+                ii13 = new ImageIcon(temp13);
+                ALLstartJB.setIcon(ii13);
 
-                    ImageIcon ii0 = new ImageIcon("src/ima/clearData.png");
-                    Image temp0 = ii0.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),ii0.getImage().SCALE_DEFAULT);
-                    ii0 = new ImageIcon(temp0);
-                    AllcloseJB.setIcon(ii0);
+                ImageIcon ii0 = new ImageIcon("src/ima/clearData.png");
+                Image temp0 = ii0.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(), ii0.getImage().SCALE_DEFAULT);
+                ii0 = new ImageIcon(temp0);
+                AllcloseJB.setIcon(ii0);
 
-                } else if (AST == 2) {
-                    ASR = 1;
-                    try {
-                        String str = "C";
-                        byte[] sb = str.getBytes();
-                        //TODO
-                        SerialTool.sendToPort(serialPort01, sb);
-                        AST = 1;
-                        ImageIcon ii2 = new ImageIcon("src/ima/end.png");
-                        Image temp2 = ii2.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),ii2.getImage().SCALE_DEFAULT);
-                        ii2 = new ImageIcon(temp2);
-                        AllcloseJB.setIcon(ii2);
-                    } catch (Exception ee) {
-                        JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
-                    }
+            } else if (AST == 2) {
+                ASR = 1;
+                try {
+                    String str = "C";
+                    byte[] sb = str.getBytes();
+                    //TODO
+                    SerialTool.sendToPort(serialPort01, sb);
+                    AST = 1;
+                    ImageIcon ii21 = new ImageIcon("src/ima/end.png");
+                    Image temp21 = ii21.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(), ii21.getImage().SCALE_DEFAULT);
+                    ii21 = new ImageIcon(temp21);
+                    AllcloseJB.setIcon(ii21);
+                } catch (Exception ee) {
+                    JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         });
         // 设置相关
-        setJB.addActionListener(new java.awt.event.ActionListener() {
+        setJB.addActionListener(e -> {
+            secondPane.removeAll();
+            panelAlls(secondPane,new_admin,surAdminJL,surAdminJF);
+            thirdPane.removeAll();
+            panelAlls(thirdPane,borders[1],borders[2],borders[3],adminJL,nameJF,nameJL,adminJF,RadminJL,RadminJF,HeartJL,HeartJF,confirmJB,deleteJB,updateJB,CnumJL,CnumJF,AbnormalJL,AbnormalJF,confirmCJB,confirmCJB2,confirmCJB3,new_Cnum);
+            secondPane.repaint();
+            thirdPane.repaint();
+        });
+        /*setJB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 secondPane.removeAll();
                 thirdPane.removeAll();
-                thirdPane.add(bor2);
-                thirdPane.add(bor3);
-                thirdPane.add(bor4);
+                thirdPane.add(borders[1]);
+                thirdPane.add(borders[2]);
+                thirdPane.add(borders[3]);
                 secondPane.add(new_admin);
+
                 secondPane.add(surAdminJL);
                 secondPane.add(surAdminJF);
                 thirdPane.add(adminJL);
@@ -1457,179 +1155,106 @@ public class MainPanel {
                 thirdPane.add(new_Cnum);
                 secondPane.repaint();
                 thirdPane.repaint();
+
+            }
+        });*/
+
+        confirmJB.addActionListener(e -> {
+            String surAdminJFPassword = String.valueOf(surAdminJF.getPassword());
+            String adminJFPassword = String.valueOf(adminJF.getPassword());
+            String RadminJFPassword = String.valueOf(RadminJF.getPassword());
+            String name = nameJL.getText();
+            if (!surAdminJFPassword.equals("") && !adminJFPassword.equals("") && !RadminJFPassword.equals("")) {
+                if (surperAdminOper.select(surAdminJFPassword)) {
+                    if (adminJFPassword.equals(RadminJFPassword)) {
+                        adminOper.add(adminJFPassword, name);
+                        p.RemindPgSelect("               添加成功");
+                        surAdminJF.setText("");
+                        adminJF.setText("");
+                        RadminJF.setText("");
+                        nameJF.setText("");
+                    }
+                } else if (!surperAdminOper.select(surAdminJFPassword))
+                    p.RemindPgSelect("           认证口令错误");
+            } else {
+                p.RemindPgSelect("           请填完信息");
             }
         });
-        confirmJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String password = surAdminJF.getText();
-                String addPassword1 = adminJF.getText();
-                String addPassword2 = RadminJF.getText();
-                String name = nameJL.getText();
-                if (!password.equals("") && !addPassword1.equals("") && !addPassword2.equals("")) {
-                    if (surperAdminOper.select(password)) {
-                        if (addPassword1.equals(addPassword2)) {
-                            ap.add(addPassword1, name);
-                            p.RemindPgSelect("               添加成功");
-                            surAdminJF.setText("");
-                            adminJF.setText("");
-                            RadminJF.setText("");
-                            nameJF.setText("");
-                        }
-                    } else if (!surperAdminOper.select(password))
-                        p.RemindPgSelect("           认证口令错误");
-                } else {
-                    p.RemindPgSelect("           请填完信息");
-                }
+        updateJB.addActionListener(e -> {
+            String password = String.valueOf(surAdminJF.getPassword());
+            String addPassword1 = String.valueOf(adminJF.getPassword());
+            String addPassword2 = String.valueOf(RadminJF.getPassword());
+            String name = nameJL.getText();
+            if (!password.equals("") && !addPassword1.equals("") && !addPassword2.equals("")) {
+                if (adminOper.select(password)) {
+                    if (addPassword1.equals(addPassword2)) {
+                        adminOper.update(name, password, addPassword1);
+                        p.RemindPgSelect("               修改成功");
+                        surAdminJF.setText("");
+                        adminJF.setText("");
+                        RadminJF.setText("");
+                        nameJF.setText("");
+                    }
+                } else if (!surperAdminOper.select(password))
+                    p.RemindPgSelect("认证口令错误");
+            } else {
+                p.RemindPgSelect("请填完信息");
             }
         });
-        updateJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String password = surAdminJF.getText();
-                String addPassword1 = adminJF.getText();
-                String addPassword2 = RadminJF.getText();
-                String name = nameJL.getText();
-                if (!password.equals("") && !addPassword1.equals("") && !addPassword2.equals("")) {
-                    if (ap.select(password)) {
-                        if (addPassword1.equals(addPassword2)) {
-                            ap.update(name, password, addPassword1);
-                            p.RemindPgSelect("               修改成功");
-                            surAdminJF.setText("");
-                            adminJF.setText("");
-                            RadminJF.setText("");
-                            nameJF.setText("");
-                        }
-                    } else if (!surperAdminOper.select(password))
-                        p.RemindPgSelect("认证口令错误");
-                } else {
-                    p.RemindPgSelect("请填完信息");
-                }
+        deleteJB.addActionListener(e -> {
+            userdataOperate.deleteAll();
+            currentbdOper.deleteAll();
+            historybdOper.deleteAll();
+        });
+        confirmCJB.addActionListener(e -> {
+            String heart_orange = HeartJF.getText();
+            if (heart_orange.length() > 0) {
+                String[] heart_list = heart_orange.split("-");
+                min_heart = Integer.parseInt(heart_list[0]);
+                max_heart = Integer.parseInt(heart_list[1]);
             }
         });
-        deleteJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                up.deleteAll();
-                currentbdOper.deleteAll();
-                hp.deleteAll();
+        confirmCJB2.addActionListener(e -> {
+            String cycle = CnumJF.getText();
+            if (cycle.length() > 0) {
+                settingCycle = cycle;
             }
         });
-        confirmCJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String heart_orange = HeartJF.getText();
-                if (heart_orange.length() > 0) {
-                    String[] heart_list = heart_orange.split("-");
-                    min_heart = Integer.parseInt(heart_list[0]);
-                    max_heart = Integer.parseInt(heart_list[1]);
-                }
+        confirmCJB3.addActionListener(e -> {
+            String trackPoint = AbnormalJF.getText();
+            if (trackPoint.length() > 0) {
+                track_point = Integer.parseInt(trackPoint);
             }
         });
-        confirmCJB2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String cycle = CnumJF.getText();
-                if (cycle.length() > 0) {
-                    settingCycle = cycle;
-                }
-            }
-        });
-        confirmCJB3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String trackPoint = AbnormalJF.getText();
-                if (trackPoint.length() > 0) {
-                    track_point = Integer.parseInt(trackPoint);
-                }
-            }
-        });
-        closeJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
+        closeJB.addActionListener(e -> System.exit(0));
     }
 
     private void RemindSucess() {
-        final JFrame RemindSucessFrame = new JFrame("提示");
-        JPanel RemindSucessPane = new JPanel();
-        JLabel RemindSucessLabel = new JLabel("添加成功");
-        JButton closeRemindSucessJB = new JButton("关闭");
-        RemindSucessFrame.setLayout(null);
-        RemindSucessPane.setLayout(null);
-        RemindSucessFrame.setBounds(0, 0, 300, 200);
-        RemindSucessPane.setBounds(0, 0, 300, 200);
-        RemindSucessLabel.setBounds(120, 30, 80, 80);
-        closeRemindSucessJB.setBounds(120, 100, 60, 30);
-        RemindSucessPane.add(closeRemindSucessJB);
-        RemindSucessPane.add(RemindSucessLabel);
-        RemindSucessFrame.add(RemindSucessPane);
-        RemindSucessFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        RemindSucessFrame.setLocationRelativeTo(null);
-        RemindSucessFrame.setResizable(false);
-        RemindSucessFrame.setVisible(true);
-        closeRemindSucessJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                RemindSucessFrame.dispose();
-            }
-        });
+        final RemindFrame remindSuccessFrame = new RemindFrame("提示", "添加成功");
+        remindSuccessFrame.setLabelBounds(120, 30, 80, 80);
+        remindSuccessFrame.init();
     }
 
     private void Remindfail() {
-        final JFrame RemindfailFrame = new JFrame("提示");
-        JPanel RemindfailPane = new JPanel();
-        JLabel RemindfailLabel = new JLabel("请填完信息");
-        JButton closeRemindfailJB = new JButton("关闭");
-        RemindfailFrame.setLayout(null);
-        RemindfailPane.setLayout(null);
-        RemindfailFrame.setBounds(0, 0, 300, 200);
-        RemindfailPane.setBounds(0, 0, 300, 200);
-        RemindfailLabel.setBounds(120, 30, 80, 80);
-        closeRemindfailJB.setBounds(120, 100, 60, 30);
-        RemindfailPane.add(closeRemindfailJB);
-        RemindfailPane.add(RemindfailLabel);
-        RemindfailFrame.add(RemindfailPane);
-        RemindfailFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        RemindfailFrame.setLocationRelativeTo(null);
-        RemindfailFrame.setResizable(false);
-        RemindfailFrame.setVisible(true);
-        closeRemindfailJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                RemindfailFrame.dispose();
-            }
-        });
+        final RemindFrame remindFrame = new RemindFrame("提示", "请填完信息");
+        remindFrame.setLabelBounds(120, 30, 80, 80);
+        remindFrame.init();
     }
 
-    void RemindPgSelect(String s) {
-        final JFrame RemindfailFrame = new JFrame("提示");
-        JPanel RemindfailPane = new JPanel();
-        JLabel RemindfailLabel = new JLabel(s);
-        JButton closeRemindfailJB = new JButton("关闭");
-        RemindfailFrame.setLayout(null);
-        RemindfailPane.setLayout(null);
-        RemindfailFrame.setBounds(0, 0, 300, 200);
-        RemindfailPane.setBounds(0, 0, 300, 200);
-        RemindfailLabel.setBounds(90, 30, 150, 80);
-        closeRemindfailJB.setBounds(120, 100, 60, 30);
-        RemindfailPane.add(closeRemindfailJB);
-        RemindfailPane.add(RemindfailLabel);
-        RemindfailFrame.add(RemindfailPane);
-        RemindfailFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        RemindfailFrame.setLocationRelativeTo(null);
-        RemindfailFrame.setResizable(false);
-        RemindfailFrame.setUndecorated(true);
-        RemindfailFrame.setVisible(true);
-        closeRemindfailJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                RemindfailFrame.dispose();
-            }
-        });
+    private void RemindPgSelect(String showMessage) {
+        final RemindFrame remindFrame = new RemindFrame("提示", showMessage);
+        remindFrame.init();
+
     }
 
     private void setAddUT(Object[][] addUser_rowData, int PgNum)// 赋值第n页添加用户的表格
     {
-        ArrayList<String> array = new ArrayList();
-        up.select(array);
+        ArrayList<String> array = new ArrayList<String>();
+        userdataOperate.select(array);
         for (int i = 20 * (PgNum - 1); i < array.size() && i < 20 * PgNum; i++) {
             int n = i % 20;
             String[] a = array.get(i).split(",");
-            for (int j = 0; j < 4; j++)
-                addUser_rowData[n][j] = a[j];
+            System.arraycopy(a, 0, addUser_rowData[n], 0, 4);
         }
     }
 
@@ -1649,16 +1274,16 @@ public class MainPanel {
             String s2 = String.valueOf(addUserT.getValueAt(i, 1));
             String s3 = String.valueOf(addUserT.getValueAt(i, 2));
             String s4 = String.valueOf(addUserT.getValueAt(i, 3));
-            up.update(s1, s2, s3, s4);
+            userdataOperate.update(s1, s2, s3, s4);
         }
     }
 
     private void setAddequipment(JTable addequipmentT)// 赋值添加设备的表格
     {
-        ArrayList<String> array = new ArrayList();
-        ep.select(array);
+        ArrayList<String> array = new ArrayList<String>();
+        equiOperater.select(array);
         int k = array.size() / 4;
-        double kk = Double.valueOf(array.size()) / 4;
+        double kk = (double) array.size() / 4;
         int num;
         if (kk > k)
             num = k + 1;
@@ -1698,17 +1323,17 @@ public class MainPanel {
         bdUBox.removeAllItems();
         bdEBox.removeAllItems();
         MainPanel p = new MainPanel();
-        ArrayList<String> array11 = new ArrayList();
-        ArrayList<String> array12 = new ArrayList();
-        up.selectID(array11);
-        ep.select(array12);
+        ArrayList<String> array11 = new ArrayList<>();
+        ArrayList<String> array12 = new ArrayList<>();
+        userdataOperate.selectID(array11);
+        equiOperater.select(array12);
         p.dbBox(bdUBox, array11);
         p.dbBox(bdEBox, array12);
     }
 
     private void BindTable(JTable dataT, ArrayList<String> array) {
-        p.DataT_clear(dataT);
-        p.setDataT_starT(dataT, array, dataPgNum);
+        mainPanel.DataT_clear(dataT);
+        mainPanel.setDataT_starT(dataT, array, dataPgNum);
     }
 
     //	 bdUserT_columnNames
@@ -1722,7 +1347,7 @@ public class MainPanel {
 
     private void setbdUserT(Object[][] bdUserT_rowData, int PgNum)// 给第PgNum页用户绑定的表格赋值
     {
-        ArrayList<String> array = new ArrayList();
+        ArrayList<String> array = new ArrayList<>();
         currentbdOper.select(array);
         for (int i = 20 * (PgNum - 1); i < array.size() && i < 20 * PgNum; i++) {
             int n = i % 20;
@@ -1761,13 +1386,6 @@ public class MainPanel {
         }
     }
 
-    public void setDataT_starT(JTable dataT, ArrayList<String> array) {
-        for (int i = 0; i < array.size() && i < 20; i++) {
-            String[] a = array.get(i).split(",");
-            for (int j = 1; j < 11; j++)
-                dataT.setValueAt(a[j - 1], i, j);
-        }
-    }
 
     private static DatePicker getDatePicker() {
         final DatePicker datepick;
@@ -1845,7 +1463,6 @@ public class MainPanel {
         PgNum = array.size() / 21 + 1;
         return PgNum;
     }
-
 
 
     class MyAbstractTableModel1 extends AbstractTableModel {
@@ -1956,18 +1573,7 @@ public class MainPanel {
                                         if (Integer.parseInt(remainCycle) > 0) {
                                             if (Integer.parseInt(remainCycle) == 1) {
                                                 DebugPrint.DPrint("结束用时：" + System.currentTimeMillis());
-                                                long totalTime = System.currentTimeMillis() - startTime;
-                                                int hour, minute, second, milli;
-                                                milli = (int) (totalTime % 1000);
-                                                totalTime = totalTime / 1000;
-                                                second = (int) (totalTime % 60);
-                                                totalTime = totalTime / 60;
-                                                minute = (int) (totalTime % 60);
-                                                totalTime = totalTime / 60;
-                                                hour = (int) (totalTime % 60);
-                                                DebugPrint.DPrint("小时：" + hour + "分钟：" + minute + "秒钟:" + second + "毫秒" + milli);
-                                                String totalTime2 = String.format("%02d:%02d:%02d:%02d", hour, minute, second, milli);
-                                                currentbdOper.UpdateTotalTime(totalTime2, SerialTemp.substring(0, 1));
+                                                currentbdOper.UpdateTotalTime(CalculateUtils.getTime(startTime), SerialTemp.substring(0, 1));
                                                 try {
                                                     String str = SerialTemp.substring(0, 1) + "S";
                                                     byte[] sb = str.getBytes();//转换成字节数组
@@ -1997,14 +1603,14 @@ public class MainPanel {
                                     String cycle = currentbdOper.select_cycle(SerialTemp.substring(0, 1));//剩余圈数
                                     Timestamp apTime = new Timestamp(System.currentTimeMillis());
                                     if (Integer.parseInt(ENH_array[2]) < min_heart || Integer.parseInt(ENH_array[2]) > max_heart) {
-                                        abp.add(SerialTemp.substring(0, 1), currentbdOper.select_uid(SerialTemp.substring(0, 1)), "心率异常(点击查看)", apTime);
+                                        abnormalOper.add(SerialTemp.substring(0, 1), currentbdOper.select_uid(SerialTemp.substring(0, 1)), "心率异常(点击查看)", apTime);
                                         currentbdOper.Update_hearbeat(ENH_array[2] + "(异常)", SerialTemp.substring(0, 1));
                                         exists = true;
-                                        wp.Pane(mainframe);
+                                        warnPane.Pane(mainframe);
                                     } else {
                                         currentbdOper.Update_hearbeat(ENH_array[2], SerialTemp.substring(0, 1));
                                     }
-                                    hp.add(id, bdUid, up.selectName(bdUid), SerialTemp.substring(0, 1), "正常", cycle, ENH_array[2], "电量正常", ENH_array[0], ENH_array[1], time);
+                                    historybdOper.add(id, bdUid, userdataOperate.selectName(bdUid), SerialTemp.substring(0, 1), "正常", cycle, ENH_array[2], "电量正常", ENH_array[0], ENH_array[1], time);
                                     SerialBuff.add(SerialTemp);
                                     DebugPrint.DPrint("是第几页" + bdUserPgNum);
                                     MainPanel p = new MainPanel();
@@ -2019,14 +1625,14 @@ public class MainPanel {
                                     String id = currentbdOper.select_id(SerialTemp.substring(0, 1));//获取对应的id(也就是绑定时的时间戳)
                                     String bdUid = currentbdOper.select_uid(SerialTemp.substring(0, 1));//获取用户id
                                     String cycle = currentbdOper.select_cycle(SerialTemp.substring(0, 1));//剩余圈数
-                                    hp.add(id, bdUid, up.selectName(bdUid), SerialTemp.substring(0, 1), "正常", cycle, ENH_array[2], "电量正常", ENH_array[0], ENH_array[1], time);
+                                    historybdOper.add(id, bdUid, userdataOperate.selectName(bdUid), SerialTemp.substring(0, 1), "正常", cycle, ENH_array[2], "电量正常", ENH_array[0], ENH_array[1], time);
                                     SerialBuff.add(SerialTemp);
                                     Timestamp apTime = new Timestamp(System.currentTimeMillis());
                                     if (Integer.parseInt(ENH_array[2]) < min_heart || Integer.parseInt(ENH_array[2]) > max_heart) {
-                                        abp.add(SerialTemp.substring(0, 1), currentbdOper.select_uid(SerialTemp.substring(0, 1)), "心率异常(点击查看)", apTime);
+                                        abnormalOper.add(SerialTemp.substring(0, 1), currentbdOper.select_uid(SerialTemp.substring(0, 1)), "心率异常(点击查看)", apTime);
                                         currentbdOper.Update_hearbeat(ENH_array[2] + "(异常)", SerialTemp.substring(0, 1));
                                         exists = true;
-                                        wp.Pane(mainframe);
+                                        warnPane.Pane(mainframe);
                                     } else {
                                         currentbdOper.Update_hearbeat(ENH_array[2], SerialTemp.substring(0, 1));
                                     }
@@ -2053,7 +1659,7 @@ public class MainPanel {
         }
     }
 
-    private static String stringConnect(String[] strings){
+    private static String stringConnect(String[] strings) {
         String temp = "";
         for (int i = 0; i < strings.length; i++) {
             if (i == strings.length - 1) {
@@ -2135,7 +1741,7 @@ public class MainPanel {
 
                         // 设置当前串口的输入输出流
                         try {
-                            if(serialPort01 != null){
+                            if (serialPort01 != null) {
                                 inputStream = new BufferedInputStream(serialPort01.getInputStream(), 20 * 1024);
                                 outputStream = serialPort01.getOutputStream();
                             }
@@ -2143,7 +1749,7 @@ public class MainPanel {
                             e.printStackTrace();
                         }
                         // 在该串口对象上添加监听器
-                        if(serialPort01 != null){
+                        if (serialPort01 != null) {
                             //TODO
                             SerialTool.addListener(serialPort01, new SerialListener());//执行接口中的方法(可获取数据)
                         }
@@ -2160,12 +1766,47 @@ public class MainPanel {
         });
 
     }
-    private void setUIFont(){
-        Font f = new Font("微软雅黑", Font.PLAIN, 11);
+
+    private void setUIFont() {
+        Font f = font12;
         for (String item : UIFontUtil.fontName) {
             UIManager.put(item + ".font", f);
         }
     }
 
+    /**
+     * JPanel 一次性添加多个控件
+     *
+     * @param panel
+     * @param jComponent
+     */
+    private void panelAlls(final JPanel panel, JComponent... jComponent) {
+        for (int i = 0; i < jComponent.length; i++) {
+            panel.add(jComponent[i]);
+        }
 
+    }
+
+    /**
+     * 重载 一次性添加多个控件
+     *
+     * @param frame
+     * @param jComponent
+     */
+    private void panelAlls(final JFrame frame, JComponent... jComponent) {
+        for (int i = 0; i < jComponent.length; i++) {
+            frame.add(jComponent[i]);
+        }
+        frame.repaint();
+    }
+
+    private void frameInit(final JFrame jFrame) {
+        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jFrame.setLocationRelativeTo(null);
+        jFrame.setResizable(false);
+        jFrame.setUndecorated(true);
+        jFrame.setVisible(true);
+
+
+    }
 }

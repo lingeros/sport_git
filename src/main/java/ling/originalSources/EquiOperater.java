@@ -1,11 +1,14 @@
 package ling.originalSources;
 
+import org.apache.poi.ss.formula.functions.T;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
 public class EquiOperater {
+    private final static String TAG = "EquiOperater:";
     private Connection conn = null;
     private PreparedStatement ps = null;
     private ResultSet rs = null;
@@ -23,7 +26,7 @@ public class EquiOperater {
                 i = rs.getInt(1);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            DebugPrint.DPrint(TAG + e.toString());
         }
         return i;
     }
@@ -32,13 +35,12 @@ public class EquiOperater {
         try {
 
             conn = d.getconn();
-            sql = "CREATE TABLE equipmendata(\r\n" +
-                    "	equipment_id varchar(16))";
+            sql = "CREATE TABLE if not exists equipmendata(equipment_id varchar(16))";
             ps = conn.prepareStatement(sql);
             ps.executeUpdate();
 
         } catch (Exception e) {
-
+            DebugPrint.DPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -48,18 +50,17 @@ public class EquiOperater {
 
         try {
             conn = d.getconn();
-            sql = "INSERT INTO equipmendata(equipment_id ) VALUES"
-                    + "(?)";
+            sql = "INSERT INTO equipmendata(equipment_id ) VALUES(?)";
             ps = conn.prepareStatement(sql);
             ps.setString(1, eid);
 
             int i = ps.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint("t");
+                DebugPrint.DPrint(TAG + "add success");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            DebugPrint.DPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -68,7 +69,7 @@ public class EquiOperater {
     public void select(ArrayList<String> array) {
         try {
             conn = d.getconn();
-            sql = "select*from equipmendata";
+            sql = "select * from equipmendata";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -76,7 +77,7 @@ public class EquiOperater {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            DebugPrint.DPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -94,7 +95,7 @@ public class EquiOperater {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            DebugPrint.DPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -113,7 +114,7 @@ public class EquiOperater {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            DebugPrint.DPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -122,15 +123,15 @@ public class EquiOperater {
     public void delete(String eid) {
         try {
             conn = d.getconn();
-            sql = "DELETE FROM equipmendata\r\n" +
-                    "   WHERE equipment_id =" + "'" + eid + "'";
+            sql = "DELETE FROM equipmendata WHERE equipment_id = ?";
             ps = conn.prepareStatement(sql);
+            ps.setString(1, eid);
             int i = ps.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint("t");
+                DebugPrint.DPrint(TAG + "delete success");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            DebugPrint.DPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -143,13 +144,14 @@ public class EquiOperater {
             sql = "SELECT COUNT(*) FROM equipmendata";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
-            while (rs.next())
+            while (rs.next()) {
                 i = rs.getInt(1);
+            }
 
             i = i / 80 + 1;
-            DebugPrint.DPrint("!!!!" + i);
+            DebugPrint.DPrint(TAG +"getPgNum :"+ i);
         } catch (Exception e) {
-            e.printStackTrace();
+            DebugPrint.DPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -160,14 +162,14 @@ public class EquiOperater {
         boolean jduge = false;
         try {
             conn = d.getconn();
-            sql = "select*from equipmendata ";
+            sql = "select * from equipmendata ";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
             while (rs.next()) {
                 if (eid.equals(rs.getString(1))) jduge = true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            DebugPrint.DPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }

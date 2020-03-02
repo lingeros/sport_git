@@ -1,5 +1,7 @@
 package ling.originalSources;
 
+import ling.CustomFrame.DetailPanelDeleteFrame;
+
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -17,8 +19,8 @@ public class detailPane {
     userdataOperate up = new userdataOperate();
     EquiOperater ep = new EquiOperater();
     CurrentbdOper currentbdOper = new CurrentbdOper();
-    HistorybdOper hp = new HistorybdOper();
-    ExportEX xp = new ExportEX();
+    HistorybdOper historybdOper = new HistorybdOper();
+    ExportEX exportEX = new ExportEX();
 
     public void pane(String id) {
         final detailPane dP = new detailPane();
@@ -63,7 +65,7 @@ public class detailPane {
         TableColumn column10 = dataT.getColumnModel().getColumn(10);
         column10.setPreferredWidth(150);
         final ArrayList<String> array = new ArrayList();
-        hp.select(id, array);
+        historybdOper.select(id, array);
         DebugPrint.DPrint("有没有hp数据：" + array);
         dP.dataT_clear(dataT);
         dP.setDataT_starT(dataT, array, PgNum);
@@ -82,32 +84,32 @@ public class detailPane {
         dFrame.setVisible(true);
         dP.JFrame_exists(dFrame);
         String sql = "select *from historybd where id =" + "'" + id + "'";
-        hp.command(sql, SDTarray);
-        PgdownJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                PgNum++;
-                if (PgNum >= dP.getPgNumArray(array)) PgNum = dP.getPgNumArray(array);
-                dP.dataT_clear(dataT);
-                dP.setDataT_starT(dataT, array, PgNum);
-            }
+        historybdOper.command(sql, SDTarray);
+        PgdownJB.addActionListener(e -> {
+            PgNum++;
+            if (PgNum >= dP.getPgNumArray(array)) PgNum = dP.getPgNumArray(array);
+            dP.dataT_clear(dataT);
+            dP.setDataT_starT(dataT, array, PgNum);
         });
-        PgupJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                PgNum--;
-                if (PgNum <= 0) PgNum = 1;
-                dP.dataT_clear(dataT);
-                dP.setDataT_starT(dataT, array, PgNum);
-            }
+        PgupJB.addActionListener(e -> {
+            PgNum--;
+            if (PgNum <= 0) PgNum = 1;
+            dP.dataT_clear(dataT);
+            dP.setDataT_starT(dataT, array, PgNum);
         });
         selectJB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int i = Integer.valueOf(selectPgNum.getText());
-                if (i <= 0 || i > dP.getPgNumArray(array)) dP.RemindPgSelect(" 请根据总页数输入跳转页");
-                else {
-                    PgNum = i;
-                    dP.dataT_clear(dataT);
-                    dP.setDataT_starT(dataT, array, PgNum);
+                String pageNumString = selectPgNum.getText();
+                if(!"".equals(pageNumString)){
+                    int i = Integer.valueOf(selectPgNum.getText());
+                    if (i <= 0 || i > dP.getPgNumArray(array)) dP.RemindPgSelect(" 请根据总页数输入跳转页");
+                    else {
+                        PgNum = i;
+                        dP.dataT_clear(dataT);
+                        dP.setDataT_starT(dataT, array, PgNum);
+                    }
                 }
+
             }
         });
         dataT.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -135,52 +137,27 @@ public class detailPane {
             public void actionPerformed(ActionEvent e) {
                 String[] a = {"序列号", "用户编号", "姓名", "设备号", "佩戴状态", "剩余圈数", "心跳"
                         , "电量", "经纬度", "录入时间"};
-                xp.wExcel(SDTarray, a);
+                exportEX.wExcel(SDTarray, a);
                 for (int i = 0; i < 20; i++)
                     dataT.setValueAt(false, i, 0);
                 SDTarray.clear();
             }
         });
-        deleteJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                final JFrame DelectJF = new JFrame();
-                JPanel DelectJP = new JPanel();
-                DelectJF.setLayout(null);
-                DelectJP.setLayout(null);
-                DelectJF.setBounds(0, 0, 300, 200);
-                DelectJP.setBounds(0, 0, 300, 200);
-                JLabel remaindJL = new JLabel("删除不可恢复，是否继续？");
-                JButton Yes = new JButton("是");
-                JButton No = new JButton("否");
-                remaindJL.setBounds(70, 30, 160, 80);
-                Yes.setBounds(70, 100, 60, 30);
-                No.setBounds(160, 100, 60, 30);
-                DelectJP.add(remaindJL);
-                DelectJP.add(Yes);
-                DelectJP.add(No);
-                DelectJF.add(DelectJP);
-                DelectJF.setLocationRelativeTo(null);
-                DelectJF.setResizable(false);
-                DelectJF.setVisible(true);
-                No.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        DelectJF.dispose();
+        deleteJB.addActionListener(e -> {
+            final DetailPanelDeleteFrame detailPanelDeleteFrame = new DetailPanelDeleteFrame();
+            JButton[]  jButtons = detailPanelDeleteFrame.init();
+            jButtons[1].addActionListener(e12 -> detailPanelDeleteFrame.dispose());//取消按钮
+            jButtons[0].addActionListener(e1 -> {
+                        for (int i = 0; i < SDTarray.size(); i++) {
+                            String a[] = SDTarray.get(i).split(",");
+                            currentbdOper.delete(a[9]);
+                        }
+                        detailPanelDeleteFrame.dispose();
+                        dP.setDataT_starT(dataT, array, PgNum);
+                        PgNumJL.setText("跳转/共" + dP.getPgNumArray(array) + "页");
                     }
-                });
-                Yes.addActionListener(new java.awt.event.ActionListener() {
-                                          public void actionPerformed(ActionEvent e) {
-                                              for (int i = 0; i < SDTarray.size(); i++) {
-                                                  String a[] = SDTarray.get(i).split(",");
-                                                  currentbdOper.delete(a[9]);
-                                              }
-                                              DelectJF.dispose();
-                                              dP.setDataT_starT(dataT, array, PgNum);
-                                              PgNumJL.setText("跳转/共" + dP.getPgNumArray(array) + "页");
-                                          }
-                                      }
-                );
-                ckb.setSelected(false);
-            }
+            );
+            ckb.setSelected(false);
         });
     }
 
@@ -239,17 +216,6 @@ public class detailPane {
         });
     }
 
-    public void setAddUT(Object[][] addUser_rowData, int PgNum)//��ֵ��nҳ����û��ı��
-    {
-        ArrayList<String> array = new ArrayList();
-        up.select(array);
-        for (int i = 20 * (PgNum - 1); i < array.size() && i < 20 * PgNum; i++) {
-            int n = i % 20;
-            String[] a = array.get(i).split(",");
-            for (int j = 0; j < 4; j++)
-                addUser_rowData[n][j] = a[j];
-        }
-    }
 
     class MyAbstractTableModel2 extends AbstractTableModel {
 
@@ -264,28 +230,35 @@ public class detailPane {
         public int getColumnCount() {
             return head.length;
         }
+
         public int getRowCount() {
             return data.length;
         }
+
         @Override
         public String getColumnName(int column) {
             return head[column];
         }
+
         public Object getValueAt(int rowIndex, int columnIndex) {
             return data[rowIndex][columnIndex];
         }
+
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
             return true;
         }
+
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
             data[rowIndex][columnIndex] = aValue;
             fireTableCellUpdated(rowIndex, columnIndex);
         }
+
         public Class getColumnClass(int columnIndex) {
             return typeArray[columnIndex];
         }
     }
+
     public static void setUIFont() {
         Font f = new Font("宋体", Font.PLAIN, 11);
         String names[] = {"Label", "CheckBox", "PopupMenu", "MenuItem", "CheckBoxMenuItem",
@@ -300,6 +273,7 @@ public class detailPane {
             UIManager.put(item + ".font", f);
         }
     }
+
     public void JFrame_exists(JFrame jf) {
         DebugPrint.DPrint("0.0");
         DebugPrint.DPrint(jf.isShowing());

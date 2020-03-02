@@ -1,11 +1,9 @@
 package ling;
 
-import ling.CustomFrame.SqlConfigFrame;
-import ling.originalSources.DatabaseInformation;
 import ling.originalSources.LoginPanel;
 
 /**
- * Hello world!
+ *
  *
  */
 public class App 
@@ -18,4 +16,5 @@ public class App
         sqlConfigFrame.init(sqlConfigFrame);*/
 
     }
+
 }

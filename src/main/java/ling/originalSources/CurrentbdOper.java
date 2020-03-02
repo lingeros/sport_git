@@ -203,9 +203,10 @@ public class CurrentbdOper {
 
     public void delete(String id) {
         try {
-            String sql = "delete from currentbd where id=" + "'" + id + "'";
+            String sql = "delete from currentbd where id=?";
             conn = d.getconn();
             ps = conn.prepareStatement(sql);
+            ps.setString(1,id);
             ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -374,7 +375,7 @@ public class CurrentbdOper {
     public void Update_lat(String lat, String e_id) {
         try {
             conn = d.getconn();
-            sql = "update currentbd set lat    =? where equipment_id =? and run='true'";
+            sql = "update currentbd set lat =? where equipment_id =? and run='true'";
             ps = conn.prepareStatement(sql);
             ps.setString(1, lat);
             ps.setString(2, e_id);
@@ -392,7 +393,7 @@ public class CurrentbdOper {
         boolean jduge = false;
         try {
             conn = d.getconn();
-            sql = "select*from currentbd  where  run ='true'";
+            sql = "select * from currentbd  where  run ='true'";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -410,7 +411,7 @@ public class CurrentbdOper {
         boolean jduge = false;
         try {
             conn = d.getconn();
-            sql = "select*from currentbd where  run ='true'";
+            sql = "select * from currentbd where  run ='true'";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
             while (rs.next()) {

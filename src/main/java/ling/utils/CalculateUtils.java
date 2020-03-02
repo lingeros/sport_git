@@ -1,5 +1,7 @@
 package ling.utils;
 
+import ling.originalSources.DebugPrint;
+
 /**
  * 该类用于计算方法的包装
  */
@@ -31,4 +33,26 @@ public class CalculateUtils {
         s = s * 1000;
         return s;
     }
+
+    /**
+     * 计算时间
+     * @param startTime 开始的时间
+     * @return 返回一个时间的字符串
+     */
+    public static String getTime(long startTime){
+        String temp = "";
+        long totalTime = System.currentTimeMillis() - startTime;
+        int hour, minute, second, milli;
+        milli = (int) (totalTime % 1000);
+        totalTime = totalTime / 1000;
+        second = (int) (totalTime % 60);
+        totalTime = totalTime / 60;
+        minute = (int) (totalTime % 60);
+        totalTime = totalTime / 60;
+        hour = (int) (totalTime % 60);
+        DebugPrint.DPrint("小时：" + hour + "分钟：" + minute + "秒钟:" + second + "毫秒" + milli);
+        temp = String.format("%02d:%02d:%02d:%02d", hour, minute, second, milli);
+        return temp;
+    }
+
 }

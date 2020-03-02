@@ -1,5 +1,7 @@
 package ling.originalSources;
 
+import ling.CustomFrame.RemindFrame;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -174,77 +176,18 @@ public class warnPane {
                 MainPanel.exists = false;
                 DebugPrint.DPrint("123123");
                 dFrame.dispose();
-//                s.stop();
-
-
-//			               }
-
-
             }
         });
 
         dFrame.setModal(true);
     }
 
-    public boolean exists(boolean exitst) {
-        return exitst;
-    }
-
-    public void remind(String s) {
-        final JFrame RemindfailFrame = new JFrame("提示");
-        JPanel RemindfailPane = new JPanel();
-        JLabel RemindfailLabel = new JLabel(s);
-        JButton closeRemindfailJB = new JButton("关闭");
-        RemindfailFrame.setLayout(null);
-        RemindfailPane.setLayout(null);
-        RemindfailFrame.setBounds(0, 0, 300, 200);
-        RemindfailPane.setBounds(0, 0, 300, 200);
-        RemindfailLabel.setBounds(90, 30, 150, 80);
-        closeRemindfailJB.setBounds(120, 100, 60, 30);
 
 
-        RemindfailPane.add(closeRemindfailJB);
-        RemindfailPane.add(RemindfailLabel);
-        RemindfailFrame.add(RemindfailPane);
-        RemindfailFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        RemindfailFrame.setLocationRelativeTo(null);
-        RemindfailFrame.setResizable(false);
-        RemindfailFrame.setUndecorated(true);
-        RemindfailFrame.setVisible(true);
-        closeRemindfailJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                RemindfailFrame.dispose();
+    public void RemindPgSelect(String showMessage) {
+        final RemindFrame remindFrame = new RemindFrame("提示",showMessage);
+        remindFrame.init();
 
-            }
-        });
-    }
-
-    public void RemindPgSelect(String s) {
-        final JFrame RemindfailFrame = new JFrame("提示");
-        JPanel RemindfailPane = new JPanel();
-        JLabel RemindfailLabel = new JLabel(s);
-        JButton closeRemindfailJB = new JButton("关闭");
-        RemindfailFrame.setLayout(null);
-        RemindfailPane.setLayout(null);
-        RemindfailFrame.setBounds(0, 0, 300, 200);
-        RemindfailPane.setBounds(0, 0, 300, 200);
-        RemindfailLabel.setBounds(90, 30, 150, 80);
-        closeRemindfailJB.setBounds(120, 100, 60, 30);
-
-
-        RemindfailPane.add(closeRemindfailJB);
-        RemindfailPane.add(RemindfailLabel);
-        RemindfailFrame.add(RemindfailPane);
-        RemindfailFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        RemindfailFrame.setLocationRelativeTo(null);
-        RemindfailFrame.setResizable(false);
-        RemindfailFrame.setUndecorated(true);
-        RemindfailFrame.setVisible(true);
-        closeRemindfailJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                RemindfailFrame.dispose();
-            }
-        });
     }
 
     public void T_clear(Object[][] abnor_columnNames) {
