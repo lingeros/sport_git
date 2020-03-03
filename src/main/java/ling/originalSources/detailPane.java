@@ -14,10 +14,7 @@ import java.util.ArrayList;
 public class detailPane {
     private Color nblue = new Color(204, 238, 218);
     private int PgNum = 1;
-    DatabaseInformation d = new DatabaseInformation();
     private static ArrayList<String> SDTarray = new ArrayList();
-    userdataOperate up = new userdataOperate();
-    EquiOperater ep = new EquiOperater();
     CurrentbdOper currentbdOper = new CurrentbdOper();
     HistorybdOper historybdOper = new HistorybdOper();
     ExportEX exportEX = new ExportEX();
@@ -97,20 +94,18 @@ public class detailPane {
             dP.dataT_clear(dataT);
             dP.setDataT_starT(dataT, array, PgNum);
         });
-        selectJB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String pageNumString = selectPgNum.getText();
-                if(!"".equals(pageNumString)){
-                    int i = Integer.valueOf(selectPgNum.getText());
-                    if (i <= 0 || i > dP.getPgNumArray(array)) dP.RemindPgSelect(" 请根据总页数输入跳转页");
-                    else {
-                        PgNum = i;
-                        dP.dataT_clear(dataT);
-                        dP.setDataT_starT(dataT, array, PgNum);
-                    }
+        selectJB.addActionListener(e -> {
+            String pageNumString = selectPgNum.getText();
+            if(!"".equals(pageNumString)){
+                int i = Integer.valueOf(selectPgNum.getText());
+                if (i <= 0 || i > dP.getPgNumArray(array)) dP.RemindPgSelect(" 请根据总页数输入跳转页");
+                else {
+                    PgNum = i;
+                    dP.dataT_clear(dataT);
+                    dP.setDataT_starT(dataT, array, PgNum);
                 }
-
             }
+
         });
         dataT.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent e) {

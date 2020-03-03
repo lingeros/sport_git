@@ -21,8 +21,9 @@ public class countCycle {
         ArrayList<String> array = new ArrayList();
         try {
             conn = d.getconn();
-            sql = "SELECT COUNT(*) FROM historybd where run='false' and id=" + "'" + id + "'" + " order by set_time ";
+            sql = "SELECT COUNT(*) FROM historybd where run='false' and id= ? order by set_time ";
             ps = conn.prepareStatement(sql);
+            ps.setString(1,id);
             rs = ps.executeQuery();
             while (rs.next()) {
                 array.add(rs.getString(10) + "," + rs.getString(11));

@@ -2,38 +2,48 @@ package ling.originalSources;
 
 import com.mysql.jdbc.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
+import ling.utils.DatabaseInfoFileUtils;
 
 import java.sql.*;
 
 /**
  * 数据库信息类
- * 106.53.85.245
+ *
  */
 public class DatabaseInformation {
     private static String driver = "com.mysql.jdbc.Driver";
     private static String url_before = "jdbc:mysql://";
     private static String url_after = "/bracelet?connectTimeout=3000&useUnicode=true&characterEncoding=utf-8&useSSL=false";
-    private static String mysqlUrl = "jdbc:mysql://106.53.85.245:3306/bracelet?useUnicode=true&characterEncoding=utf-8&useSSL=false";
+    private static String mysqlUrl = "jdbc:mysql://192.168.0.106:3306/bracelet?useUnicode=true&characterEncoding=utf-8&useSSL=false";
     private static String default_port = "3306";
     private static String username = "root";
     private static String password = "lingeros";
     private static String mysqlPort;
     public static boolean connectionState = false;
+    private static String host;
 
     public DatabaseInformation() {
+
         try {
             Class.forName(driver);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
     }
 
     public Connection getconn() {
         Connection conn = null;
+        String[] strings = DatabaseInfoFileUtils.readInfo();
+        default_port = strings[1];
+        setMysqlUrl(strings[0]);
+        username = strings[2];
+        password = strings[3];
         try {
             conn = DriverManager.getConnection(mysqlUrl, username, password);
-        }catch(Exception e){
+        } catch (Exception e) {
             connectionState = false;
             e.printStackTrace();
         }
@@ -67,7 +77,7 @@ public class DatabaseInformation {
         }
 
         DebugPrint.DPrint("地址：" + mysqlUrl + ",用户名：" + username + ",密码：" + password);
-
+        DatabaseInfoFileUtils.updateInfo(mysqlInfo[0], mysqlInfo[1], mysqlInfo[2], mysqlInfo[3]);
     }
 
     public static void close(Connection conn, Statement statement, ResultSet resultSet) {
@@ -121,14 +131,16 @@ public class DatabaseInformation {
         return mysqlUrl;
     }
 
-    public static void setMysqlUrl(String mysqlUrl) {
+    public static void setMysqlUrl(String host) {
         if (mysqlPort != null) {
-            DatabaseInformation.mysqlUrl = url_before + mysqlUrl + ":" + mysqlPort + url_after;
+            DatabaseInformation.mysqlUrl = url_before + host + ":" + mysqlPort + url_after;
         } else {
-            DatabaseInformation.mysqlUrl = url_before + mysqlUrl + ":" + default_port + url_after;
+            DatabaseInformation.mysqlUrl = url_before + host + ":" + default_port + url_after;
         }
 
     }
+
+
 
 
 }

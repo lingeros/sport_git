@@ -54,8 +54,11 @@ public class AdminOper {
     {
         try {
             conn = d.getconn();
-            sql = "UPDATE admin set admin_key='" + newP + "'" + " where admin_name='" + name + "'" + " and admin_key='" + oldP + "'";
+            sql = "UPDATE admin set admin_key= ? where admin_name= ? and admin_key=?";
             ps = conn.prepareStatement(sql);
+            ps.setString(1,newP);
+            ps.setString(2,name);
+            ps.setString(3,oldP);
             int i = ps.executeUpdate();
             if (i != 0) {
                 DebugPrint.DPrint("t");

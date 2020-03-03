@@ -11,12 +11,10 @@ public class createTable {
     private String sql;
     DatabaseInformation d = new DatabaseInformation();
 
-    public void createsurperadmin() {
+    public void createSurperadmin() {
         try {
             conn = d.getconn();
-            sql = "create table surperadmin(			\r\n" +
-                    "admin_key varchar(64)PRIMARY KEY\r\n" +
-                    ")";
+            sql = "create table if not exists surperadmin(admin_key varchar(64) PRIMARY KEY)";
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
@@ -26,13 +24,10 @@ public class createTable {
         }
     }
 
-    public void createadmin() {
+    public void createAdmin() {
         try {
             conn = d.getconn();
-            sql = "create table admin(			\r\n" +
-                    "admin_key varchar(64),\r\n" +
-                    "admin_name varchar(20)not null\r\n" +
-                    ")";
+            sql = "create table if not exists admin(admin_key varchar(64), admin_name varchar(20) not null)";
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
@@ -42,14 +37,10 @@ public class createTable {
         }
     }
 
-    public void createuserdata() {
+    public void createUserdata() {
         try {
             conn = d.getconn();
-            sql = "CREATE TABLE  userdata(\r\n" +
-                    "	user_id varchar(16) PRIMARY KEY ,\r\n" +
-                    "	user_name varchar(16),\r\n" +
-                    "	user_sex varchar(4),\r\n" +
-                    "	user_phone varchar(25))";
+            sql = "CREATE TABLE  if not exists userdata(user_id varchar(16) PRIMARY KEY ,user_name varchar(16),user_sex varchar(4),user_phone varchar(25))";
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
@@ -59,11 +50,10 @@ public class createTable {
         }
     }
 
-    public void createequipmendata() {
+    public void createEquipmendata() {
         try {
             conn = d.getconn();
-            sql = "CREATE TABLE equipmendata(\r\n" +
-                    "	equipment_id varchar(16))";
+            sql = "CREATE TABLE if not exists equipmendata( equipment_id varchar(16))";
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
@@ -73,23 +63,11 @@ public class createTable {
         }
     }
 
-    public void createcurrentbd() {
+    public void createCurrentbd() {
         try {
             conn = d.getconn();
-            sql = "CREATE TABLE currentbd(\r\n" +
-                    "	id varchar(25) PRIMARY KEY ,\r\n" +
-                    "	user_id varchar(16)NOT NULL,\r\n" +
-                    "	user_name varchar(16),\r\n" +
-                    "	equipment_id varchar(16) NOT NULL,\r\n" +
-                    "	`condition` varchar(16),\r\n" +
-                    "	cycle_num varchar(4),\r\n" +
-                    "	hearbeat varchar(16),\r\n" +
-                    "	`power` varchar(4),\r\n" +
-                    "	`long` varchar(16),\r\n" +
-                    "	lat varchar(16),\r\n" +
-                    "	totalTime varchar(25),\r\n" +
-                    "	run varchar(5))";
-
+            sql = "CREATE TABLE if not exists currentbd(id varchar(25) PRIMARY KEY ,user_id varchar(16)NOT NULL,user_name varchar(16),equipment_id varchar(16) NOT NULL,user_condition varchar(16),cycle_num varchar(4),\r\n" +
+                    "hearbeat varchar(16),watch_power varchar(4),user_long varchar(16),lat varchar(16),totalTime varchar(25),run varchar(5))";
             ps = conn.prepareStatement(sql);
             ps.execute();
             DebugPrint.DPrint("currentbd:" + ps.execute());
@@ -100,22 +78,12 @@ public class createTable {
         }
     }
 
-    public void createhistorybd() {
+    public void createHistorybd() {
         try {
             conn = d.getconn();
-            sql = "CREATE TABLE historybd(	\r\n" +
-                    "	num integer not null auto_increment primary key,\r\n" +
-                    "	id varchar(25)not null ,\r\n" +
-                    "	user_id varchar(16)NOT NULL,\r\n" +
-                    "	user_name varchar(16),\r\n" +
-                    "	equipment_id varchar(16)NOT NULL,\r\n" +
-                    "	`condition` varchar(16),\r\n" +
-                    "	cycle_num varchar(4),\r\n" +
-                    "	hearbeat varchar(16),\r\n" +
-                    "	`power` varchar(4),\r\n" +
-                    "	`long` varchar(16),\r\n" +
-                    "	lat varchar(16),\r\n" +
-                    "	set_time timestamp DEFAULT CURRENT_TIMESTAMP)";
+            sql = "CREATE TABLE if not exists historybd(num integer not null auto_increment primary key,id varchar(25)not null ,user_id varchar(16)NOT NULL,user_name varchar(16),\r\n" +
+                    "	equipment_id varchar(16)NOT NULL,user_condition varchar(16),cycle_num varchar(4),hearbeat varchar(16),watch_power varchar(4),user_long varchar(16),\r\n" +
+                    "	lat varchar(16),set_time timestamp DEFAULT CURRENT_TIMESTAMP)";
             ps = conn.prepareStatement(sql);
             ps.execute();
             DebugPrint.DPrint("historybd:" + ps.execute());
@@ -126,15 +94,10 @@ public class createTable {
         }
     }
 
-    public void createabnormal() {
+    public void createAbnormal() {
         try {
             conn = d.getconn();
-            sql = "CREATE TABLE abnormal(\r\n" +
-                    "	num INTEGER NOT NULL auto_increment primary key,\r\n" +
-                    "	equipment_id varchar(16)NOT NULL,\r\n" +
-                    "	user_id varchar(16)NOT NULL,\r\n" +
-                    "	abnor varchar(25)NOT NULL,\r\n" +
-                    "	time  timestamp DEFAULT CURRENT_TIMESTAMP)";
+            sql = "CREATE TABLE if not exists abnormal(num INTEGER NOT NULL auto_increment primary key,equipment_id varchar(16)NOT NULL,user_id varchar(16)NOT NULL,abnor varchar(25)NOT NULL,time  timestamp DEFAULT CURRENT_TIMESTAMP)";
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
@@ -144,15 +107,6 @@ public class createTable {
         }
     }
 
-    public void createAll() {
-        createTable ct = new createTable();
-        ct.createsurperadmin();
-        ct.createadmin();
-        ct.createuserdata();
-        ct.createequipmendata();
-        ct.createcurrentbd();
-        ct.createhistorybd();
-        ct.createabnormal();
-    }
+
 
 }

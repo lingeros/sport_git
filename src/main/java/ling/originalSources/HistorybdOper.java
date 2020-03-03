@@ -8,230 +8,207 @@ import java.util.ArrayList;
 
 //记录所有手环传过来的数据
 public class HistorybdOper {
-	private Connection conn = null;
-	private PreparedStatement ps = null;
-	private ResultSet rs = null;
-	private	String sql;
-	DatabaseInformation d=new DatabaseInformation();
-	public void create()	
-	{
-		try {
-			
-			conn=d.getconn();
-			sql="CREATE TABLE historybd(	\r\n" + 
-					"	num integer not null auto_increment primary key,\r\n" +
-					"	id varchar(25)not null ,\r\n" + //对应currentbdOper的id属性
-					"	user_id varchar(16)NOT NULL,\r\n" + 
-					"	user_name varchar(16),\r\n" + 
-					"	equipment_id varchar(16)NOT NULL,\r\n" + 
-					"	`condition` varchar(16),\r\n" +
-					"	cycle_num varchar(4),\r\n" +
-					"	hearbeat varchar(16),\r\n" + 
-					"	`power` double(4),\r\n" +
-					"	`long` varchar(16),\r\n" +
-					"	lat varchar(16),\r\n" +
-					"	set_time timestamp DEFAULT CURRENT_TIMESTAMP\r\n" + 
-					"	)";
-				ps = conn.prepareStatement(sql);
-				ps.executeUpdate();
-			
-		}catch(Exception e) {
-			
-		}finally {
-	    	d.close(conn, ps, rs);
-	    }
-	}	
-	public void add(String id,String user_id,String user_name,
-			String equipment_id,String condition,
-			String cycle_num,String hearbeat,
-			String power,String lon,String lat ,
-			Timestamp set_time )
-	{
-		try {
-			conn=d.getconn();
-			 sql="INSERT INTO historybd(id,user_id,user_name,"
-			 		+ "equipment_id,`condition`,cycle_num,hearbeat,"
-			 		+ "`power`,`long`,lat,set_time)"
-			 		+ " VALUES(?,?,?,?,?,?,?,?,?,?,?)";
-			 ps = conn.prepareStatement(sql);
-			 ps.setString(1,id);
-			 ps.setString(2,user_id);
-			 ps.setString(3,user_name);
-			 ps.setString(4,equipment_id); 
-			 ps.setString(5,condition);
-			 ps.setString(6,cycle_num);
-			 ps.setString(7,hearbeat);
-			 ps.setString(8,power);
-			 ps.setString(9,lon);
-			 ps.setString(10,lat);
-			 ps.setTimestamp(11,set_time);
-			int i= ps.executeUpdate();			
-			 if(i!=0){
-					DebugPrint.DPrint("��ӳɹ�");
-				}
-			
-		}catch(Exception e)
-	    {
-	    	e.printStackTrace();
-	    }finally {
-	    	d.close(conn, ps, rs);
-	    }
-	}
-	//查询某个同学的所有手环数据，添加到array
-	public void select(String id,ArrayList<String>array )//�������к�id����,������ؽ�����array������
-	{
-	try {
-		conn=d.getconn();
-		sql="select * from historybd where id="+"'"+id+"'";
-		ps = conn.prepareStatement(sql);
-		rs=ps.executeQuery();	
-		while(rs.next())
-		{
-			array.add(rs.getString(2)+","+rs.getString(3)+","+rs.getString(4)+","+
-					rs.getString(5)+","+rs.getString(6)+","+rs.getString(7)+","+
-					rs.getString(8)+","+rs.getString(9)+","+rs.getString(10)+","+
-					rs.getString(11)+","+rs.getString(12));
-		}		
-	}catch(Exception e)
-	{
-		e.printStackTrace();
-	}finally {
-		d.close(conn, ps, rs);
-		
-	}
-	}
-	//查询某同学的所有轨迹点的数据(以数组形式存储东经数据和北纬数据)
-	public void select(ArrayList<String> Aarray,ArrayList<String> Barray,String id)
-	{
-		try {
-			int i=0;int j=0;
-			conn=d.getconn();
-			sql="select * from historybd where id ="+"'"+id+"'";
-			ps = conn.prepareStatement(sql);
-			rs=ps.executeQuery();
-			while(rs.next())
-			{
-				if(!rs.getString("long").equals("")&&!rs.getString("lat").equals("")) {
-				Aarray.add(rs.getString("long"));
-				Barray.add(rs.getString("lat"));
-			}
-					i++;j++;
-			}		
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}finally {
-			d.close(conn, ps, rs);
-			
-		}
-	}
-	public int getPgNum()
-	{	int i=-1; 
-		try {
-		conn=d.getconn();
-		sql="SELECT COUNT(*) FROM historybd";
-		ps = conn.prepareStatement(sql);
-		rs = ps.executeQuery();
-		i=rs.getInt(1);
-		i=i/21+1;
-			
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		i=i/20+1;
-		return i;
-	}
-	public void delete(String id) {
-		try {
-			String sql ="delete from historybd where id="+"'"+id+"'";
-			conn=d.getconn();
-			ps = conn.prepareStatement(sql);
-			ps.executeUpdate();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}finally {
-	    	d.close(conn, ps, rs);
-	    }
-	}
-	public void deleteAll() {
-		try {
-			String sql ="delete from historybd";
-			conn=d.getconn();
-			ps = conn.prepareStatement(sql);
-			ps.executeUpdate();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}finally {
-			d.close(conn, ps, rs);
-		}
-	}
-	public void command(String sql,ArrayList<String>array) {
-		try {
-			conn=d.getconn();
-			ps = conn.prepareStatement(sql);
-			rs=ps.executeQuery();
-			while(rs.next())
-			{
-				array.add(rs.getString(2)+", "+rs.getString(3)+", "+
-						rs.getString(4)+", "+rs.getString(5)+", "+rs.getString(6)+", "+
-						rs.getString(7)+", "+rs.getString(8)+", "+rs.getString(9)+",("+
-						rs.getString(10)+"/ "+rs.getString(11)+")"+", "+rs.getString(12));
-			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}finally {
-	    	d.close(conn, ps, rs);
-	    }
-	}
-	public void Update_power( String power,String e_id )
-	{
-		try {
-			conn=d.getconn();
-			sql="update currentbd set `power`  =? where equipment_id =? and run='true'";
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, power );
-			ps.setString(2, e_id);
-			ps.executeUpdate();	
-			int t=ps.executeUpdate();
-			DebugPrint.DPrint(t);
-		}catch(Exception e)
-	    {
-    	e.printStackTrace();
-    }finally {
-    	d.close(conn, ps, rs);
-    }
-	}
-	
-	public void Update_lat_lng(String lng,String lat,String id,String uid,String eid)
-	{	
-		
-		try {
-			conn=d.getconn();
-			sql="INSERT INTO  historybd (id,user_id,equipment_id,`long`,lat)VALUES(?,?,?,?,?) ";
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, id);
-			ps.setString(2, uid);
-			ps.setString(3, eid);
-			ps.setString(4, lng);
-			ps.setString(5, lat);
-			
-			ps.executeUpdate();	
-			int t=ps.executeUpdate();
-			DebugPrint.DPrint("y");
-		}catch(Exception e)
-	    {
-    	e.printStackTrace();
-    }finally {
-    	d.close(conn, ps, rs);
-    }
 
 
-	}
+    private Connection connection = null;
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
+    private String sql;
+    private DatabaseInformation databaseInformation = new DatabaseInformation();
+    private final String TAG = "HistorybdOper:";
+
+    public void create() {
+        try {
+
+            connection = databaseInformation.getconn();
+            sql = "CREATE TABLE if not exists historybd(num integer not null auto_increment primary key,id varchar(25)not null ,user_id varchar(16)NOT NULL,user_name varchar(16),\r\n" +
+                    "	equipment_id varchar(16)NOT NULL,user_condition varchar(16),cycle_num varchar(4),hearbeat varchar(16),watch_power varchar(4),user_long varchar(16),\r\n" +
+                    "	lat varchar(16),set_time timestamp DEFAULT CURRENT_TIMESTAMP)";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+
+        } catch (Exception e) {
+            DebugPrint.DPrint(TAG + e.toString());
+        } finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
+
+    public void add(String id, String user_id, String user_name, String equipment_id, String condition, String cycle_num, String hearbeat, String power, String lon, String lat, Timestamp set_time) {
+        try {
+            connection = databaseInformation.getconn();
+            sql = "INSERT INTO historybd(id,user_id,user_name,equipment_id,user_condition,cycle_num,hearbeat,watch_power,user_long,lat,set_time) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, id);
+            preparedStatement.setString(2, user_id);
+            preparedStatement.setString(3, user_name);
+            preparedStatement.setString(4, equipment_id);
+            preparedStatement.setString(5, condition);
+            preparedStatement.setString(6, cycle_num);
+            preparedStatement.setString(7, hearbeat);
+            preparedStatement.setString(8, power);
+            preparedStatement.setString(9, lon);
+            preparedStatement.setString(10, lat);
+            preparedStatement.setTimestamp(11, set_time);
+            int i = preparedStatement.executeUpdate();
+            if (i != 0) {
+                DebugPrint.DPrint(TAG + "add " + " success");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
+
+    //查询某个同学的所有手环数据，添加到array
+    public void select(String id, ArrayList<String> array) {
+        try {
+            connection = databaseInformation.getconn();
+            sql = "select * from historybd where id=?";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, id);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                array.add(resultSet.getString(2) + "," + resultSet.getString(3) + "," + resultSet.getString(4) + "," +
+                        resultSet.getString(5) + "," + resultSet.getString(6) + "," + resultSet.getString(7) + "," +
+                        resultSet.getString(8) + "," + resultSet.getString(9) + "," + resultSet.getString(10) + "," +
+                        resultSet.getString(11) + "," + resultSet.getString(12));
+            }
+        } catch (Exception e) {
+            DebugPrint.DPrint(TAG+"select:"+e.toString());
+        } finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+
+        }
+    }
+
+    //查询某同学的所有轨迹点的数据(以数组形式存储东经数据和北纬数据)
+    public void select(ArrayList<String> Aarray, ArrayList<String> Barray, String id) {
+        try {
+            int i = 0;
+            int j = 0;
+            connection = databaseInformation.getconn();
+            sql = "select * from historybd where id =?";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1,id);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                if (!resultSet.getString("long").equals("") && !resultSet.getString("lat").equals("")) {
+                    Aarray.add(resultSet.getString("long"));
+                    Barray.add(resultSet.getString("lat"));
+                }
+                i++;
+                j++;
+            }
+        } catch (Exception e) {
+            DebugPrint.DPrint(TAG+"select:"+e.toString());
+        } finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+
+        }
+    }
+
+    public int getPgNum() {
+        int i = -1;
+        try {
+            connection = databaseInformation.getconn();
+            sql = "SELECT COUNT(*) FROM historybd";
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            i = resultSet.getInt(1);
+            i = i / 21 + 1;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        i = i / 20 + 1;
+        return i;
+    }
+
+    public void delete(String id) {
+        try {
+            String sql = "delete from historybd where id= ?";
+            connection = databaseInformation.getconn();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1,id);
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            DebugPrint.DPrint(TAG+"deletc:"+e.toString());
+        } finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
+
+    public void deleteAll() {
+        try {
+            String sql = "delete from historybd";
+            connection = databaseInformation.getconn();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            DebugPrint.DPrint(TAG+"deleteAll:"+e.toString());
+        } finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
+
+    public void command(String sql, ArrayList<String> array) {
+        try {
+            connection = databaseInformation.getconn();
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                array.add(resultSet.getString(2) + ", " + resultSet.getString(3) + ", " +
+                        resultSet.getString(4) + ", " + resultSet.getString(5) + ", " + resultSet.getString(6) + ", " +
+                        resultSet.getString(7) + ", " + resultSet.getString(8) + ", " + resultSet.getString(9) + ",(" +
+                        resultSet.getString(10) + "/ " + resultSet.getString(11) + ")" + ", " + resultSet.getString(12));
+            }
+        } catch (Exception e) {
+            DebugPrint.DPrint(TAG+"command:"+e.toString());
+        } finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
+
+    public void Update_power(String power, String e_id) {
+        try {
+            connection = databaseInformation.getconn();
+            sql = "update currentbd set `power`  =? where equipment_id =? and run='true'";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, power);
+            preparedStatement.setString(2, e_id);
+            preparedStatement.executeUpdate();
+            int t = preparedStatement.executeUpdate();
+            DebugPrint.DPrint(t);
+        } catch (Exception e) {
+            DebugPrint.DPrint(TAG+"Update_power:"+e.toString());
+        } finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
+
+    public void Update_lat_lng(String lng, String lat, String id, String uid, String eid) {
+
+        try {
+            connection = databaseInformation.getconn();
+            sql = "INSERT INTO  historybd (id,user_id,equipment_id,`long`,lat)VALUES(?,?,?,?,?) ";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, id);
+            preparedStatement.setString(2, uid);
+            preparedStatement.setString(3, eid);
+            preparedStatement.setString(4, lng);
+            preparedStatement.setString(5, lat);
+
+            preparedStatement.executeUpdate();
+            int t = preparedStatement.executeUpdate();
+            DebugPrint.DPrint("y");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+        }
+
+
+    }
 }
