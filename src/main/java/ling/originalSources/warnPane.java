@@ -36,7 +36,7 @@ public class warnPane {
             warningSounds = new WarningSounds(f);
             warningSounds.start();
         } catch (Exception e) {
-           DebugPrint.DPrint(e);
+           DebugPrint.dPrint(e);
         }
         final JDialog dFrame = new JDialog(mainframe, "异常数据", false);
         JPanel dPane = new JPanel();
@@ -120,7 +120,7 @@ public class warnPane {
             public void windowClosing(WindowEvent we) {
                 dFrame.dispose();
                 MainPanel.exists = false;
-                DebugPrint.DPrint(TAG+"close window");
+                DebugPrint.dPrint(TAG+"close window");
                 warningSounds.stop();
                 dFrame.dispose();
             }

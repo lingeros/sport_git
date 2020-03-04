@@ -50,7 +50,7 @@ public class CalculateUtils {
         minute = (int) (totalTime % 60);
         totalTime = totalTime / 60;
         hour = (int) (totalTime % 60);
-        DebugPrint.DPrint("小时：" + hour + "分钟：" + minute + "秒钟:" + second + "毫秒" + milli);
+        DebugPrint.dPrint("小时：" + hour + "分钟：" + minute + "秒钟:" + second + "毫秒" + milli);
         temp = String.format("%02d:%02d:%02d:%02d", hour, minute, second, milli);
         return temp;
     }

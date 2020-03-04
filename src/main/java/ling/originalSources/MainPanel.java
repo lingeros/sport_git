@@ -15,7 +15,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -27,6 +26,8 @@ import java.util.*;
 
 
 public class MainPanel {
+
+
     static InputStream inputStream;
     static OutputStream outputStream;
     private static SerialPort serialPort01 = null; // 保存串口1对象
@@ -80,6 +81,7 @@ public class MainPanel {
     private static Font font16 = new Font("微软雅黑", Font.PLAIN, 16);
 
     void mainpane() {
+
         //设置字体格式
         mainPanel.setUIFont();
         //获取串口
@@ -89,7 +91,7 @@ public class MainPanel {
             System.out.println(portName);
         }
         //串口设置 这里需要改
-        //cport();
+        cport();
         //设置界面
         JPanel mainPane = new JPanel();
         JPanel backColorPane = new JPanel();
@@ -602,7 +604,7 @@ public class MainPanel {
                     deleteFrame.centainButton.addActionListener(e13 -> {
                         int r = addequipmentT.getSelectedRow();
                         int c1 = addequipmentT.getSelectedColumn();
-                        DebugPrint.DPrint(r);
+                        DebugPrint.dPrint(r);
                         String delect_row = String.valueOf(addequipmentT.getValueAt(r, c1));
                         equiOperater.delete(delect_row);
                         p.addequipmentTB_clear(addequipmentT);
@@ -735,10 +737,10 @@ public class MainPanel {
                         String recode = array.get((bdUserPgNum - 1) * 20 + row);    //根据点击的行，返回那行数据
                         String[] recodeArray = recode.split(",");
                         String eid = recodeArray[2];                           //这里点击需要获取行的eid
-                        DebugPrint.DPrint("eid是" + eid);
+                        DebugPrint.dPrint("eid是" + eid);
                         historybdOper.select(aaa, bbb, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
-                        DebugPrint.DPrint("aaa:" + aaa);
-                        DebugPrint.DPrint("bbb:" + bbb);
+                        DebugPrint.dPrint("aaa:" + aaa);
+                        DebugPrint.dPrint("bbb:" + bbb);
                         StringBuilder points = new StringBuilder();
                         if ((aaa.size() > 0) && bbb.size() > 0) {
                             points = new StringBuilder("new AMap.LngLat(" + aaa.get(0) + "," + bbb.get(0) + ")"); // 原点
@@ -771,7 +773,7 @@ public class MainPanel {
             public void mouseClicked(MouseEvent e) {
                 int c = e.getButton();
                 int row = warnPane.warnTB.getSelectedRow();
-                DebugPrint.DPrint("点击的是哪一行" + row);
+                DebugPrint.dPrint("点击的是哪一行" + row);
                 int col = warnPane.warnTB.getSelectedColumn();
                 String dbjduge = "true";
                 if (c == MouseEvent.BUTTON1) {//左键点击
@@ -780,15 +782,15 @@ public class MainPanel {
                         ArrayList<String> bbb = new ArrayList();
                         ArrayList<String> array = new ArrayList(200);
                         abnormalOper.selectAll(array);  //获取所有wp表的数据，存储在array里
-                        DebugPrint.DPrint("获取报警的数组是" + array);
+                        DebugPrint.dPrint("获取报警的数组是" + array);
                         String recode = array.get((abnormalOper.getPgNum() - 1) * 20 + row);    //根据点击的行，返回那行数据
-                        DebugPrint.DPrint("报警表相应的记录是：" + recode);
+                        DebugPrint.dPrint("报警表相应的记录是：" + recode);
                         String[] recodeArray = recode.split(",");
                         String eid = recodeArray[0];                           //这里点击需要获取行的eid
-                        DebugPrint.DPrint("报警表eid是" + eid);
+                        DebugPrint.dPrint("报警表eid是" + eid);
                         historybdOper.select(aaa, bbb, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
-                        DebugPrint.DPrint("报警表aaa:" + aaa);
-                        DebugPrint.DPrint("报警表bbb:" + bbb);
+                        DebugPrint.dPrint("报警表aaa:" + aaa);
+                        DebugPrint.dPrint("报警表bbb:" + bbb);
                         StringBuilder points = new StringBuilder("new AMap.LngLat(" + aaa.get(0) + "," + bbb.get(0) + ")"); // 原点
                         for (int i = 1; i < aaa.size() && i < bbb.size(); i++) {
                             points.append("," + "new AMap.LngLat(").append(aaa.get(i)).append(",").append(bbb.get(i)).append(")");
@@ -939,7 +941,7 @@ public class MainPanel {
                         currentbdOper.command(sql, DTarray);
 
                         for (String s : DTarray) {
-                            DebugPrint.DPrint(s);
+                            DebugPrint.dPrint(s);
                         }
                     }
                     if (col == 0 && id != null && DTarray.size() != 0
@@ -1047,21 +1049,24 @@ public class MainPanel {
                 ii31 = new ImageIcon(temp31);
                 ALLstartJB.setIcon(ii31);
             } else if (ASR == 2) {
+                try {
+                    String str = "B";
+                    byte[] sb = str.getBytes();//转换成字节数组
+                    //TODO
+                    SerialTool.sendToPort( SerialPorts.getPortsMap().get("串口线程1"), sb);//发送数据
+                    startTime = System.currentTimeMillis();
+                    DebugPrint.dPrint("开始用时：" + startTime);
+                } catch (Exception ee) {
+                    JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
+                    ASR = 1;
+                    return;
+                }
                 ImageIcon ii0 = new ImageIcon("src/ima/doing.png");
                 Image temp0 = ii0.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),
                         ii0.getImage().SCALE_DEFAULT);
                 ii0 = new ImageIcon(temp0);
                 ALLstartJB.setIcon(ii0);
-                try {
-                    String str = "B";
-                    byte[] sb = str.getBytes();//转换成字节数组
-                    //TODO
-                    SerialTool.sendToPort(serialPort01, sb);//发送数据
-                    startTime = System.currentTimeMillis();
-                    DebugPrint.DPrint("开始用时：" + startTime);
-                } catch (Exception ee) {
-                    JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
-                }
+
             }
         });
         // 一键停止相关
@@ -1072,9 +1077,10 @@ public class MainPanel {
                     String str = "E";
                     byte[] sb = str.getBytes();
                     //TODO
-                    SerialTool.sendToPort(serialPort01, sb);
+                    SerialTool.sendToPort(SerialPorts.getPortsMap().get("串口线程1"), sb);
                 } catch (Exception ee) {
                     JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
+                    return;
                 }
                 ImageIcon ii13 = new ImageIcon("src/ima/prepare.png");
                 Image temp13 = ii13.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(),
@@ -1093,7 +1099,7 @@ public class MainPanel {
                     String str = "C";
                     byte[] sb = str.getBytes();
                     //TODO
-                    SerialTool.sendToPort(serialPort01, sb);
+                    SerialTool.sendToPort(SerialPorts.getPortsMap().get("串口线程1"), sb);
                     AST = 1;
                     ImageIcon ii21 = new ImageIcon("src/ima/end.png");
                     Image temp21 = ii21.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(), ii21.getImage().SCALE_DEFAULT);
@@ -1101,6 +1107,7 @@ public class MainPanel {
                     AllcloseJB.setIcon(ii21);
                 } catch (Exception ee) {
                     JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
+                    ASR = 1;
                 }
             }
         });
@@ -1255,8 +1262,9 @@ public class MainPanel {
             }
         }
     }
+
     // 清空添加设备的表格数据
-    private void addequipmentTB_clear(JTable addequipmentT){
+    private void addequipmentTB_clear(JTable addequipmentT) {
         int c = addequipmentT.getColumnCount();
         int r = addequipmentT.getRowCount();
         for (int i = 0; i < r; i++) {
@@ -1265,8 +1273,9 @@ public class MainPanel {
             addequipmentT.setModel(t2);
         }
     }
+
     // 为下拉列表添加属性
-    private void dbBox(JComboBox<String> Box, ArrayList<String> array){
+    private void dbBox(JComboBox<String> Box, ArrayList<String> array) {
         for (int i = 0; i < array.size(); i++) {
             Box.addItem(array.get(i));
         }
@@ -1284,7 +1293,7 @@ public class MainPanel {
         p.dbBox(bdEBox, array12);
     }
 
-    private void BindTable(JTable dataT, ArrayList<String> array){
+    private void BindTable(JTable dataT, ArrayList<String> array) {
         mainPanel.DataT_clear(dataT);
         mainPanel.setDataT_starT(dataT, array, dataPgNum);
     }
@@ -1297,8 +1306,9 @@ public class MainPanel {
             }
         }
     }
+
     // 给第PgNum页用户绑定的表格赋值
-    private void setbdUserT(Object[][] bdUserT_rowData, int PgNum){
+    private void setbdUserT(Object[][] bdUserT_rowData, int PgNum) {
         ArrayList<String> array = new ArrayList<>();
         currentbdOper.select(array);
         for (int i = 20 * (PgNum - 1); i < array.size() && i < 20 * PgNum; i++) {
@@ -1327,8 +1337,9 @@ public class MainPanel {
                 dataT.setValueAt(null, i, j);
         }
     }
+
     // 赋值第PgNum页数据处理的表格
-    private void setDataT_starT(JTable dataT, ArrayList<String> array, int PgNum)    {
+    private void setDataT_starT(JTable dataT, ArrayList<String> array, int PgNum) {
         for (int i = 20 * (PgNum - 1); i < array.size() && i < 20 * PgNum; i++) {
             int n = i % 20;
             String[] a = array.get(i).split(",");
@@ -1505,12 +1516,12 @@ public class MainPanel {
                                     double distanceOne = CalculateUtils.getDistance(Double.parseDouble(ENH_array[1]), Double.parseDouble(ENH_array[0]), Double.parseDouble(allTrail[allTrail.length - 3]), Double.parseDouble(allTrail[allTrail.length - 4]));
                                     String cycle_num = currentbdOper.selectCycleNum(SerialTemp.substring(0, 1));//获取
                                     if (distanceOne > track_point || Integer.parseInt(cycle_num) == 0) {
-                                        DebugPrint.DPrint("异常点或圈数为0测试结束");
+                                        DebugPrint.dPrint("异常点或圈数为0测试结束");
                                         return;
                                     }
                                     alltrailData.put(SerialTemp.substring(0, 1), st);
                                     double distance = CalculateUtils.getDistance(Double.parseDouble(ENH_array[1]), Double.parseDouble(ENH_array[0]), Double.parseDouble(allTrail[3]), Double.parseDouble(allTrail[2]));
-                                    DebugPrint.DPrint("E现在距离原点的距离是：" + distance);
+                                    DebugPrint.dPrint("E现在距离原点的距离是：" + distance);
                                     int num = Integer.parseInt(allTrail[0]);
                                     if (num < 1 && distance > 40) {
                                         num++;
@@ -1523,7 +1534,7 @@ public class MainPanel {
                                         String remainCycle = currentbdOper.select_cycle(SerialTemp.substring(0, 1));
                                         if (Integer.parseInt(remainCycle) > 0) {
                                             if (Integer.parseInt(remainCycle) == 1) {
-                                                DebugPrint.DPrint("结束用时：" + System.currentTimeMillis());
+                                                DebugPrint.dPrint("结束用时：" + System.currentTimeMillis());
                                                 currentbdOper.UpdateTotalTime(CalculateUtils.getTime(startTime), SerialTemp.substring(0, 1));
                                                 try {
                                                     String str = SerialTemp.substring(0, 1) + "S";
@@ -1541,13 +1552,13 @@ public class MainPanel {
                                             p.bdUserTB_clear(bdUserT_rowData);
                                             p.setbdUserT(bdUserT_rowData, bdUserPgNum);
                                             thirdPane.repaint();
-                                            DebugPrint.DPrint("E更改之后的圈数:" + currentbdOper.select_cycle(SerialTemp.substring(0, 1)));
+                                            DebugPrint.dPrint("E更改之后的圈数:" + currentbdOper.select_cycle(SerialTemp.substring(0, 1)));
                                         }
                                         num--;
                                         allTrail[0] = String.valueOf(num);
                                         allTrail[1] = String.valueOf(num);
                                         alltrailData.put(SerialTemp.substring(0, 1), stringConnect(allTrail));//再次回到第一个轨迹点附近时，num-1
-                                        DebugPrint.DPrint("Nnum有没有变回0：" + num);
+                                        DebugPrint.dPrint("Nnum有没有变回0：" + num);
                                     }
                                     String id = currentbdOper.select_id(SerialTemp.substring(0, 1));//获取对应的id(也就是绑定时的时间戳)
                                     String bdUid = currentbdOper.select_uid(SerialTemp.substring(0, 1));//获取用户id
@@ -1563,7 +1574,7 @@ public class MainPanel {
                                     }
                                     historybdOper.add(id, bdUid, userdataOperate.selectName(bdUid), SerialTemp.substring(0, 1), "正常", cycle, ENH_array[2], "电量正常", ENH_array[0], ENH_array[1], time);
                                     SerialBuff.add(SerialTemp);
-                                    DebugPrint.DPrint("是第几页" + bdUserPgNum);
+                                    DebugPrint.dPrint("是第几页" + bdUserPgNum);
                                     MainPanel p = new MainPanel();
                                     p.bdUserTB_clear(bdUserT_rowData);
                                     p.setbdUserT(bdUserT_rowData, bdUserPgNum);
@@ -1587,7 +1598,7 @@ public class MainPanel {
                                     } else {
                                         currentbdOper.Update_hearbeat(ENH_array[2], SerialTemp.substring(0, 1));
                                     }
-                                    DebugPrint.DPrint("是第几页" + bdUserPgNum);
+                                    DebugPrint.dPrint("是第几页" + bdUserPgNum);
                                     MainPanel p = new MainPanel();
                                     p.bdUserTB_clear(bdUserT_rowData);
                                     p.setbdUserT(bdUserT_rowData, bdUserPgNum);
@@ -1704,7 +1715,7 @@ public class MainPanel {
                             //TODO
                             SerialTool.addListener(serialPort01, new SerialListener());//执行接口中的方法(可获取数据)
                         }
-                        DebugPrint.DPrint(portId.getName());
+                        DebugPrint.dPrint(portId.getName());
                         return;
                     }
                 }

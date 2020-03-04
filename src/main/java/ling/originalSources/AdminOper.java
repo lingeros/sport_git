@@ -41,7 +41,7 @@ public class AdminOper {
             ps.setString(2, name);
             int i = ps.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint("t");
+                DebugPrint.dPrint("t");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -61,7 +61,7 @@ public class AdminOper {
             ps.setString(3,oldP);
             int i = ps.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint("t");
+                DebugPrint.dPrint("t");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,7 +78,7 @@ public class AdminOper {
             ps = conn.prepareStatement(sql);
             int i = ps.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint("t");
+                DebugPrint.dPrint("t");
             }
         } catch (Exception e) {
             e.printStackTrace();

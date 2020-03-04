@@ -43,7 +43,7 @@ public class SerialPorts {
         String temp = "";
         while (portList.hasMoreElements()) {
             temp = portList.nextElement().getName();
-            DebugPrint.DPrint("find a serial port :" + temp);
+            DebugPrint.dPrint("find a serial port :" + temp);
             serialPortQueuel.push(temp);
         }
         //
@@ -121,20 +121,20 @@ public class SerialPorts {
                 }
 
                 for (int i = 0; i < threadMap.size(); i++) {
-                    DebugPrint.DPrint("现在运行的线程有：" + threadMap.get(threadName[i]).getName());
+                    DebugPrint.dPrint("现在运行的线程有：" + threadMap.get(threadName[i]).getName());
                 }
 
 
             } catch (Exception e) {
-                DebugPrint.DPrint(e);
+                DebugPrint.dPrint(e);
             }
         } else {
-            DebugPrint.DPrint(NOT_PORT_ERROR);
+            DebugPrint.dPrint(NOT_PORT_ERROR);
         }
     }
 
     public static void closeThreads() {
-        DebugPrint.DPrint("开始关闭线程");
+        DebugPrint.dPrint("开始关闭线程");
         if (threadMap.size() != 0) {
             for (int i = 0; i < threadMap.size(); i++) {
                 Thread thread = threadMap.get(threadName[i]);
@@ -142,7 +142,7 @@ public class SerialPorts {
                 //先关闭串口
                 if (serialPort != null) {
                     serialPort.close();
-                    DebugPrint.DPrint("串口" + serialPort.getName() + "已释放");
+                    DebugPrint.dPrint("串口" + serialPort.getName() + "已释放");
                     SerialPortThread.usedSerialPortMap.remove(thread.getName());
                 }
                 //再暂停串口所在线程
@@ -159,7 +159,7 @@ public class SerialPorts {
             outputStream.flush();
 
         } catch (IOException e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             try {
                 if (outputStream != null) {
@@ -167,10 +167,14 @@ public class SerialPorts {
                     outputStream = null;
                 }
             } catch (IOException e) {
-                DebugPrint.DPrint(e);
+                DebugPrint.dPrint(e);
             }
         }
 
+    }
+
+    public static Map<String, SerialPort> getPortsMap(){
+        return SerialPortThread.usedSerialPortMap;
     }
 
     public static boolean isUsedSerialPortMapEmpty() {
@@ -184,15 +188,15 @@ public class SerialPorts {
 
         @Override
         public void run() {
-            DebugPrint.DPrint("new Thread start:" + Thread.currentThread().getId());
+            DebugPrint.dPrint("new Thread start:" + Thread.currentThread().getId());
             String portName = SerialPortThread.serialPortThreadQueuel.pop();
             if (portName != null) {
                 SerialPort serialPort = openSerialPort(portName, 115200);
-                String sendMsg = portName + ":message";
+                String sendMsg = "B";
                 if (serialPort != null) {
                     try {
                         usedSerialPortMap.put(Thread.currentThread().getName(), serialPort);
-                        DebugPrint.DPrint("open serial port is :" + portName);
+                        DebugPrint.dPrint("open serial port is :" + portName);
                         InputStream inputStream = new BufferedInputStream(serialPort.getInputStream(), 1024);
                         OutputStream outputStream = serialPort.getOutputStream();
                         serialPort.addEventListener(new SerialPortListener(inputStream, outputStream, serialPort));
@@ -213,6 +217,27 @@ public class SerialPorts {
             }
 
         }
+    }
+
+    /**
+     * 直接给所有线程发送一个字符串
+     * @param string
+     */
+    public static void sendToAllPorts(String string){
+        Map<String, SerialPort> usedSerialPortMap = SerialPortThread.usedSerialPortMap;
+        for (int i = 0; i < usedSerialPortMap.size(); i++) {
+            SerialTool.sendToPort(usedSerialPortMap.get(threadName[i]),string.getBytes());
+        }
+
+    }
+
+    /**
+     * 直接给一个串口发送字符串
+     * @param portName 串口线程名字 如串口线程1
+     * @param string 发送的字符串
+     */
+    public static void sentToOnePort(String portName,String string){
+        SerialTool.sendToPort(SerialPortThread.usedSerialPortMap.get(portName),string.getBytes());
     }
 
 }

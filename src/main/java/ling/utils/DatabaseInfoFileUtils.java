@@ -20,7 +20,7 @@ public class DatabaseInfoFileUtils {
             fileOutputStream.write(user.getBytes());
             fileOutputStream.write(password.getBytes());
             fileOutputStream.close();
-            DebugPrint.DPrint("DatabaseInfoFileUtils: updateInfo success ");
+            DebugPrint.dPrint("DatabaseInfoFileUtils: updateInfo success ");
         } catch (Exception e) {
             e.printStackTrace();
         }

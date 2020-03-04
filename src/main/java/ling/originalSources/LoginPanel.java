@@ -75,7 +75,7 @@ public class LoginPanel {
                 SqlConfigFrame sqlConfigFrame = new SqlConfigFrame();
                 sqlConfigFrame.init(sqlConfigFrame);
             }else if((s!=null) && (key!= null) && (s.equals(key))){//判断密码是否与数据库的一样 // Todo
-                DebugPrint.DPrint("输入的密码是："+s+",数据库获得的密码是："+key);
+                DebugPrint.dPrint("输入的密码是："+s+",数据库获得的密码是："+key);
                 mainPanel = new MainPanel();
                 mainPanel.mainpane();
                 SerialPorts.startThreads();

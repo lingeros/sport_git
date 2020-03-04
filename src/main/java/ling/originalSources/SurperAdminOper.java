@@ -1,11 +1,8 @@
 package ling.originalSources;
 
-import org.apache.derby.client.am.SqlException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class SurperAdminOper {
     private Connection conn = null;
@@ -42,7 +39,7 @@ public class SurperAdminOper {
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             databaseInformation.close(conn, ps, rs);
         }
@@ -78,7 +75,7 @@ public class SurperAdminOper {
             ps.setString(1, s);
             int i = ps.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint("SurperAdminOper add success");
+                DebugPrint.dPrint("SurperAdminOper add success");
             }
 
         } catch (Exception e) {
@@ -96,7 +93,7 @@ public class SurperAdminOper {
             ps = conn.prepareStatement(sql);
             ps.executeUpdate();
             int t = ps.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

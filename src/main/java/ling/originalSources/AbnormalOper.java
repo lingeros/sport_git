@@ -16,14 +16,14 @@ public class AbnormalOper {
     public void create() {
         try {
             conn = databaseInformation.getconn();
-            DebugPrint.DPrint("testa");
+            DebugPrint.dPrint("testa");
             sql = "CREATE TABLE abnormal (\r\n" +
                     "	num INTEGER NOT NULL auto_increment primary key,\r\n" +
                     "	equipment_id varchar(16)NOT NULL,\r\n" +
                     "	user_id varchar(16)NOT NULL,\r\n" +
                     "	abnor varchar(255)NOT NULL,\r\n" +
                     "	time  timestamp DEFAULT CURRENT_TIMESTAMP)";
-            DebugPrint.DPrint("testb");
+            DebugPrint.dPrint("testb");
             preparedStatement = conn.prepareStatement(sql);
             preparedStatement.execute();
         } catch (Exception e) {
@@ -43,7 +43,7 @@ public class AbnormalOper {
             preparedStatement.setTimestamp(4, time);
             preparedStatement.executeUpdate();
         } catch (Exception e) {
-            DebugPrint.DPrint("报警错误信息:" + e);
+            DebugPrint.dPrint("报警错误信息:" + e);
         } finally {
             databaseInformation.close(conn, preparedStatement, rs);
         }
@@ -63,7 +63,7 @@ public class AbnormalOper {
                         rs.getString(5));
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             databaseInformation.close(conn, preparedStatement, rs);
         }
@@ -80,7 +80,7 @@ public class AbnormalOper {
                         rs.getString(4) + ", " + rs.getString(5));
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             databaseInformation.close(conn, preparedStatement, rs);
         }
@@ -97,7 +97,7 @@ public class AbnormalOper {
                 i = rs.getInt(1);
             i = i / 20 + 1;
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         }
         return i;
     }

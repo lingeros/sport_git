@@ -1,7 +1,5 @@
 package ling.originalSources;
 
-import com.mysql.jdbc.CommunicationsException;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import ling.utils.DatabaseInfoFileUtils;
 
 import java.sql.*;
@@ -76,7 +74,7 @@ public class DatabaseInformation {
             setPassword(mysqlInfo[3]);
         }
 
-        DebugPrint.DPrint("地址：" + mysqlUrl + ",用户名：" + username + ",密码：" + password);
+        DebugPrint.dPrint("地址：" + mysqlUrl + ",用户名：" + username + ",密码：" + password);
         DatabaseInfoFileUtils.updateInfo(mysqlInfo[0], mysqlInfo[1], mysqlInfo[2], mysqlInfo[3]);
     }
 

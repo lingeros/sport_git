@@ -18,7 +18,7 @@ public class createTable {
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             d.close(conn, ps, rs);
         }
@@ -31,7 +31,7 @@ public class createTable {
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             d.close(conn, ps, rs);
         }
@@ -44,7 +44,7 @@ public class createTable {
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             d.close(conn, ps, rs);
         }
@@ -57,7 +57,7 @@ public class createTable {
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             d.close(conn, ps, rs);
         }
@@ -70,9 +70,9 @@ public class createTable {
                     "hearbeat varchar(16),watch_power varchar(4),user_long varchar(16),lat varchar(16),totalTime varchar(25),run varchar(5))";
             ps = conn.prepareStatement(sql);
             ps.execute();
-            DebugPrint.DPrint("currentbd:" + ps.execute());
+            DebugPrint.dPrint("currentbd:" + ps.execute());
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             d.close(conn, ps, rs);
         }
@@ -86,9 +86,9 @@ public class createTable {
                     "	lat varchar(16),set_time timestamp DEFAULT CURRENT_TIMESTAMP)";
             ps = conn.prepareStatement(sql);
             ps.execute();
-            DebugPrint.DPrint("historybd:" + ps.execute());
+            DebugPrint.dPrint("historybd:" + ps.execute());
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             d.close(conn, ps, rs);
         }
@@ -101,7 +101,7 @@ public class createTable {
             ps = conn.prepareStatement(sql);
             ps.execute();
         } catch (Exception e) {
-            DebugPrint.DPrint(e.toString());
+            DebugPrint.dPrint(e.toString());
         } finally {
             d.close(conn, ps, rs);
         }

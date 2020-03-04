@@ -103,7 +103,7 @@ public class SqlConfigFrame extends JFrame {
             enterButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    DebugPrint.DPrint("确定按钮点击了");
+                    DebugPrint.dPrint("确定按钮点击了");
                     for (int i = 0; i < 4; i++) {
                         if (i != 3) {
                             inputInfo[i] = inputFrame[i].getText();
@@ -112,7 +112,7 @@ public class SqlConfigFrame extends JFrame {
                         }
                     }
                     for (int i = 0; i < 4; i++) {
-                        DebugPrint.DPrint(inputInfo[i]);
+                        DebugPrint.dPrint(inputInfo[i]);
                     }
                     DatabaseInformation.resetMysql(inputInfo);
                     sqlConfigFrame.dispose();
@@ -121,7 +121,7 @@ public class SqlConfigFrame extends JFrame {
             resetButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    DebugPrint.DPrint("重置键点击了");
+                    DebugPrint.dPrint("重置键点击了");
                     for (int i = 0; i < 3; i++) {
                         inputFrame[i].setText("");
                     }

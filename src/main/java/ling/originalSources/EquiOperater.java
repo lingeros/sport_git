@@ -1,7 +1,5 @@
 package ling.originalSources;
 
-import org.apache.poi.ss.formula.functions.T;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,7 +24,7 @@ public class EquiOperater {
                 i = rs.getInt(1);
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         }
         return i;
     }
@@ -40,7 +38,7 @@ public class EquiOperater {
             ps.executeUpdate();
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -56,11 +54,11 @@ public class EquiOperater {
 
             int i = ps.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint(TAG + "add success");
+                DebugPrint.dPrint(TAG + "add success");
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -77,7 +75,7 @@ public class EquiOperater {
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -95,11 +93,11 @@ public class EquiOperater {
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
-        DebugPrint.DPrint(i);
+        DebugPrint.dPrint(i);
         return i;
     }
 
@@ -114,7 +112,7 @@ public class EquiOperater {
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -128,10 +126,10 @@ public class EquiOperater {
             ps.setString(1, eid);
             int i = ps.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint(TAG + "delete success");
+                DebugPrint.dPrint(TAG + "delete success");
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -149,9 +147,9 @@ public class EquiOperater {
             }
 
             i = i / 80 + 1;
-            DebugPrint.DPrint(TAG +"getPgNum :"+ i);
+            DebugPrint.dPrint(TAG +"getPgNum :"+ i);
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }
@@ -169,7 +167,7 @@ public class EquiOperater {
                 if (eid.equals(rs.getString(1))) jduge = true;
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         } finally {
             d.close(conn, ps, rs);
         }

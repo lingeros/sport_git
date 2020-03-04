@@ -63,7 +63,7 @@ public class detailPane {
         column10.setPreferredWidth(150);
         final ArrayList<String> array = new ArrayList();
         historybdOper.select(id, array);
-        DebugPrint.DPrint("有没有hp数据：" + array);
+        DebugPrint.dPrint("有没有hp数据：" + array);
         dP.dataT_clear(dataT);
         dP.setDataT_starT(dataT, array, PgNum);
         PgNumJL.setText("跳转/共" + dP.getPgNumArray(array) + "页");
@@ -119,8 +119,8 @@ public class detailPane {
                         for (int m = 0; m < SDTarray.size(); m++) {
                             String[] a = SDTarray.get(m).split(",");
 
-                            DebugPrint.DPrint(a[9]);
-                            DebugPrint.DPrint(time);
+                            DebugPrint.dPrint(a[9]);
+                            DebugPrint.dPrint(time);
 
                             if (a[9].equals(time)) SDTarray.remove(m);
                         }
@@ -270,7 +270,7 @@ public class detailPane {
     }
 
     public void JFrame_exists(JFrame jf) {
-        DebugPrint.DPrint("0.0");
-        DebugPrint.DPrint(jf.isShowing());
+        DebugPrint.dPrint("0.0");
+        DebugPrint.dPrint(jf.isShowing());
     }
 }

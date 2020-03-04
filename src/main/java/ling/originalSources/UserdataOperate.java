@@ -22,7 +22,7 @@ public class UserdataOperate {
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.executeUpdate();
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "create:" + e.toString());
+            DebugPrint.dPrint(TAG + "create:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -41,7 +41,7 @@ public class UserdataOperate {
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "jduge:" + e.toString());
+            DebugPrint.dPrint(TAG + "jduge:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -59,11 +59,11 @@ public class UserdataOperate {
             preparedStatement.setString(4, user_phone);
             int i = preparedStatement.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint(TAG + "add success");
+                DebugPrint.dPrint(TAG + "add success");
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "add:" + e.toString());
+            DebugPrint.dPrint(TAG + "add:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -81,10 +81,10 @@ public class UserdataOperate {
             preparedStatement.setString(4, uid);
             int i = preparedStatement.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint("userdataOperate update success");
+                DebugPrint.dPrint("userdataOperate update success");
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "update:" + e.toString());
+            DebugPrint.dPrint(TAG + "update:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -101,7 +101,7 @@ public class UserdataOperate {
                         + "," + resultSet.getString(3) + "," + resultSet.getString(4));
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "select:" + e.toString());
+            DebugPrint.dPrint(TAG + "select:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -115,10 +115,10 @@ public class UserdataOperate {
             preparedStatement.setString(1, uid);
             int i = preparedStatement.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint(TAG+"delete success");
+                DebugPrint.dPrint(TAG+"delete success");
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "delete:" + e.toString());
+            DebugPrint.dPrint(TAG + "delete:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -131,10 +131,10 @@ public class UserdataOperate {
             preparedStatement = connection.prepareStatement(sql);
             int i = preparedStatement.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint("userdataOperate delete all success");
+                DebugPrint.dPrint("userdataOperate delete all success");
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "deleteAll:" + e.toString());
+            DebugPrint.dPrint(TAG + "deleteAll:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -171,7 +171,7 @@ public class UserdataOperate {
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "select:" + e.toString());
+            DebugPrint.dPrint(TAG + "select:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -190,7 +190,7 @@ public class UserdataOperate {
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "selectID:" + e.toString());
+            DebugPrint.dPrint(TAG + "selectID:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -210,7 +210,7 @@ public class UserdataOperate {
             }
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + "selectName:" + e.toString());
+            DebugPrint.dPrint(TAG + "selectName:" + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }

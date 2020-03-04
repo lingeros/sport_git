@@ -28,7 +28,7 @@ public class HistorybdOper {
             preparedStatement.executeUpdate();
 
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG + e.toString());
+            DebugPrint.dPrint(TAG + e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -52,7 +52,7 @@ public class HistorybdOper {
             preparedStatement.setTimestamp(11, set_time);
             int i = preparedStatement.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint(TAG + "add " + " success");
+                DebugPrint.dPrint(TAG + "add " + " success");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,7 +76,7 @@ public class HistorybdOper {
                         resultSet.getString(11) + "," + resultSet.getString(12));
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG+"select:"+e.toString());
+            DebugPrint.dPrint(TAG+"select:"+e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
 
@@ -102,7 +102,7 @@ public class HistorybdOper {
                 j++;
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG+"select:"+e.toString());
+            DebugPrint.dPrint(TAG+"select:"+e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
 
@@ -134,7 +134,7 @@ public class HistorybdOper {
             preparedStatement.setString(1,id);
             preparedStatement.executeUpdate();
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG+"deletc:"+e.toString());
+            DebugPrint.dPrint(TAG+"deletc:"+e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -147,7 +147,7 @@ public class HistorybdOper {
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.executeUpdate();
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG+"deleteAll:"+e.toString());
+            DebugPrint.dPrint(TAG+"deleteAll:"+e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -165,7 +165,7 @@ public class HistorybdOper {
                         resultSet.getString(10) + "/ " + resultSet.getString(11) + ")" + ", " + resultSet.getString(12));
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG+"command:"+e.toString());
+            DebugPrint.dPrint(TAG+"command:"+e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -180,9 +180,9 @@ public class HistorybdOper {
             preparedStatement.setString(2, e_id);
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
-            DebugPrint.DPrint(TAG+"Update_power:"+e.toString());
+            DebugPrint.dPrint(TAG+"Update_power:"+e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -202,7 +202,7 @@ public class HistorybdOper {
 
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint("y");
+            DebugPrint.dPrint("y");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

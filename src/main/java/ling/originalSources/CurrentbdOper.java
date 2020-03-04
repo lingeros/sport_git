@@ -5,7 +5,6 @@ import ling.entity.Currentbd;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 public class CurrentbdOper {
@@ -27,7 +26,7 @@ public class CurrentbdOper {
             preparedStatement.executeUpdate();
 
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -59,7 +58,7 @@ public class CurrentbdOper {
             preparedStatement.setString(12, run);
             int i = preparedStatement.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint("currentbdOper add success");
+                DebugPrint.dPrint("currentbdOper add success");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,10 +88,10 @@ public class CurrentbdOper {
             preparedStatement.setString(12,currentbd.getRun());
             int i = preparedStatement.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint(TAG+"add success");
+                DebugPrint.dPrint(TAG+"add success");
             }
         }catch(Exception e){
-            DebugPrint.DPrint(TAG+"add:"+e.toString());
+            DebugPrint.dPrint(TAG+"add:"+e.toString());
         }finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -120,11 +119,11 @@ public class CurrentbdOper {
             preparedStatement.setString(12, "true");
             int i = preparedStatement.executeUpdate();
             if (i != 0) {
-                DebugPrint.DPrint(TAG+"add success");
+                DebugPrint.dPrint(TAG+"add success");
             }
 
         } catch (Exception e) {
-           DebugPrint.DPrint(TAG+"add:"+e.toString());
+           DebugPrint.dPrint(TAG+"add:"+e.toString());
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
@@ -163,7 +162,7 @@ public class CurrentbdOper {
             preparedStatement.setString(2, eid);
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -263,7 +262,7 @@ public class CurrentbdOper {
             preparedStatement.setString(2, e_id);
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -320,7 +319,7 @@ public class CurrentbdOper {
             preparedStatement.setString(2, e_id);
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -331,14 +330,14 @@ public class CurrentbdOper {
     public void UpdateTotalTime(String totalTime, String eid) {
         try {
             connection = databaseInformation.getconn();
-            DebugPrint.DPrint("即将修改的用时是：" + totalTime + "eid是：" + eid);
+            DebugPrint.dPrint("即将修改的用时是：" + totalTime + "eid是：" + eid);
             sql = "update currentbd set totalTime =? where equipment_id=? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, totalTime);
             preparedStatement.setString(2, eid);
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -356,7 +355,7 @@ public class CurrentbdOper {
             preparedStatement.setString(2, e_id);
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -373,7 +372,7 @@ public class CurrentbdOper {
             preparedStatement.setString(2, e_id);
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -390,7 +389,7 @@ public class CurrentbdOper {
             preparedStatement.setString(2, e_id);
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -407,7 +406,7 @@ public class CurrentbdOper {
             preparedStatement.setString(2, e_id);
             preparedStatement.executeUpdate();
             int t = preparedStatement.executeUpdate();
-            DebugPrint.DPrint(t);
+            DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -444,7 +443,7 @@ public class CurrentbdOper {
                 if (eid.equals(resultSet.getString(4))) jduge = true;
             }
         } catch (Exception e) {
-            DebugPrint.DPrint(e);
+            DebugPrint.dPrint(e);
         } finally {
             databaseInformation.close(connection, preparedStatement, resultSet);
         }

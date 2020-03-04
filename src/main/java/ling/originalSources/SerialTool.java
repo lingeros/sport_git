@@ -69,23 +69,23 @@ public class SerialTool {
                 } catch (UnsupportedCommOperationException e) {
                     //throw new SerialPortParameterFailure();
                 }
-                DebugPrint.DPrint("Open " + portName + " sucessfully !");
+                DebugPrint.dPrint("Open " + portName + " sucessfully !");
                 serialStatus.put(serialPort.getName(),1);
                 return serialPort;
             
             }        
             else {
                 //不是串口
-                DebugPrint.DPrint("不是串口");
+                DebugPrint.dPrint("不是串口");
                 serialStatus.put(commPort.getName(),2);
             }
             
         } catch (NoSuchPortException e1) {
          // throw new NoSuchPort();
-            DebugPrint.DPrint("找不到串口异常");
+            DebugPrint.dPrint("找不到串口异常");
         } catch (PortInUseException e2) {
            //throw new PortInUse();
-            DebugPrint.DPrint("串口占用异常");
+            DebugPrint.dPrint("串口占用异常");
         }
         return null;
     }
