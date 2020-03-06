@@ -121,7 +121,7 @@ public class warnPane {
                 dFrame.dispose();
                 MainPanel.exists = false;
                 DebugPrint.dPrint(TAG+"close window");
-                warningSounds.stop();
+                warningSounds.interrupt();
                 dFrame.dispose();
             }
         });

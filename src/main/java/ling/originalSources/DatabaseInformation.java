@@ -19,7 +19,20 @@ public class DatabaseInformation {
     private static String mysqlPort;
     public static boolean connectionState = false;
     private static String host;
+    private static DatabaseInformation databaseInformation;
+    private static Connection connection;
+    public static DatabaseInformation getInstance(){
+        if(databaseInformation == null){
+            databaseInformation = new DatabaseInformation();
+        }
+        return databaseInformation;
 
+    }
+
+    public static Connection getConnection(){
+        getconn();
+        return connection;
+    }
     public DatabaseInformation() {
 
         try {
@@ -32,23 +45,22 @@ public class DatabaseInformation {
 
     }
 
-    public Connection getconn() {
-        Connection conn = null;
+    public static Connection getconn() {
         String[] strings = DatabaseInfoFileUtils.readInfo();
         default_port = strings[1];
         setMysqlUrl(strings[0]);
         username = strings[2];
         password = strings[3];
         try {
-            conn = DriverManager.getConnection(mysqlUrl, username, password);
+            connection = DriverManager.getConnection(mysqlUrl, username, password);
         } catch (Exception e) {
             connectionState = false;
             e.printStackTrace();
         }
-        if (conn != null) {
+        if (connection != null) {
             connectionState = true;
         }
-        return conn;
+        return connection;
     }
 
     /**
