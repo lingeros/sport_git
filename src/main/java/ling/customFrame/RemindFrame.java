@@ -1,4 +1,4 @@
-package ling.CustomFrame;
+package ling.customFrame;
 
 import javax.swing.*;
 import java.awt.*;

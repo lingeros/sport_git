@@ -1,4 +1,5 @@
 package ling.originalSources;
+import ling.entity.DatabaseInformation;
 import ling.utils.CalculateUtils;
 
 import java.sql.Connection;

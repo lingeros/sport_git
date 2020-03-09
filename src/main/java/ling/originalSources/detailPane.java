@@ -1,6 +1,10 @@
 package ling.originalSources;
 
-import ling.CustomFrame.DetailPanelDeleteFrame;
+import ling.customFrame.DetailPanelDeleteFrame;
+import ling.mysqlOperation.CurrentbdOper;
+import ling.mysqlOperation.HistorybdOper;
+import ling.utils.DebugPrint;
+import ling.utils.ExportEX;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

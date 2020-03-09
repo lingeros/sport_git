@@ -1,5 +1,6 @@
-package ling.originalSources;
+package ling.entity;
 
+import ling.utils.DebugPrint;
 import ling.utils.DatabaseInfoFileUtils;
 
 import java.sql.*;

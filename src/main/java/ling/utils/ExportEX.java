@@ -1,4 +1,4 @@
-package ling.originalSources;
+package ling.utils;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -6,9 +6,6 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.FileOutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,7 +13,7 @@ import java.util.Date;
 /**
  * 输出xls文件类
  */
-class ExportEX {
+public class ExportEX {
 
     public void wExcel(ArrayList<String> array, String[] a) {
         Date now = new Date();

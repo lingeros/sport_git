@@ -3,6 +3,7 @@ package ling.originalSources;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
+import ling.utils.DebugPrint;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -191,7 +192,8 @@ public class SerialPorts {
             DebugPrint.dPrint("new Thread start:" + Thread.currentThread().getId());
             String portName = SerialPortThread.serialPortThreadQueuel.pop();
             if (portName != null) {
-                SerialPort serialPort = openSerialPort(portName, 115200);
+                SerialPort serialPort = openSerialPort(portName, 460800);//460800
+
                 String sendMsg = "B";
                 if (serialPort != null) {
                     try {

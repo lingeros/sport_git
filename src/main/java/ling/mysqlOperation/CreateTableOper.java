@@ -1,10 +1,13 @@
-package ling.originalSources;
+package ling.mysqlOperation;
+
+import ling.entity.DatabaseInformation;
+import ling.utils.DebugPrint;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-public class createTable {
+public class CreateTableOper {
     private Connection conn = null;
     private PreparedStatement ps = null;
     private ResultSet rs = null;

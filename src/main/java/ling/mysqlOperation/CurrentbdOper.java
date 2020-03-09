@@ -1,6 +1,8 @@
-package ling.originalSources;
+package ling.mysqlOperation;
 
 import ling.entity.Currentbd;
+import ling.entity.DatabaseInformation;
+import ling.utils.DebugPrint;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,7 +17,75 @@ public class CurrentbdOper {
     private String sql;
     private DatabaseInformation databaseInformation = new DatabaseInformation();
 
-    void create() {
+
+    /**
+     * 添加或者更新
+     * @param addOrUpd 添加或者更新  只能有两个选项：add 和 update
+     * @param currentbd 添加或更新的数据
+     */
+    public void addOrUpdate(String addOrUpd,Currentbd currentbd){
+        try{
+            connection = databaseInformation.getconn();
+
+            String sqlString = null;
+            if("add".equals(addOrUpd)){
+                sqlString = "INSERT INTO currentbd(id,user_id,user_name,equipment_id,user_condition,cycle_num "
+                        + ",hearbeat,watch_power,user_long,lat,totalTime,"
+                        + "run ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+                preparedStatement = connection.prepareStatement(sqlString);
+                preparedStatement.setString(1,currentbd.getId());
+                preparedStatement.setString(2,currentbd.getUser_id());
+                preparedStatement.setString(3,currentbd.getUser_name());
+                preparedStatement.setString(4,currentbd.getEquipment_id());
+                preparedStatement.setString(5,currentbd.getUser_condition());
+                preparedStatement.setString(6,currentbd.getCycle_num());
+                preparedStatement.setString(7,currentbd.getHearbeat());
+                preparedStatement.setString(8,currentbd.getWatch_power());
+                preparedStatement.setString(9,currentbd.getUser_long());
+                preparedStatement.setString(10,currentbd.getLat());
+                preparedStatement.setString(11,currentbd.getTotalTime());
+                preparedStatement.setString(12,currentbd.getRun());
+            }else if("update".equals(addOrUpd)){//更新
+                sqlString = "UPDATE  currentbd SET user_name = ?,user_condition = ?,cycle_num = ?,hearbeat = ?,watch_power = ?,user_long = ?,lat = ?,totalTime = ?,run = ? where user_id =? and equipment_id =?";
+                preparedStatement = connection.prepareStatement(sqlString);
+                preparedStatement.setString(1,currentbd.getUser_name());
+                preparedStatement.setString(2,currentbd.getUser_condition());
+                preparedStatement.setString(3,currentbd.getCycle_num());
+                preparedStatement.setString(4,currentbd.getHearbeat());
+                preparedStatement.setString(5,currentbd.getWatch_power());
+                preparedStatement.setString(6,currentbd.getUser_long());
+                preparedStatement.setString(7,currentbd.getLat());
+                preparedStatement.setString(8,currentbd.getTotalTime());
+                preparedStatement.setString(9,currentbd.getRun());
+                preparedStatement.setString(10,currentbd.getUser_id());
+                preparedStatement.setString(11,currentbd.getEquipment_id());
+            }else{//表示出错
+                DebugPrint.dPrint(TAG+":"+"addOrUpdate"+"command error");
+                return;
+            }
+            int i = preparedStatement.executeUpdate();
+            if (i != 0) {
+                DebugPrint.dPrint(TAG+"add success");
+            }
+        }catch(Exception e){
+            DebugPrint.dPrint(TAG+"add:"+e.toString());
+        }finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+  /**********************************************************************************************************************************************/
+
+    public void create() {
         try {
             connection = databaseInformation.getconn();
             sql = "CREATE TABLE if not exists currentbd(id varchar(25) PRIMARY KEY ,\r\n" +
@@ -67,35 +137,7 @@ public class CurrentbdOper {
         }
     }
 
-    public void add(Currentbd currentbd){
-        try{
-            connection = databaseInformation.getconn();
-            sql = "INSERT INTO currentbd(id,user_id,user_name,equipment_id,`user_condition`,cycle_num "
-                    + ",hearbeat,watch_power,user_long,lat,totalTime,"
-                    + "run ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
-            preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1,currentbd.getId());
-            preparedStatement.setString(2,currentbd.getUser_id());
-            preparedStatement.setString(3,currentbd.getUser_name());
-            preparedStatement.setString(4,currentbd.getEquipment_id());
-            preparedStatement.setString(5,currentbd.getUser_condition());
-            preparedStatement.setString(6,currentbd.getCycle_num());
-            preparedStatement.setString(7,currentbd.getHearbeat());
-            preparedStatement.setString(8,currentbd.getWatch_power());
-            preparedStatement.setString(9,currentbd.getUser_long());
-            preparedStatement.setString(10,currentbd.getLat());
-            preparedStatement.setString(11,currentbd.getTotalTime());
-            preparedStatement.setString(12,currentbd.getRun());
-            int i = preparedStatement.executeUpdate();
-            if (i != 0) {
-                DebugPrint.dPrint(TAG+"add success");
-            }
-        }catch(Exception e){
-            DebugPrint.dPrint(TAG+"add:"+e.toString());
-        }finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
-        }
-    }
+
 
     public void add(String id, String uid, String uname, String eid, String cycle_num) {
         try {

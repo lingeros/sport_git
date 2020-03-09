@@ -1,4 +1,4 @@
-package ling.originalSources;
+package ling.utils;
 
 import javax.swing.*;
 

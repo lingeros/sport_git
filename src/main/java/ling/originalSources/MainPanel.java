@@ -5,9 +5,13 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
-import ling.CustomFrame.RemindFrame;
-import ling.CustomFrame.SelectFrame;
+import ling.customFrame.RemindFrame;
+import ling.customFrame.SelectFrame;
+import ling.entity.DatabaseInformation;
+import ling.mysqlOperation.*;
 import ling.utils.CalculateUtils;
+import ling.utils.DebugPrint;
+import ling.utils.*;
 import ling.utils.UIFontUtil;
 
 import javax.swing.*;
@@ -46,7 +50,6 @@ public class MainPanel {
     private int AST = 1;
     static boolean exists = true;
     private static String sql;
-    DatabaseInformation databaseInformation = new DatabaseInformation();
     private static MainPanel mainPanel = new MainPanel();
     private static UserdataOperate userdataOperate = new UserdataOperate();
     private static EquiOperater equiOperater = new EquiOperater();
@@ -226,13 +229,13 @@ public class MainPanel {
         bdUBox.setBounds(250, 26, 145, 25);
         final JComboBox<String> bdEBox = new JComboBox();
         bdEBox.setBounds(490, 26, 145, 25);
-        final MainPanel p = new MainPanel();
+        final MainPanel mainPanel = new MainPanel();
         ArrayList<String> array1 = new ArrayList<>();
         ArrayList<String> array2 = new ArrayList<>();
         userdataOperate.selectID(array1);//获取user_id数组
         equiOperater.select(array2);  //获取eid数组
-        p.dbBox(bdUBox, array1);
-        p.dbBox(bdEBox, array2);
+        mainPanel.dbBox(bdUBox, array1);
+        mainPanel.dbBox(bdEBox, array2);
         // *****************************************************thirdPane UI
         // 添加用户部分组件
         final JButton saveAllJB = new JButton("保存");
@@ -265,13 +268,13 @@ public class MainPanel {
         DefaultTableCellRenderer bdUserR = new DefaultTableCellRenderer();
         bdUserR.setHorizontalAlignment(JLabel.CENTER);
         bdUserT.setDefaultRenderer(Object.class, bdUserR);
-        p.bdUserTB_clear(bdUserT_rowData);
-        p.setbdUserT(bdUserT_rowData, bdUserPgNum);
+        mainPanel.bdUserTB_clear(bdUserT_rowData);
+        mainPanel.setbdUserT(bdUserT_rowData, bdUserPgNum);
         bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
         thirdPane.add(bdUserJP);
         panelAlls(secondPane, bdUser, bdUBox, bdequipment, bdEBox, bd);
-        p.bdUserTB_clear(bdUserT_rowData);
-        p.setbdUserT(bdUserT_rowData, bdUserPgNum);
+        mainPanel.bdUserTB_clear(bdUserT_rowData);
+        mainPanel.setbdUserT(bdUserT_rowData, bdUserPgNum);
         TableColumn column8 = bdUserT.getColumnModel().getColumn(8);
         column8.setPreferredWidth(160);
         TableColumn column9 = bdUserT.getColumnModel().getColumn(9);
@@ -652,7 +655,7 @@ public class MainPanel {
             bdEnum = bdEnum.replace(" ", "");//除空
             if (!currentbdOper.jdugeU(bdUnum) && !currentbdOper.jdugeE(bdEnum)) {
                 if (Double.parseDouble(settingCycle) < 1 || settingCycle == null) {
-                    p.RemindPgSelect("    请设置圈数后绑定");
+                    mainPanel.RemindPgSelect("    请设置圈数后绑定");
                 } else {
                     Date now = new Date();
                     String id = String.valueOf(now.getTime());
@@ -661,7 +664,7 @@ public class MainPanel {
 
             } else {
                 if (currentbdOper.jdugeU(bdUnum) || currentbdOper.jdugeE(bdEnum))
-                    p.RemindPgSelect("    用户或设备已被绑定");
+                    mainPanel.RemindPgSelect("    用户或设备已被绑定");
             }
             thirdPane.removeAll();
             MainPanel p19 = new MainPanel();
@@ -700,7 +703,7 @@ public class MainPanel {
             try {
                 int n = Integer.valueOf(bdUserPgSelectTF.getText());
                 if (n <= 0 || n > currentbdOper.getPgNum())
-                    p.RemindPgSelect(" 请根据总页数输入跳转页");
+                    mainPanel.RemindPgSelect(" 请根据总页数输入跳转页");
                 else {
                     bdUserPgNum = n;
                 }
@@ -820,7 +823,7 @@ public class MainPanel {
             sql = " SELECT * FROM  currentbd where run='false' limit " + se + "," + sa;
             ArrayList<String> DataArray = new ArrayList();
             currentbdOper.command(sql, DataArray);
-            p.BindTable(dataTable, DataArray);
+            mainPanel.BindTable(dataTable, DataArray);
             addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
         });
         dataSelectJB.addActionListener(e -> {
@@ -844,9 +847,9 @@ public class MainPanel {
                     sql = sql + "and equipment_id =" + "'" + eid + "'";
             }
             currentbdOper.command(sql, Sarray);
-            addDataPgSelectLabel.setText("跳转/共" + p.getPgNumArray(Sarray) + "页");
+            addDataPgSelectLabel.setText("跳转/共" + mainPanel.getPgNumArray(Sarray) + "页");
             dataPgNum = 1;
-            p.BindTable(dataTable, Sarray);
+            mainPanel.BindTable(dataTable, Sarray);
             jCheckBox.setSelected(false);
         });
         addDataPgdownJB.addActionListener(e -> {
@@ -860,14 +863,14 @@ public class MainPanel {
                 Sarray.clear();
                 currentbdOper.command(sql, Sarray);
                 addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-                p.BindTable(dataTable, Sarray);
+                mainPanel.BindTable(dataTable, Sarray);
             }
             if (jduge == 2) {
-                if (dataPgNum >= p.getPgNumArray(Sarray))
-                    dataPgNum = p.getPgNumArray(Sarray);
+                if (dataPgNum >= mainPanel.getPgNumArray(Sarray))
+                    dataPgNum = mainPanel.getPgNumArray(Sarray);
                 addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-                p.DataT_clear(dataTable);
-                p.setDataT_starT(dataTable, Sarray, dataPgNum);
+                mainPanel.DataT_clear(dataTable);
+                mainPanel.setDataT_starT(dataTable, Sarray, dataPgNum);
             }
             jCheckBox.setSelected(false);
         });
@@ -884,12 +887,12 @@ public class MainPanel {
                 Sarray.clear();
                 currentbdOper.command(sql, Sarray);
                 addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-                p.BindTable(dataTable, Sarray);
+                mainPanel.BindTable(dataTable, Sarray);
             }
             if (jduge == 2) {
                 addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-                p.DataT_clear(dataTable);
-                p.setDataT_starT(dataTable, Sarray, dataPgNum);
+                mainPanel.DataT_clear(dataTable);
+                mainPanel.setDataT_starT(dataTable, Sarray, dataPgNum);
             }
             jCheckBox.setSelected(false);
         });
@@ -898,7 +901,7 @@ public class MainPanel {
             int i = Integer.valueOf(addDataPgSelectTF.getText());
             if (jduge == 1) {
                 if (i <= 0 || i > currentbdOper.getPgNumF())
-                    p.RemindPgSelect(" 请根据总页数输入跳转页");
+                    mainPanel.RemindPgSelect(" 请根据总页数输入跳转页");
                 else {
                     dataPgNum = i;
                 }
@@ -908,17 +911,17 @@ public class MainPanel {
                 Sarray.clear();
                 currentbdOper.command(sql, Sarray);
                 addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
-                p.BindTable(dataTable, Sarray);
+                mainPanel.BindTable(dataTable, Sarray);
             }
 
             if (jduge == 2) {
-                if (i <= 0 || i > p.getPgNumArray(Sarray))
-                    p.RemindPgSelect(" 请根据总页数输入跳转页");
+                if (i <= 0 || i > mainPanel.getPgNumArray(Sarray))
+                    mainPanel.RemindPgSelect(" 请根据总页数输入跳转页");
                 else {
                     dataPgNum = i;
                     addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
-                    p.DataT_clear(dataTable);
-                    p.setDataT_starT(dataTable, Sarray, dataPgNum);
+                    mainPanel.DataT_clear(dataTable);
+                    mainPanel.setDataT_starT(dataTable, Sarray, dataPgNum);
 
                 }
             }
@@ -1004,10 +1007,10 @@ public class MainPanel {
                     sql = " SELECT * FROM  currentbd limit " + se + "," + sa;
                     ArrayList<String> DataArray = new ArrayList();
                     currentbdOper.command(sql, DataArray);
-                    p.BindTable(dataTable, DataArray);
+                    mainPanel.BindTable(dataTable, DataArray);
                     addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
                 } else if (jduge == 2) {
-                    p.BindTable(dataTable, Sarray);
+                    mainPanel.BindTable(dataTable, Sarray);
                 }
             });
             jCheckBox.setSelected(false);
@@ -1131,16 +1134,16 @@ public class MainPanel {
                 if (surperAdminOper.select(surAdminJFPassword)) {
                     if (adminJFPassword.equals(RadminJFPassword)) {
                         adminOper.add(adminJFPassword, name);
-                        p.RemindPgSelect("               添加成功");
+                        mainPanel.RemindPgSelect("               添加成功");
                         surAdminJF.setText("");
                         adminJF.setText("");
                         RadminJF.setText("");
                         nameJF.setText("");
                     }
                 } else if (!surperAdminOper.select(surAdminJFPassword))
-                    p.RemindPgSelect("           认证口令错误");
+                    mainPanel.RemindPgSelect("           认证口令错误");
             } else {
-                p.RemindPgSelect("           请填完信息");
+                mainPanel.RemindPgSelect("           请填完信息");
             }
         });
         updateJB.addActionListener(e -> {
@@ -1152,16 +1155,16 @@ public class MainPanel {
                 if (adminOper.select(password)) {
                     if (addPassword1.equals(addPassword2)) {
                         adminOper.update(name, password, addPassword1);
-                        p.RemindPgSelect("               修改成功");
+                        mainPanel.RemindPgSelect("               修改成功");
                         surAdminJF.setText("");
                         adminJF.setText("");
                         RadminJF.setText("");
                         nameJF.setText("");
                     }
                 } else if (!surperAdminOper.select(password))
-                    p.RemindPgSelect("认证口令错误");
+                    mainPanel.RemindPgSelect("认证口令错误");
             } else {
-                p.RemindPgSelect("请填完信息");
+                mainPanel.RemindPgSelect("请填完信息");
             }
         });
         deleteJB.addActionListener(e -> {
@@ -1511,7 +1514,7 @@ public class MainPanel {
                                 //计算距离
                                 //判断手环设备是否第一次添加  假设SerialTemp = "eE11321.7995N23.9.2798H81"
                                 //将设备号提取出来
-                                String equitmentId = SerialTemp.substring(0,1);
+                                String equitmentId = SerialTemp.substring(0, 1);
                                 if (alltrailData.containsKey(equitmentId)) {
                                     //获得处理后的数据  返回 long + lat + hdata
                                     String ENH_data = dealData(SerialTemp);
@@ -1538,7 +1541,7 @@ public class MainPanel {
                                     //更新标志位数据
                                     int num = Integer.parseInt(allTrail[0]);
                                     //表示已经离开了原点 也就是开始跑了
-                                    if (num < 1 && distance > 40) {
+                                    if (num < 1 && distance > 40) {//这里如果num是0 ，并且距离大于40 说明已经开始第一圈 所以num置一
                                         //表示已经跑第一圈了
                                         num++;
                                         allTrail[0] = String.valueOf(num);
@@ -1547,7 +1550,7 @@ public class MainPanel {
                                     }
                                     //计算用时
                                     //这个判断条件就是已经开始跑了并且离开了原点
-                                    if (num > 0 && distance < 40) {
+                                    if (num > 0 && distance < 40) {//这里如果距离小于40，并且num置一了，说明跑完一圈了 则计算
                                         //剩下的圈数：select cycle_num from currentbd where equipment_id =? and run='true'
                                         String remainCycle = currentbdOper.select_cycle(SerialTemp.substring(0, 1));
                                         //判断是否还有剩余圈数
@@ -1566,20 +1569,21 @@ public class MainPanel {
                                                 } catch (Exception ee) {
                                                     JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
                                                 }
+                                            } else {
+                                                //计算圈数
+                                                //这里说明没有只剩1圈
+                                                int cycle = Integer.parseInt(remainCycle) - 1;//剩余圈数-1
+                                                //更新圈数：update currentbd set cycle_num =? where equipment_id =? and run='true'
+                                                currentbdOper.UpdateCycle_num(String.valueOf(cycle), SerialTemp.substring(0, 1));
+                                                //更新界面的数据
+                                                MainPanel p = new MainPanel();
+                                                p.bdUserTB_clear(bdUserT_rowData);
+                                                p.setbdUserT(bdUserT_rowData, bdUserPgNum);
+                                                thirdPane.repaint();
+                                                DebugPrint.dPrint("E更改之后的圈数:" + currentbdOper.select_cycle(SerialTemp.substring(0, 1)));
                                             }
-                                            //计算圈数
-                                            //这里说明没有只剩1圈
-                                            int cycle = Integer.parseInt(remainCycle) - 1;//剩余圈数-1
-                                            //更新圈数：update currentbd set cycle_num =? where equipment_id =? and run='true'
-                                            currentbdOper.UpdateCycle_num(String.valueOf(cycle), SerialTemp.substring(0, 1));
-                                            //更新界面的数据
-                                            MainPanel p = new MainPanel();
-                                            p.bdUserTB_clear(bdUserT_rowData);
-                                            p.setbdUserT(bdUserT_rowData, bdUserPgNum);
-                                            thirdPane.repaint();
-                                            DebugPrint.dPrint("E更改之后的圈数:" + currentbdOper.select_cycle(SerialTemp.substring(0, 1)));
                                         }
-                                        //
+                                        //经过减少一圈 重置num
                                         num--;
                                         allTrail[0] = String.valueOf(num);
                                         allTrail[1] = String.valueOf(num);
@@ -1587,6 +1591,7 @@ public class MainPanel {
                                         alltrailData.put(SerialTemp.substring(0, 1), stringConnect(allTrail));//再次回到第一个轨迹点附近时，num-1
                                         DebugPrint.dPrint("Nnum有没有变回0：" + num);
                                     }
+                                    //因为重置圈数，所以更新数据库的数据
                                     //保存数据到historybdOper
                                     String id = currentbdOper.select_id(SerialTemp.substring(0, 1));//获取对应的id(也就是绑定时的时间戳)
                                     String bdUid = currentbdOper.select_uid(SerialTemp.substring(0, 1));//获取用户id
@@ -1627,7 +1632,7 @@ public class MainPanel {
                                     String bdUid = currentbdOper.select_uid(equitmentId);//获取用户id
                                     //返回的是cycle_num 圈数
                                     String cycle = currentbdOper.select_cycle(equitmentId);//剩余圈数
-                                    //INSERT INTO historybd(id,user_id,user_name,                       equipment_id,              user_condition,cycle_num,hearbeat,           watch_power,  user_long,      lat,    set_time)
+                                    //INSERT INTO historybd(id,user_id,user_name,                   equipment_id,  user_condition,cycle_num,hearbeat,     watch_power,  user_long,      lat,    set_time)
                                     historybdOper.add(id, bdUid, userdataOperate.selectName(bdUid), equitmentId, "正常", cycle, ENH_array[2], "电量正常", ENH_array[0], ENH_array[1], time);
                                     //暂存数据
                                     SerialBuff.add(SerialTemp);
@@ -1686,53 +1691,47 @@ public class MainPanel {
         return temp;
     }
 
-    private static String dealData(String data) {
-        int N_index = data.indexOf("N");
-        int H_index = data.indexOf("H");
-        String Edata = data.substring(2, N_index);
-        String Ndata = data.substring(N_index + 1, H_index);
-        String Hdata = data.substring(H_index + 1);
-        int index1 = Edata.indexOf(".");
-        String EdegreeMinute = Edata.substring(0, index1);
-        String EdotMinute = "0" + Edata.substring(index1);
-        String Ereverse = new StringBuilder(EdegreeMinute).reverse().toString();
-        String Edegree = Ereverse.substring(2);
-        String Edegree2 = new StringBuilder(Edegree).reverse().toString();//获取度
-        String Eminute = Ereverse.substring(0, 2);
-        String Eminute2 = new StringBuilder(Eminute).reverse().toString();
-        Double lonDegree = Double.parseDouble(Edegree2) + Double.parseDouble(Eminute2) / 60 + Double.parseDouble(EdotMinute) / 60;
-        int index2 = Ndata.indexOf(".");
-        String NdegreeMinute = Ndata.substring(0, index2);
-        String NdotMinute = "0" + Ndata.substring(index2);
-        String Nreverse = new StringBuilder(NdegreeMinute).reverse().toString();
-        String Ndegree = Nreverse.substring(2);
-        String Ndegree2 = new StringBuilder(Ndegree).reverse().toString();//获取度
-        String Nminute = Nreverse.substring(0, 2);
-        String Nminute2 = new StringBuilder(Nminute).reverse().toString();
-        String lon = null;//经度
-        String lat = null;//纬度
-        try {
-            Double latDegree = Double.parseDouble(Ndegree2) + Double.parseDouble(Nminute2) / 60 + Double.parseDouble(NdotMinute) / 60;//这是北纬
-            String longi = String.valueOf(lonDegree);
-            String lati = String.valueOf(latDegree);
-
-            if (longi.length() < 12) {
-                lon = longi.substring(0);
-            } else {
-                lon = longi.substring(0, 11);
-            }
-            if (lati.length() < 12) {
-                lat = lati.substring(0);
-            } else {
-                lat = lati.substring(0, 11);
-            }
-        } catch (Exception e) {
-            DebugPrint.dPrint(e);
-        } finally {
-
-            return "1" + "," + "2" + "," + "80";
+    public static String dealData(String data) {
+        //例如  12E11321.7995N23.9.2798H81
+        int N_index = data.indexOf("N");//12  就是N字符的位置
+        int H_index = data.indexOf("H");//22  就是H字符的位置
+        String Edata = data.substring(3, N_index);//经度数据  11321.7995
+        String Ndata = data.substring(N_index + 1, H_index);//纬度数据  23.9.2798
+        String Hdata = data.substring(H_index + 1);//心率数据  Hdata = 81
+        int index1 = Edata.indexOf(".");//5 点的位置
+        String EdegreeMinute = Edata.substring(0, index1);//11321  经度整数部分
+        String EdotMinute = "0" + Edata.substring(index1);//0.7995  经度小数部分
+        String Ereverse = new StringBuilder(EdegreeMinute).reverse().toString();//12311  整数部分反转
+        String Edegree = Ereverse.substring(2);//311
+        String Edegree2 = new StringBuilder(Edegree).reverse().toString();//获取度  113
+        String Eminute = Ereverse.substring(0, 2);//12
+        String Eminute2 = new StringBuilder(Eminute).reverse().toString();//21
+        Double lonDegree = Double.parseDouble(Edegree2) + Double.parseDouble(Eminute2) / 60 + Double.parseDouble(EdotMinute) / 60;//113.363324999999
+        //Ndata = 23.9.2798
+        int indexOfFirstDot = Ndata.indexOf(".");//2
+        String NdegreeMinute = Ndata.substring(0, indexOfFirstDot);//23
+        String NdotMinute ="0"+ Ndata.substring(indexOfFirstDot);//0.9.2798
+        String Nreverse = new StringBuilder(NdegreeMinute).reverse().toString();//32
+        String Ndegree = Nreverse.substring(2);//""
+        String Ndegree2 = new StringBuilder(Ndegree).reverse().toString();//获取度  ""
+        String Nminute = Nreverse.substring(0, 2);//32
+        String Nminute2 = new StringBuilder(Nminute).reverse().toString();//23
+        Double latDegree = Double.parseDouble(Ndegree2) + Double.parseDouble(Nminute2) / 60 + Double.parseDouble(NdotMinute) / 60;//这是北纬
+        String longi=String.valueOf(lonDegree);//
+        String lati=String.valueOf(latDegree);//
+        String lon=null;
+        String lat=null;
+        if (longi.length()<12){
+            lon=longi.substring(0);
+        }else{
+            lon=longi.substring(0,11);
         }
-
+        if (lati.length()<12){
+            lat=lati.substring(0);
+        }else{
+            lat=lati.substring(0,11);
+        }
+        return lon+","+lat+","+Hdata;
     }
 
     public static void reload(final String a, final String b) {

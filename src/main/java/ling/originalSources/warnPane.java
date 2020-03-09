@@ -1,6 +1,8 @@
 package ling.originalSources;
 
-import ling.CustomFrame.RemindFrame;
+import ling.customFrame.RemindFrame;
+import ling.mysqlOperation.AbnormalOper;
+import ling.utils.DebugPrint;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -23,11 +25,7 @@ public class warnPane {
     Object[][] abnor_rowData = new Object[20][4];
     JTable warnTB = new JTable(abnor_rowData, abnor_columnNames);
 
-    public static void main(String[] args) {
-        JFrame mainframe = new JFrame();
-        wp.Pane(mainframe);
 
-    }
 
     public void Pane(JFrame mainframe) {
         try {

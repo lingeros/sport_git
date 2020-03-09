@@ -1,8 +1,8 @@
-package ling.CustomFrame;
+package ling.customFrame;
 
 
-import ling.originalSources.DatabaseInformation;
-import ling.originalSources.DebugPrint;
+import ling.entity.DatabaseInformation;
+import ling.utils.DebugPrint;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

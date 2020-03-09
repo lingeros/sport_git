@@ -4,6 +4,7 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 import ling.entity.SerialPortData;
+import ling.utils.DebugPrint;
 import ling.utils.SerialPortDataList;
 
 import java.io.InputStream;

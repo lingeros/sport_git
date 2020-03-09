@@ -49,7 +49,6 @@ public class SerialPortData {
             return DATA_ERROE;
         } else {
             boolean isStartsWithA = tempData.startsWith("A");
-            boolean isEndsWithB = tempData.endsWith("B");
             if (!(isStartsWithA)) {
                 return DATA_ERROE;
             } else {
@@ -59,7 +58,6 @@ public class SerialPortData {
                 String equitmentIDStr = "0";//设备号id的字符串格式
                 String realData = "";
                 String GPSLongitudeType = "E";//经度类型 默认为东经
-                String GPSLongitudeTemp = "";//经度数据的缓存
                 if(str1 != null){
                     equitmentIDStr = str1.substring(0,2);
                     equitmentID = Integer.decode(equitmentIDStr);//获得设备号id

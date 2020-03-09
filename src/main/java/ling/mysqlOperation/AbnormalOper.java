@@ -1,4 +1,7 @@
-package ling.originalSources;
+package ling.mysqlOperation;
+
+import ling.entity.DatabaseInformation;
+import ling.utils.DebugPrint;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -69,7 +72,7 @@ public class AbnormalOper {
         }
     }
 
-    void selectAll(ArrayList<String> array) {//获取abnormal表的所有数据，存储到array中。
+    public void selectAll(ArrayList<String> array) {//获取abnormal表的所有数据，存储到array中。
         try {
             conn = databaseInformation.getconn();
             sql = "select * from abnormal";
@@ -86,7 +89,7 @@ public class AbnormalOper {
         }
     }
 
-    int getPgNum() {
+    public int getPgNum() {
         int i = -1;
         try {
             conn = databaseInformation.getconn();

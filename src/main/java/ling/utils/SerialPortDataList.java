@@ -2,7 +2,6 @@ package ling.utils;
 
 
 import ling.entity.SerialPortData;
-import ling.originalSources.DebugPrint;
 
 import java.util.ArrayDeque;
 import java.util.concurrent.locks.Lock;
@@ -65,7 +64,7 @@ public class SerialPortDataList {
                     DebugPrint.dPrint(data.toString());
                 }
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

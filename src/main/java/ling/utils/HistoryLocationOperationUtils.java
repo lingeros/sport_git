@@ -1,13 +1,11 @@
 package ling.utils;
 
 import ling.entity.HistoryLocation;
-import ling.originalSources.DatabaseInformation;
-import ling.originalSources.DebugPrint;
+import ling.entity.DatabaseInformation;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 public class HistoryLocationOperationUtils {
