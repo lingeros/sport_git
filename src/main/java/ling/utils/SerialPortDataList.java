@@ -1,6 +1,8 @@
 package ling.utils;
 
 
+import ling.entity.HistoryLocation;
+import ling.entity.SerialDataTemp;
 import ling.entity.SerialPortData;
 
 import java.util.ArrayDeque;
@@ -18,6 +20,10 @@ public class SerialPortDataList {
 
     //内建一条接收数据的线程
     private static Thread receiveThread;
+
+    //
+
+
     /**
      * 存储数据
      *
@@ -48,7 +54,6 @@ public class SerialPortDataList {
             serialPortData[count] = dataQueue.pop();
             count++;
         }
-        DebugPrint.dPrint("当前队列中的数据量为：" + dataQueue.size());
         lock.unlock();
         return serialPortData;
     }
@@ -56,15 +61,24 @@ public class SerialPortDataList {
     /**
      * 直接启动一条接收数据的线程
      */
-    public static void startReceiveThread(){
+    public static void startReceiveThread() {
         receiveThread = new Thread(() -> {
-            while(true){
+            while (true) {
                 SerialPortData[] serialPortData = SerialPortDataList.getData();
-                for (SerialPortData data:serialPortData) {
-                    DebugPrint.dPrint(data.toString());
+                /**
+                 *     private String equitmentID;
+                 *     private String GPSLongitudeData;//经度数据
+                 *     private String GPSLongitudeType;//经度类型
+                 *     private String GPSLatitudeData;//纬度数据
+                 *     private String GPSLatitudeType;//纬度类型
+                 *     private String HeartRateData;//心率
+                 */
+                for (SerialPortData data : serialPortData) {
+                    // HistoryLocation(String equipmentId, String longitudeType, String longitudeData, String latitudeType, String latitudeData, String saveTime, String distanceFromLastLocation, String isBeginRun, String totalTime, String circleNum)
+                    SerialDataTemp.addOneData(data);
                 }
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -74,11 +88,21 @@ public class SerialPortDataList {
         receiveThread.start();
     }
 
-    public static void closeReceiveThread(){
-        if(receiveThread != null){
-            receiveThread.interrupt();
-            DebugPrint.dPrint("SerialPortDataList:"+"关闭接收线程");
-        }
+    public static void closeReceiveThread() {
+        try {
+            if (receiveThread != null) {
+                receiveThread.stop();
+                DebugPrint.dPrint("SerialPortDataList:" + "关闭接收线程");
+            }
+        } catch (Exception e) {
+            DebugPrint.dPrint(e.toString());
+        }/*finally {
+            if(receiveThread != null){
+                receiveThread.interrupt();
+                DebugPrint.dPrint("SerialPortDataList:"+"关闭接收线程");
+            }
+        }*/
+
     }
 
 }

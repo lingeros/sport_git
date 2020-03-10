@@ -1,5 +1,7 @@
 package ling.entity;
 
+import ling.utils.DebugPrint;
+
 /**
  * 串口传输的数据封装
  */
@@ -35,7 +37,10 @@ public class SerialPortData {
     private String GPSLongitudeType;//经度类型
     private String GPSLatitudeData;//纬度数据
     private String GPSLatitudeType;//纬度类型
-    private String HeartRateData;
+    private String HeartRateData;//心率
+
+
+
 
 
     /**
@@ -54,25 +59,34 @@ public class SerialPortData {
             } else {
                 //A12E11321.7995N23.9.2798H0B
                 String str1 = tempData.split("A")[1];//去掉A 12E11321.7995N23.9.2798H0B
-                equitmentData = str1;
+                String str2 = str1.split("B")[0];//去掉B 12E11321.7995N2309.2798H0
+                equitmentData = str2;
                 String equitmentIDStr = "0";//设备号id的字符串格式
-                String realData = "";
-                String GPSLongitudeType = "E";//经度类型 默认为东经
-                if(str1 != null){
-                    equitmentIDStr = str1.substring(0,2);
-                    equitmentID = Integer.decode(equitmentIDStr);//获得设备号id
-                    realData = str1.substring(2);
-                    String result = equitmentDataSplit(realData);
-                    if(SUCCESS.equals(result)){
-                        String strTemp1 = GPSLongitudeType;
-                        String strTemp2 = GPSLongitudeData;
-                        GPSLongitudeData = GpsDataCovert(strTemp1, strTemp2);
-                        strTemp1 = GPSLatitudeType;
-                        strTemp2 = GPSLatitudeData;
-                        GPSLatitudeData = GpsDataCovert(strTemp1,strTemp2);
-                    }
 
-                }else{
+                if (str2 != null) {
+                    equitmentIDStr = str2.substring(0, 2);
+                    try {
+                        equitmentID = Integer.decode(equitmentIDStr);//获得设备号id
+                    } catch (Exception e) {
+                        DebugPrint.dPrint("SerialPortData:" + "dealData error:" + e.toString());
+                        return DATA_ERROE;
+                    }
+                    String temp = dealData(str2);
+                    String[] strings = temp.split(",");
+                    GPSLongitudeData = strings[0];
+                    GPSLatitudeData = strings[1];
+                    HeartRateData = strings[2];
+                    if (str2.contains("E")) {
+                        GPSLongitudeType = "E";
+                    } else {
+                        GPSLongitudeType = "W";
+                    }
+                    if (str2.contains("S")) {
+                        GPSLatitudeType = "S";
+                    } else {
+                        GPSLatitudeType = "N";
+                    }
+                } else {
                     return DATA_ERROE;
                 }
                 return SUCCESS;
@@ -95,17 +109,17 @@ public class SerialPortData {
         if (temp == null) {
             return DATA_ERROE;
         } else if (temp.length() > 5) {//如果出现Ae0H0B 这样的数据，说明串口传输的数据是0数据，则不需要进行处理 直接返回数据错误
-            if(temp.contains("N")){
+            if (temp.contains("N")) {
                 parts = temp.split("N");//如果数据为"E11321.7995N23.9.2798H0B"  会分割成E11321.7995 和 23.9.2798H0B两部分
                 GPSLatitudeType = "N";
-            }else if(temp.contains("S")){
+            } else if (temp.contains("S")) {
                 parts = temp.split("S");
                 GPSLatitudeType = "S";
-            }else{
+            } else {
                 return DATA_ERROE;
             }
             GPSLongitudeData = parts[0].substring(1);
-            GPSLongitudeType = parts[0].substring(0,1);
+            GPSLongitudeType = parts[0].substring(0, 1);
             GPSLatitudeData = parts[1].split("H")[0];
             HeartRateData = parts[1].split("H")[1].split("B")[0];
             return SUCCESS;
@@ -226,6 +240,56 @@ public class SerialPortData {
         return intTemp;
     }
 
+    /**
+     * 处理数据 这个准确
+     *
+     * @param data
+     * @return
+     */
+    public static String dealData(String data) {
+        //例如  12E11321.7995N2309.2798H81
+        int N_index = data.indexOf("N");//12  就是N字符的位置
+        int H_index = data.indexOf("H");//22  就是H字符的位置
+        String Edata = data.substring(3, N_index);//经度数据  11321.7995
+        String Ndata = data.substring(N_index + 1, H_index);//纬度数据  23.9.2798
+        String Hdata = data.substring(H_index + 1);//心率数据  Hdata = 81
+        int index1 = Edata.indexOf(".");//5 点的位置
+        String EdegreeMinute = Edata.substring(0, index1);//11321  经度整数部分
+        String EdotMinute = "0" + Edata.substring(index1);//0.7995  经度小数部分
+        String Ereverse = new StringBuilder(EdegreeMinute).reverse().toString();//12311  整数部分反转
+        String Edegree = Ereverse.substring(2);//311
+        String Edegree2 = new StringBuilder(Edegree).reverse().toString();//获取度  113
+        String Eminute = Ereverse.substring(0, 2);//12
+        String Eminute2 = new StringBuilder(Eminute).reverse().toString();//21
+        Double lonDegree = Double.parseDouble(Edegree2) + Double.parseDouble(Eminute2) / 60 + Double.parseDouble(EdotMinute) / 60;//113.363324999999
+        //Ndata = 2309.2798
+        int indexOfFirstDot = Ndata.indexOf(".");//2
+        String NdegreeMinute = Ndata.substring(0, indexOfFirstDot);//23
+        String NdotMinute = "0" + Ndata.substring(indexOfFirstDot);//0.2798
+        String Nreverse = new StringBuilder(NdegreeMinute).reverse().toString();//32
+        String Ndegree = Nreverse.substring(2);//32
+        String Ndegree2 = new StringBuilder(Ndegree).reverse().toString();//获取度  23
+        String Nminute = Nreverse.substring(0, 2);//90
+        String Nminute2 = new StringBuilder(Nminute).reverse().toString();//09
+        Double latDegree = Double.parseDouble(Ndegree2) + Double.parseDouble(Nminute2) / 60 + Double.parseDouble(NdotMinute) / 60;//这是北纬
+        String longi = String.valueOf(lonDegree);//
+        String lati = String.valueOf(latDegree);//
+        String lon = null;
+        String lat = null;
+        if (longi.length() < 12) {
+            lon = longi.substring(0);
+        } else {
+            lon = longi.substring(0, 11);
+        }
+        if (lati.length() < 12) {
+            lat = lati.substring(0);
+        } else {
+            lat = lati.substring(0, 11);
+        }
+        return lon + "," + lat + "," + Hdata;
+    }
+
+
     public SerialPortData(String allData) {
         this.allData = allData;
         initData();
@@ -309,6 +373,22 @@ public class SerialPortData {
 
     public void setAllData(String allData) {
         this.allData = allData;
+    }
+
+    public String getGPSLongitudeType() {
+        return GPSLongitudeType;
+    }
+
+    public void setGPSLongitudeType(String GPSLongitudeType) {
+        this.GPSLongitudeType = GPSLongitudeType;
+    }
+
+    public String getGPSLatitudeType() {
+        return GPSLatitudeType;
+    }
+
+    public void setGPSLatitudeType(String GPSLatitudeType) {
+        this.GPSLatitudeType = GPSLatitudeType;
     }
 
     @Override

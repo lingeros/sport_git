@@ -8,6 +8,8 @@ import gnu.io.SerialPortEventListener;
 import ling.customFrame.RemindFrame;
 import ling.customFrame.SelectFrame;
 import ling.entity.DatabaseInformation;
+import ling.entity.HistoryLocation;
+import ling.entity.SerialPortData;
 import ling.mysqlOperation.*;
 import ling.utils.CalculateUtils;
 import ling.utils.DebugPrint;
@@ -32,13 +34,10 @@ import java.util.*;
 public class MainPanel {
 
 
-    static InputStream inputStream;
-    static OutputStream outputStream;
-    private static SerialPort serialPort01 = null; // 保存串口1对象
 
 
     private static LinkedList<String> SerialBuff = new LinkedList<>();
-    private static String SerialTemp = "";
+
     private Color nblue = new Color(2, 94, 33);
     private Color ngray = new Color(245, 238, 235);
     private int addUserPgNum = 1;
@@ -73,7 +72,7 @@ public class MainPanel {
     private static JTable bdUserT = new JTable(bdUserT_rowData, bdUserT_columnNames);
 
     private static Map<String, String> alltrailData = new HashMap<>();//存储手环传过来的数据
-    private static String settingCycle = "0";
+    private static String settingCycle = "3";
     private static int min_heart = 60;
     private static int max_heart = 100;
     //这个变量用于设定一个圈数的阈值 也就是当一个人的位置大于这个距离就表示点的位置是错的
@@ -94,8 +93,6 @@ public class MainPanel {
         ) {
             System.out.println(portName);
         }
-        //串口设置 这里需要改
-        cport();
         //设置界面
         JPanel mainPane = new JPanel();
         JPanel backColorPane = new JPanel();
@@ -1056,8 +1053,9 @@ public class MainPanel {
                 try {
                     String str = "B";
                     byte[] sb = str.getBytes();//转换成字节数组
-                    //TODO
-                    SerialTool.sendToPort(SerialPorts.getPortsMap().get("串口线程1"), sb);//发送数据
+                    SerialPorts.startThreads();
+                    SerialPorts.sendToAllPorts("B");
+                    SerialPortDataList.startReceiveThread();
                     startTime = System.currentTimeMillis();
                     DebugPrint.dPrint("开始用时：" + startTime);
                 } catch (Exception ee) {
@@ -1081,7 +1079,9 @@ public class MainPanel {
                     String str = "E";
                     byte[] sb = str.getBytes();
                     //TODO
-                    SerialTool.sendToPort(SerialPorts.getPortsMap().get("串口线程1"), sb);
+                    SerialPorts.sendToAllPorts("E");
+                    SerialPortDataList.closeReceiveThread();
+                    SerialPorts.closeThreads();
                 } catch (Exception ee) {
                     JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
                     return;
@@ -1103,7 +1103,7 @@ public class MainPanel {
                     String str = "C";
                     byte[] sb = str.getBytes();
                     //TODO
-                    SerialTool.sendToPort(SerialPorts.getPortsMap().get("串口线程1"), sb);
+                    HistoryLocationOperationUtils.deletaAllData();
                     AST = 1;
                     ImageIcon ii21 = new ImageIcon("src/ima/end.png");
                     Image temp21 = ii21.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(), ii21.getImage().SCALE_DEFAULT);
@@ -1476,208 +1476,7 @@ public class MainPanel {
         }
     }
 
-    /**
-     * 以内部类形式创建一个串口监听类
-     *
-     * @author zhong
-     */
-    private static class SerialListener implements SerialPortEventListener {
 
-        /**
-         * 处理监控到的串口事件
-         */
-        public void serialEvent(SerialPortEvent serialPortEvent) {
-            switch (serialPortEvent.getEventType()) {
-                case SerialPortEvent.BI: // 10 通讯中断
-                    JOptionPane.showMessageDialog(null, "与串口设备通讯中断", "错误", JOptionPane.INFORMATION_MESSAGE);
-                    break;
-                case SerialPortEvent.OE: // 7 溢位（溢出）错误
-                case SerialPortEvent.FE: // 9 帧错误
-                case SerialPortEvent.PE: // 8 奇偶校验错误
-                case SerialPortEvent.CD: // 6 载波检测
-                case SerialPortEvent.CTS: // 3 清除待发送数据
-                case SerialPortEvent.DSR: // 4 待发送数据准备好了
-                case SerialPortEvent.RI: // 5 振铃指示
-                case SerialPortEvent.OUTPUT_BUFFER_EMPTY: // 2 输出缓冲区已清空
-                    break;
-                case SerialPortEvent.DATA_AVAILABLE: // 1 串口存在可用数据
-                    //手环传进来的值
-                    try {
-                        while (inputStream.available() > 0) {
-                            int newData = inputStream.read();
-                            if (65 == newData) { // 'A'
-                                SerialTemp = "";
-                            } else if (66 == newData) { // 'B'
-
-                                all += SerialTemp;
-                                Timestamp time = new Timestamp(System.currentTimeMillis());//historybd表的设置时间属性
-                                //计算距离
-                                //判断手环设备是否第一次添加  假设SerialTemp = "eE11321.7995N23.9.2798H81"
-                                //将设备号提取出来
-                                String equitmentId = SerialTemp.substring(0, 1);
-                                if (alltrailData.containsKey(equitmentId)) {
-                                    //获得处理后的数据  返回 long + lat + hdata
-                                    String ENH_data = dealData(SerialTemp);
-                                    //long  lat  hdata
-                                    String[] ENH_array = ENH_data.split(",");
-                                    //alltrailData.get = "0,0,long,lat"      st = "0,0,long（上一次的）,lat（上一次的）,long（新的）,lat（新的）"  前面的long是上一次的数据
-                                    String st = alltrailData.get(equitmentId) + "," + ENH_array[0] + "," + ENH_array[1];
-                                    //allTrail  = 0  0  long（上一次的）  lat（上一次的）  long（新的）  lat（新的）
-                                    String[] allTrail = st.split(",");
-                                    //getDistance(  lat(新的)，long（新的）, lat（上一次的）， long（上一次的） )
-                                    double distanceOne = CalculateUtils.getDistance(Double.parseDouble(ENH_array[1]), Double.parseDouble(ENH_array[0]), Double.parseDouble(allTrail[allTrail.length - 3]), Double.parseDouble(allTrail[allTrail.length - 4]));
-                                    //获取圈数：select cycle_num from currentbd where equipment_id =?
-                                    String cycle_num = currentbdOper.selectCycleNum(equitmentId);//获取
-                                    //判断是否是异常点
-                                    if (distanceOne > track_point || Integer.parseInt(cycle_num) == 0) {
-                                        DebugPrint.dPrint("异常点或圈数为0测试结束");
-                                        return;
-                                    }
-                                    //e,  st = "0,0,long（上一次的）,lat（上一次的）,long（新的）,lat（新的）"
-                                    alltrailData.put(equitmentId, st);
-                                    //计算两点距离
-                                    double distance = CalculateUtils.getDistance(Double.parseDouble(ENH_array[1]), Double.parseDouble(ENH_array[0]), Double.parseDouble(allTrail[3]), Double.parseDouble(allTrail[2]));
-                                    DebugPrint.dPrint("E现在距离原点的距离是：" + distance);
-                                    //更新标志位数据
-                                    int num = Integer.parseInt(allTrail[0]);
-                                    //表示已经离开了原点 也就是开始跑了
-                                    if (num < 1 && distance > 40) {//这里如果num是0 ，并且距离大于40 说明已经开始第一圈 所以num置一
-                                        //表示已经跑第一圈了
-                                        num++;
-                                        allTrail[0] = String.valueOf(num);
-                                        allTrail[1] = String.valueOf(num);
-                                        alltrailData.put(equitmentId, stringConnect(allTrail));//num>1表示已离开原点
-                                    }
-                                    //计算用时
-                                    //这个判断条件就是已经开始跑了并且离开了原点
-                                    if (num > 0 && distance < 40) {//这里如果距离小于40，并且num置一了，说明跑完一圈了 则计算
-                                        //剩下的圈数：select cycle_num from currentbd where equipment_id =? and run='true'
-                                        String remainCycle = currentbdOper.select_cycle(SerialTemp.substring(0, 1));
-                                        //判断是否还有剩余圈数
-                                        if (Integer.parseInt(remainCycle) > 0) {
-                                            //判断是否等于1圈
-                                            if (Integer.parseInt(remainCycle) == 1) {
-                                                //直接输出用时
-                                                DebugPrint.dPrint("结束用时：" + System.currentTimeMillis());
-                                                //更新用时：update currentbd set totalTime =? where equipment_id=? and run='true'
-                                                currentbdOper.UpdateTotalTime(CalculateUtils.getTime(startTime), SerialTemp.substring(0, 1));
-                                                try {
-                                                    //str = eS
-                                                    String str = SerialTemp.substring(0, 1) + "S";
-                                                    byte[] sb = str.getBytes();//转换成字节数组
-                                                    SerialTool.sendToPort(serialPort01, sb);//发送数据
-                                                } catch (Exception ee) {
-                                                    JOptionPane.showMessageDialog(null, "断开连接，发送失败", "错误", JOptionPane.INFORMATION_MESSAGE);
-                                                }
-                                            } else {
-                                                //计算圈数
-                                                //这里说明没有只剩1圈
-                                                int cycle = Integer.parseInt(remainCycle) - 1;//剩余圈数-1
-                                                //更新圈数：update currentbd set cycle_num =? where equipment_id =? and run='true'
-                                                currentbdOper.UpdateCycle_num(String.valueOf(cycle), SerialTemp.substring(0, 1));
-                                                //更新界面的数据
-                                                MainPanel p = new MainPanel();
-                                                p.bdUserTB_clear(bdUserT_rowData);
-                                                p.setbdUserT(bdUserT_rowData, bdUserPgNum);
-                                                thirdPane.repaint();
-                                                DebugPrint.dPrint("E更改之后的圈数:" + currentbdOper.select_cycle(SerialTemp.substring(0, 1)));
-                                            }
-                                        }
-                                        //经过减少一圈 重置num
-                                        num--;
-                                        allTrail[0] = String.valueOf(num);
-                                        allTrail[1] = String.valueOf(num);
-                                        //
-                                        alltrailData.put(SerialTemp.substring(0, 1), stringConnect(allTrail));//再次回到第一个轨迹点附近时，num-1
-                                        DebugPrint.dPrint("Nnum有没有变回0：" + num);
-                                    }
-                                    //因为重置圈数，所以更新数据库的数据
-                                    //保存数据到historybdOper
-                                    String id = currentbdOper.select_id(SerialTemp.substring(0, 1));//获取对应的id(也就是绑定时的时间戳)
-                                    String bdUid = currentbdOper.select_uid(SerialTemp.substring(0, 1));//获取用户id
-                                    String cycle = currentbdOper.select_cycle(SerialTemp.substring(0, 1));//剩余圈数
-                                    Timestamp apTime = new Timestamp(System.currentTimeMillis());
-                                    //判断心率
-                                    if (Integer.parseInt(ENH_array[2]) < min_heart || Integer.parseInt(ENH_array[2]) > max_heart) {
-                                        abnormalOper.add(SerialTemp.substring(0, 1), currentbdOper.select_uid(SerialTemp.substring(0, 1)), "心率异常(点击查看)", apTime);
-                                        currentbdOper.Update_hearbeat(ENH_array[2] + "(异常)", SerialTemp.substring(0, 1));
-                                        exists = true;
-                                        warnPane.Pane(mainframe);
-                                    } else {
-                                        //更新心率
-                                        currentbdOper.Update_hearbeat(ENH_array[2], SerialTemp.substring(0, 1));
-                                    }
-                                    //添加数据 ：INSERT INTO historybd(id,user_id,user_name,equipment_id,user_condition,cycle_num,hearbeat,watch_power,user_long,lat,set_time)
-                                    historybdOper.add(id, bdUid, userdataOperate.selectName(bdUid), SerialTemp.substring(0, 1), "正常", cycle, ENH_array[2], "电量正常", ENH_array[0], ENH_array[1], time);
-                                    //暂存数据
-                                    SerialBuff.add(SerialTemp);
-                                    DebugPrint.dPrint("是第几页" + bdUserPgNum);
-                                    MainPanel p = new MainPanel();
-                                    p.bdUserTB_clear(bdUserT_rowData);
-                                    p.setbdUserT(bdUserT_rowData, bdUserPgNum);
-                                    thirdPane.repaint();
-                                } else {
-                                    //分解数据信息 这个函数有问题  这里返回的是 long + lat + hdata
-                                    //serialTemp = "eE11321.7995N23.9.2798H81"
-                                    String ENH_data = dealData(SerialTemp);
-                                    //分割成  long   lat  hdata
-                                    String[] ENH_array = ENH_data.split(",");
-                                    //0,0，long，lat  不清楚这里的0,0代表什么  后面的一个是经度  一个是纬度
-                                    String st = "0,0," + ENH_array[0] + "," + ENH_array[1];
-                                    // alltrailData.put(e,"0,0,long,lat")
-                                    alltrailData.put(equitmentId, st);
-                                    //直接从数据库获取当前手环的数据 返回的是数据库表的id
-                                    String id = currentbdOper.select_id(equitmentId);//获取对应的id(也就是绑定时的时间戳)
-                                    //返回的是用户的id
-                                    String bdUid = currentbdOper.select_uid(equitmentId);//获取用户id
-                                    //返回的是cycle_num 圈数
-                                    String cycle = currentbdOper.select_cycle(equitmentId);//剩余圈数
-                                    //INSERT INTO historybd(id,user_id,user_name,                   equipment_id,  user_condition,cycle_num,hearbeat,     watch_power,  user_long,      lat,    set_time)
-                                    historybdOper.add(id, bdUid, userdataOperate.selectName(bdUid), equitmentId, "正常", cycle, ENH_array[2], "电量正常", ENH_array[0], ENH_array[1], time);
-                                    //暂存数据
-                                    SerialBuff.add(SerialTemp);
-                                    //获得时间戳
-                                    Timestamp apTime = new Timestamp(System.currentTimeMillis());
-                                    //ENH_array[2] 是心率  判断心率是否小于最小值或者大于最大值
-                                    if (Integer.parseInt(ENH_array[2]) < min_heart || Integer.parseInt(ENH_array[2]) > max_heart) {
-                                        //INSERT INTO abnormal (equipment_id , user_id ,abnor,time)   插入异常数据
-                                        abnormalOper.add(equitmentId, currentbdOper.select_uid(equitmentId), "心率异常(点击查看)", apTime);
-                                        //
-                                        currentbdOper.Update_hearbeat(ENH_array[2] + "(异常)", equitmentId);
-                                        //这个变量估计没什么用
-                                        exists = true;
-                                        //
-                                        warnPane.Pane(mainframe);
-                                    } else {
-                                        //update currentbd set hearbeat =? where equipment_id =? and run='true'"
-                                        currentbdOper.Update_hearbeat(ENH_array[2], equitmentId);
-                                    }
-                                    DebugPrint.dPrint("是第几页" + bdUserPgNum);
-                                    //
-                                    MainPanel p = new MainPanel();
-                                    //
-                                    p.bdUserTB_clear(bdUserT_rowData);
-                                    //
-                                    p.setbdUserT(bdUserT_rowData, bdUserPgNum);
-                                    //
-                                    thirdPane.repaint();
-
-                                }
-                            } else {
-                                SerialTemp += (char) newData;
-                            }
-                        }
-                        if (SerialBuff.size() > 10) { // 缓冲长度(单位：元素)
-                            SerialBuff.pop();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-            }
-
-        }
-    }
 
     private static String stringConnect(String[] strings) {
         String temp = "";
@@ -1691,103 +1490,9 @@ public class MainPanel {
         return temp;
     }
 
-    public static String dealData(String data) {
-        //例如  12E11321.7995N23.9.2798H81
-        int N_index = data.indexOf("N");//12  就是N字符的位置
-        int H_index = data.indexOf("H");//22  就是H字符的位置
-        String Edata = data.substring(3, N_index);//经度数据  11321.7995
-        String Ndata = data.substring(N_index + 1, H_index);//纬度数据  23.9.2798
-        String Hdata = data.substring(H_index + 1);//心率数据  Hdata = 81
-        int index1 = Edata.indexOf(".");//5 点的位置
-        String EdegreeMinute = Edata.substring(0, index1);//11321  经度整数部分
-        String EdotMinute = "0" + Edata.substring(index1);//0.7995  经度小数部分
-        String Ereverse = new StringBuilder(EdegreeMinute).reverse().toString();//12311  整数部分反转
-        String Edegree = Ereverse.substring(2);//311
-        String Edegree2 = new StringBuilder(Edegree).reverse().toString();//获取度  113
-        String Eminute = Ereverse.substring(0, 2);//12
-        String Eminute2 = new StringBuilder(Eminute).reverse().toString();//21
-        Double lonDegree = Double.parseDouble(Edegree2) + Double.parseDouble(Eminute2) / 60 + Double.parseDouble(EdotMinute) / 60;//113.363324999999
-        //Ndata = 23.9.2798
-        int indexOfFirstDot = Ndata.indexOf(".");//2
-        String NdegreeMinute = Ndata.substring(0, indexOfFirstDot);//23
-        String NdotMinute ="0"+ Ndata.substring(indexOfFirstDot);//0.9.2798
-        String Nreverse = new StringBuilder(NdegreeMinute).reverse().toString();//32
-        String Ndegree = Nreverse.substring(2);//""
-        String Ndegree2 = new StringBuilder(Ndegree).reverse().toString();//获取度  ""
-        String Nminute = Nreverse.substring(0, 2);//32
-        String Nminute2 = new StringBuilder(Nminute).reverse().toString();//23
-        Double latDegree = Double.parseDouble(Ndegree2) + Double.parseDouble(Nminute2) / 60 + Double.parseDouble(NdotMinute) / 60;//这是北纬
-        String longi=String.valueOf(lonDegree);//
-        String lati=String.valueOf(latDegree);//
-        String lon=null;
-        String lat=null;
-        if (longi.length()<12){
-            lon=longi.substring(0);
-        }else{
-            lon=longi.substring(0,11);
-        }
-        if (lati.length()<12){
-            lat=lati.substring(0);
-        }else{
-            lat=lati.substring(0,11);
-        }
-        return lon+","+lat+","+Hdata;
-    }
 
-    public static void reload(final String a, final String b) {
-        // Thread to= new Thread() {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                if (a.equals("H")) {
-                    bdUserT_rowData[0][5] = b;
-                }
 
-            }
-        });
-    }
 
-    /**
-     * 获取串口
-     * TODO 创建4条线程
-     */
-    private static void cport() {
-        EventQueue.invokeLater(() -> {
-            CommPortIdentifier portId;
-            while (true) {
-                Enumeration en = CommPortIdentifier.getPortIdentifiers();//获取当前可用的串口
-                if (en.hasMoreElements()) { //
-                    portId = (CommPortIdentifier) en.nextElement();
-                    if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {//如果端口类型是串口
-                        //TODO
-                        serialPort01 = SerialTool.openPort("COM1", 115200);//获取该端口名及波特率的串口对象(相互通讯，波特率要一致)
-
-                        // 设置当前串口的输入输出流
-                        try {
-                            if (serialPort01 != null) {
-                                inputStream = new BufferedInputStream(serialPort01.getInputStream(), 20 * 1024);
-                                outputStream = serialPort01.getOutputStream();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        // 在该串口对象上添加监听器
-                        if (serialPort01 != null) {
-                            //TODO
-                            SerialTool.addListener(serialPort01, new SerialListener());//执行接口中的方法(可获取数据)
-                        }
-                        DebugPrint.dPrint(portId.getName());
-                        return;
-                    }
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-    }
 
     private void setUIFont() {
         Font f = font12;
@@ -1830,5 +1535,17 @@ public class MainPanel {
         jFrame.setVisible(true);
 
 
+    }
+
+    public static String getSettingCycle() {
+        return settingCycle;
+    }
+
+    public static int getTrack_point() {
+        return track_point;
+    }
+
+    public static long getStartTime() {
+        return startTime;
     }
 }

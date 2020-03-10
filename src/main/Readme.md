@@ -8,3 +8,7 @@
    
   ####开启接收数据线程：SerialPortDataList.startReceiveThread();
   ####关闭接收数据线程：SerialPortDataList.closeReceiveThread(); 
+  
+  
+ ##暂存数据的类： SerialDataTemp
+       在该类中，对数据进行封装和转换，并批量存入数据库

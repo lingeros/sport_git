@@ -81,7 +81,7 @@ public class LoginPanel {
                 DebugPrint.dPrint("输入的密码是："+s+",数据库获得的密码是："+key);
                 mainPanel = new MainPanel();
                 mainPanel.mainpane();
-                SerialPorts.startThreads();
+                //SerialPorts.startThreads();
                 loginFrame.dispose();
                 loginFrame = null;
             }else {

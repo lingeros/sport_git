@@ -194,7 +194,7 @@ public class SerialPorts {
             if (portName != null) {
                 SerialPort serialPort = openSerialPort(portName, 460800);//460800
 
-                String sendMsg = "B";
+
                 if (serialPort != null) {
                     try {
                         usedSerialPortMap.put(Thread.currentThread().getName(), serialPort);
@@ -207,7 +207,7 @@ public class SerialPorts {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    sendData(serialPort, sendMsg.getBytes());
+
                 } else {
                     System.out.println("没有打开串口");
                 }

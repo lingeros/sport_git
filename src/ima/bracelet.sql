@@ -1,5 +1,5 @@
 /*
-SQLyog Ultimate v12.09 (64 bit)
+SQLyog Ultimate v12.08 (64 bit)
 MySQL - 5.7.28-0ubuntu0.19.04.2 : Database - bracelet
 *********************************************************************
 */
@@ -70,7 +70,7 @@ CREATE TABLE `currentbd` (
 
 /*Data for the table `currentbd` */
 
-insert  into `currentbd`(`id`,`user_id`,`user_name`,`equipment_id`,`user_condition`,`cycle_num`,`hearbeat`,`watch_power`,`user_long`,`lat`,`totalTime`,`run`) values ('1583292733058','55','55','55','正常','3','','正常','','','','true'),('1583458393070','4','4','e','正常','3','80','正常','','','','true');
+insert  into `currentbd`(`id`,`user_id`,`user_name`,`equipment_id`,`user_condition`,`cycle_num`,`hearbeat`,`watch_power`,`user_long`,`lat`,`totalTime`,`run`) values ('1583292733058','55','55','55','正常','3','','正常','','','','true'),('1583458393070','4','4','e','正常','3','80','正常','','','','true'),('1583733611794','11','11','11','正常','3','80','正常','3','3','122','true');
 
 /*Table structure for table `equipmendata` */
 
@@ -127,18 +127,20 @@ DROP TABLE IF EXISTS `t_history_location`;
 
 CREATE TABLE `t_history_location` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `equipment_id` varchar(3) NOT NULL COMMENT '设备号',
+  `equipment_id` varchar(10) NOT NULL COMMENT '设备号',
   `longitude_type` varchar(2) NOT NULL COMMENT '经度类型: E W',
   `longitude_data` varchar(20) NOT NULL COMMENT '经度数据',
   `latitude_type` varchar(2) NOT NULL COMMENT '纬度类型: N S',
   `latitude_data` varchar(20) NOT NULL COMMENT '纬度数据',
   `save_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据存入的时间',
+  `distance_from_last_location` varchar(10) NOT NULL COMMENT '与上一次的距离',
+  `is_begin_run` varchar(2) NOT NULL COMMENT '是否已经开始跑',
+  `total_time` varchar(10) DEFAULT NULL COMMENT '总体时间',
+  `circle_num` varchar(2) NOT NULL COMMENT '剩余圈数',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3955 DEFAULT CHARSET=utf8;
 
 /*Data for the table `t_history_location` */
-
-insert  into `t_history_location`(`id`,`equipment_id`,`longitude_type`,`longitude_data`,`latitude_type`,`latitude_data`,`save_time`) values (1,'12','E','23','N','12','2020-03-06 16:31:39'),(2,'12','E','23','N','12','2020-03-06 16:31:52'),(3,'13','E','23','N','12','2020-03-06 16:34:22'),(4,'13','E','23','N','12','2020-03-06 16:34:23');
 
 /*Table structure for table `userdata` */
 
