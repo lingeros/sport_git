@@ -18,7 +18,7 @@ public class HistoryLocationOperationUtils {
     //通过设备号查找语句  并返回一个集合  sql按照时间的降序来查找 返回的集合中最先出来的数据是最新的数据
     private static String selectByEquitmentIdSql = "SELECT * FROM t_history_location WHERE equipment_id = ? ORDER BY save_time DESC;";
     //存储数据
-    private static String insertNewDataSql = "insert into t_history_location (equipment_id,longitude_type,longitude_data,latitude_type,latitude_data,distance_from_last_location,is_begin_run,total_time,circle_num) VALUES(?,?,?,?,?,?,?,?,?)";//9个参数
+    private static String insertNewDataSql = "insert into t_history_location (equipment_id,longitude_type,longitude_data,latitude_type,latitude_data,distance_from_last_location,is_begin_run,total_time,circle_num,heart_rate) VALUES(?,?,?,?,?,?,?,?,?,?)";//9个参数
     //
     private static Connection connection;
     //
@@ -40,6 +40,7 @@ public class HistoryLocationOperationUtils {
                 preparedStatement.setString(7,historyLocation.getIsBeginRun());
                 preparedStatement.setString(8,historyLocation.getTotalTime());
                 preparedStatement.setString(9,historyLocation.getCircleNum());
+                preparedStatement.setString(10,historyLocation.getHeartRate());
                 int i = preparedStatement.executeUpdate();
                 if (i != 0) {
                     DebugPrint.dPrint(TAG+"insert success");
@@ -70,6 +71,7 @@ public class HistoryLocationOperationUtils {
                    preparedStatement.setString(7,historyLocation.getIsBeginRun());
                    preparedStatement.setString(8,historyLocation.getTotalTime());
                    preparedStatement.setString(9,historyLocation.getCircleNum());
+                   preparedStatement.setString(10,historyLocation.getHeartRate());
                    preparedStatement.executeUpdate();
                 }
                 connection.commit();
@@ -101,7 +103,8 @@ public class HistoryLocationOperationUtils {
                     String isBeginRun = resultSet.getString("is_begin_run");
                     String totalTime = resultSet.getString("total_time");
                     String circleNum = resultSet.getString("circle_num");
-                    HistoryLocation historyLocation = new HistoryLocation(equipmentId, longitudeType, longitudeData, latitudeType, latitudeData, save_time,distanceFromLastLocation,isBeginRun,totalTime,circleNum);
+                    String heartRate = resultSet.getString("heart_rate");
+                    HistoryLocation historyLocation = new HistoryLocation(equipmentId, longitudeType, longitudeData, latitudeType, latitudeData, save_time,distanceFromLastLocation,isBeginRun,totalTime,circleNum,heartRate);
                     historyLocations.push(historyLocation);
                 }
             } catch (Exception e) {

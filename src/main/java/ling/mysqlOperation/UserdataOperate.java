@@ -9,14 +9,14 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 
 public class UserdataOperate {
-    private Connection connection = null;
-    private PreparedStatement preparedStatement = null;
-    private ResultSet resultSet = null;
-    private String sql;
-    private DatabaseInformation databaseInformation = new DatabaseInformation();
-    private final String TAG = "UserdataOperate:";
+    private static Connection connection = null;
+    private static PreparedStatement preparedStatement = null;
+    private static ResultSet resultSet = null;
+    private static String sql;
+    private static  DatabaseInformation databaseInformation = new DatabaseInformation();
+    private static final String TAG = "UserdataOperate:";
 
-    public void create() {
+    public static void create() {
         try {
             connection = databaseInformation.getconn();
             preparedStatement = connection.prepareStatement(sql);
@@ -31,7 +31,7 @@ public class UserdataOperate {
         }
     }
 
-    public boolean jduge(String uid) {
+    public static boolean jduge(String uid) {
         boolean jduge = false;
         try {
             connection = databaseInformation.getconn();
@@ -51,7 +51,30 @@ public class UserdataOperate {
         return jduge;
     }
 
-    public void add(String user_id, String user_name, String user_sex, String user_phone) {
+    public static void addAll(){
+        try{
+            connection = databaseInformation.getconn();
+            sql = "INSERT INTO userdata(user_id,user_name,user_sex,user_phone )VALUES (?,?,?,?)";
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(sql);
+            for (int i = 0; i < 100; i++) {
+               preparedStatement.setString(1,""+i);
+               preparedStatement.setString(2,""+i);
+               preparedStatement.setString(3,"男");
+               preparedStatement.setString(4,""+i);
+               preparedStatement.execute();
+            }
+            connection.commit();
+
+        }catch(Exception e){
+            DebugPrint.dPrint(TAG+"add all error:"+e.toString());
+        }finally {
+            DatabaseInformation.close(connection, preparedStatement, resultSet);
+        }
+
+    }
+
+    public static void add(String user_id, String user_name, String user_sex, String user_phone) {
         try {
             connection = databaseInformation.getconn();
             sql = "INSERT INTO userdata(user_id,user_name,user_sex,user_phone )VALUES (?,?,?,?)";
@@ -64,7 +87,6 @@ public class UserdataOperate {
             if (i != 0) {
                 DebugPrint.dPrint(TAG + "add success");
             }
-
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "add:" + e.toString());
         } finally {
@@ -73,7 +95,7 @@ public class UserdataOperate {
 
     }
 
-    public void update(String uid, String uname, String usex, String uphone) {
+    public static void update(String uid, String uname, String usex, String uphone) {
         try {
             connection = databaseInformation.getconn();
             sql = "UPDATE userdata set user_name=?,user_sex=? ,user_phone=? where user_id=?";
@@ -93,7 +115,7 @@ public class UserdataOperate {
         }
     }
 
-    public void select(ArrayList<String> array) {
+    public static void select(ArrayList<String> array) {
         try {
             connection = databaseInformation.getconn();
             sql = "select * from userdata";
@@ -110,7 +132,7 @@ public class UserdataOperate {
         }
     }
 
-    public void delete(String uid) {
+    public static void delete(String uid) {
         try {
             connection = databaseInformation.getconn();
             sql = "DELETE FROM userdata WHERE user_id= ?";
@@ -127,7 +149,7 @@ public class UserdataOperate {
         }
     }
 
-    public void deleteAll() {
+    public static void deleteAll() {
         try {
             connection = databaseInformation.getconn();
             sql = "DELETE FROM userdata";

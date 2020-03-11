@@ -27,13 +27,27 @@ public class HistoryLocation {
     private String totalTime;
     //剩下的圈数
     private String circleNum;
-
+    //心率
+    private String heartRate;
 
 
     public HistoryLocation() {
     }
 
-    public HistoryLocation(String equipmentId, String longitudeType, String longitudeData, String latitudeType, String latitudeData, String saveTime, String distanceFromLastLocation, String isBeginRun, String totalTime, String circleNum) {
+    public HistoryLocation(String equipmentId, String longitudeType, String longitudeData, String latitudeType, String latitudeData, String distanceFromLastLocation, String isBeginRun, String totalTime, String circleNum, String heartRate) {
+        this.equipmentId = equipmentId;
+        this.longitudeType = longitudeType;
+        this.longitudeData = longitudeData;
+        this.latitudeType = latitudeType;
+        this.latitudeData = latitudeData;
+        this.distanceFromLastLocation = distanceFromLastLocation;
+        this.isBeginRun = isBeginRun;
+        this.totalTime = totalTime;
+        this.circleNum = circleNum;
+        this.heartRate = heartRate;
+    }
+
+    public HistoryLocation(String equipmentId, String longitudeType, String longitudeData, String latitudeType, String latitudeData, String saveTime, String distanceFromLastLocation, String isBeginRun, String totalTime, String circleNum, String heartRate) {
         this.equipmentId = equipmentId;
         this.longitudeType = longitudeType;
         this.longitudeData = longitudeData;
@@ -44,19 +58,7 @@ public class HistoryLocation {
         this.isBeginRun = isBeginRun;
         this.totalTime = totalTime;
         this.circleNum = circleNum;
-    }
-
-    public HistoryLocation(String equipmentId, String longitudeType, String longitudeData, String latitudeType, String latitudeData, String distanceFromLastLocation, String isBeginRun, String totalTime, String circleNum) {
-        this.equipmentId = equipmentId;
-        this.longitudeType = longitudeType;
-        this.longitudeData = longitudeData;
-        this.latitudeType = latitudeType;
-        this.latitudeData = latitudeData;
-        this.distanceFromLastLocation = distanceFromLastLocation;
-        this.isBeginRun = isBeginRun;
-        this.totalTime = totalTime;
-        this.circleNum = circleNum;
-
+        this.heartRate = heartRate;
     }
 
     public String getEquipmentId() {
@@ -139,6 +141,14 @@ public class HistoryLocation {
         this.circleNum = circleNum;
     }
 
+    public String getHeartRate() {
+        return heartRate;
+    }
+
+    public void setHeartRate(String heartRate) {
+        this.heartRate = heartRate;
+    }
+
     @Override
     public String toString() {
         return "HistoryLocation{" +
@@ -152,6 +162,7 @@ public class HistoryLocation {
                 ", isBeginRun='" + isBeginRun + '\'' +
                 ", totalTime='" + totalTime + '\'' +
                 ", circleNum='" + circleNum + '\'' +
+                ", heartRate='" + heartRate + '\'' +
                 '}';
     }
 }

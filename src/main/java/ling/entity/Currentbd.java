@@ -14,6 +14,24 @@ public class Currentbd {
     private String totalTime;
     private String run;
 
+    public Currentbd() {
+    }
+
+    public Currentbd(String id, String user_id, String user_name, String equipment_id, String user_condition, String cycle_num, String hearbeat, String watch_power, String user_long, String lat, String totalTime, String run) {
+        this.id = id;
+        this.user_id = user_id;
+        this.user_name = user_name;
+        this.equipment_id = equipment_id;
+        this.user_condition = user_condition;
+        this.cycle_num = cycle_num;
+        this.hearbeat = hearbeat;
+        this.watch_power = watch_power;
+        this.user_long = user_long;
+        this.lat = lat;
+        this.totalTime = totalTime;
+        this.run = run;
+    }
+
     @Override
     public String toString() {
         return "Currentbd{" +

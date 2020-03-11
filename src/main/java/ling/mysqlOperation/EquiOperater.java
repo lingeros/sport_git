@@ -10,21 +10,21 @@ import java.util.ArrayList;
 
 public class EquiOperater {
     private final static String TAG = "EquiOperater:";
-    private Connection conn = null;
-    private PreparedStatement ps = null;
-    private ResultSet rs = null;
-    private String sql;
-    DatabaseInformation d = new DatabaseInformation();
+    private static Connection connection = null;
+    private static PreparedStatement preparedStatement = null;
+    private static ResultSet resultSet = null;
+    private static String sql;
+    private static DatabaseInformation databaseInformation = new DatabaseInformation();
 
-    public int getNum() {
+    public static int getNum() {
         int i = 0;
         try {
-            conn = d.getconn();
+            connection = databaseInformation.getconn();
             sql = "SELECT COUNT(*) FROM equipmendata";
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next())
-                i = rs.getInt(1);
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next())
+                i = resultSet.getInt(1);
 
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
@@ -32,30 +32,30 @@ public class EquiOperater {
         return i;
     }
 
-    public void create() {
+    public static void create() {
         try {
 
-            conn = d.getconn();
+            connection = databaseInformation.getconn();
             sql = "CREATE TABLE if not exists equipmendata(equipment_id varchar(16))";
-            ps = conn.prepareStatement(sql);
-            ps.executeUpdate();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
 
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
-    public void add(String eid) {
+    public static void add(String eid) {
 
         try {
-            conn = d.getconn();
+            connection = databaseInformation.getconn();
             sql = "INSERT INTO equipmendata(equipment_id ) VALUES(?)";
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, eid);
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, eid);
 
-            int i = ps.executeUpdate();
+            int i = preparedStatement.executeUpdate();
             if (i != 0) {
                 DebugPrint.dPrint(TAG + "add success");
             }
@@ -63,90 +63,124 @@ public class EquiOperater {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
+    public static void addAll(){
+        try {
+            connection = databaseInformation.getconn();
+            connection.setAutoCommit(false);
+            sql = "INSERT INTO equipmendata(equipment_id ) VALUES(?)";
+            preparedStatement = connection.prepareStatement(sql);
+            for (int i = 0; i < 100; i++) {
+                preparedStatement.setString(1,i+"");
+                preparedStatement.execute();
+            }
+            connection.commit();
+        } catch (Exception e) {
+            DebugPrint.dPrint(TAG + e.toString());
+        } finally {
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
-    public void select(ArrayList<String> array) {
+    public static void deleteAll(){
         try {
-            conn = d.getconn();
-            sql = "select * from equipmendata";
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                array.add(rs.getString(1));
+            connection = databaseInformation.getconn();
+            sql = "delete from equipmendata";
+            preparedStatement = connection.prepareStatement(sql);
+            boolean i = preparedStatement.execute();
+            if (i) {
+                DebugPrint.dPrint(TAG + "add success");
             }
 
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
-    public int select(int PgNum) {
+    public static void select(ArrayList<String> array) {
+        try {
+            connection = databaseInformation.getconn();
+            sql = "select * from equipmendata";
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                array.add(resultSet.getString(1));
+            }
+
+        } catch (Exception e) {
+            DebugPrint.dPrint(TAG + e.toString());
+        } finally {
+            databaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
+
+    public static int select(int PgNum) {
         int i = 0;
         try {
-            conn = d.getconn();
+            connection = databaseInformation.getconn();
             sql = " SELECT COUNT(*) from equipmendata limit " + 80 * (PgNum - 1) + "," + 80;
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                i = rs.getInt(1);
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                i = resultSet.getInt(1);
             }
 
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
         DebugPrint.dPrint(i);
         return i;
     }
 
-    public void select(int PgNum, ArrayList<String> array) {
+    public static void select(int PgNum, ArrayList<String> array) {
         try {
-            conn = d.getconn();
+            connection = databaseInformation.getconn();
             sql = "select * from equipmendata limit " + 80 * (PgNum - 1) + "," + 80;
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                array.add(rs.getString(1));
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                array.add(resultSet.getString(1));
             }
 
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
-    public void delete(String eid) {
+    public static void delete(String eid) {
         try {
-            conn = d.getconn();
+            connection = databaseInformation.getconn();
             sql = "DELETE FROM equipmendata WHERE equipment_id = ?";
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, eid);
-            int i = ps.executeUpdate();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, eid);
+            int i = preparedStatement.executeUpdate();
             if (i != 0) {
                 DebugPrint.dPrint(TAG + "delete success");
             }
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
-    public int getPgNum() {
+    public static int getPgNum() {
         int i = -1;
         try {
-            conn = d.getconn();
+            connection = databaseInformation.getconn();
             sql = "SELECT COUNT(*) FROM equipmendata";
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                i = rs.getInt(1);
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                i = resultSet.getInt(1);
             }
 
             i = i / 80 + 1;
@@ -154,25 +188,25 @@ public class EquiOperater {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
         return i;
     }
 
-    public boolean jdugeE(String eid) {
+    public static boolean jdugeE(String eid) {
         boolean jduge = false;
         try {
-            conn = d.getconn();
+            connection = databaseInformation.getconn();
             sql = "select * from equipmendata ";
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                if (eid.equals(rs.getString(1))) jduge = true;
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                if (eid.equals(resultSet.getString(1))) jduge = true;
             }
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
 
         return jduge;

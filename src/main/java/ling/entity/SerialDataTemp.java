@@ -1,5 +1,6 @@
 package ling.entity;
 
+import ling.mysqlOperation.CurrentbdOper;
 import ling.originalSources.MainPanel;
 import ling.utils.CalculateUtils;
 import ling.utils.DebugPrint;
@@ -54,12 +55,14 @@ public class SerialDataTemp {
                     if(circleNum == 1){
                         //如果剩余一圈，并且准备跑完了
                         historyLocation.setTotalTime(CalculateUtils.getTime(MainPanel.getStartTime()));
+
                     }else{
                         circleNum = circleNum -1 ;
                         historyLocation.setCircleNum(""+circleNum);
                     }
                 }
                 historyLocation.setIsBeginRun("no");
+
 
             }else if("no".equals(lastHistoryLocationData.getIsBeginRun()) && distance > 40 ){
                 //进入这里表示开始运动 并且远离原点了
@@ -79,8 +82,13 @@ public class SerialDataTemp {
             historyLocation.setCircleNum(MainPanel.getSettingCycle());
             historyLocation.setDistanceFromLastLocation("0");
             historyLocation.setSaveTime(new Timestamp(System.currentTimeMillis()).toString());
+            historyLocation.setHeartRate(serialPortData.getHeartRateData());
             serialDataTempMap.put(equitmentId,historyLocation);
         }
+        //将historyLocation实例转换为currentbd
+        Currentbd currentbd = CurrentbdOper.historyLocationToCurrentbd(historyLocation);
+        DebugPrint.dPrint(currentbd.toString());
+        CurrentbdOper.addOrUpdate("update",currentbd);
         historyLocationArrayDeque.push(historyLocation);
         if(historyLocationArrayDeque.size() > 40){
             HistoryLocationOperationUtils.insertData(historyLocationArrayDeque);
