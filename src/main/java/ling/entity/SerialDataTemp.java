@@ -1,10 +1,12 @@
 package ling.entity;
 
+import ling.mysqlOperation.AbnormalOper;
 import ling.mysqlOperation.CurrentbdOper;
 import ling.originalSources.MainPanel;
 import ling.utils.CalculateUtils;
 import ling.utils.DebugPrint;
 import ling.utils.HistoryLocationOperationUtils;
+import sun.applet.Main;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -41,36 +43,49 @@ public class SerialDataTemp {
             //旧的纬度
             double oldLatitudeData  = Double.parseDouble(strings[1]);
             double distance = CalculateUtils.getDistance(newLatitudeData, newLongitudeData, oldLatitudeData, oldLongitudeData);
+            DebugPrint.dPrint("SerialDataTemp distance:"+distance);
             historyLocation.setDistanceFromLastLocation(""+distance);
             locationMap.put(equitmentId,serialPortData.getGPSLongitudeData()+"|"+serialPortData.getGPSLatitudeData());
             //从map中取出数据
             HistoryLocation lastHistoryLocationData = serialDataTempMap.get(equitmentId);
+            int circleNum =Integer.parseInt(lastHistoryLocationData.getCircleNum());
+            String isRuning = lastHistoryLocationData.getIsBeginRun();
             //判断是否正在进行运动 并且距离大于阈值
             if("yes".equals(lastHistoryLocationData.getIsBeginRun()) && distance < 40){
                 //进入这里表示已经在跑了 并且距离原点很近了
-                int circleNum = Integer.parseInt(lastHistoryLocationData.getCircleNum());
                 //判断是否还有剩余圈数
                 if(circleNum > 0){
                     //判断是否等于1
                     if(circleNum == 1){
                         //如果剩余一圈，并且准备跑完了
                         historyLocation.setTotalTime(CalculateUtils.getTime(MainPanel.getStartTime()));
-
+                        circleNum = 0;
                     }else{
                         circleNum = circleNum -1 ;
-                        historyLocation.setCircleNum(""+circleNum);
+
                     }
                 }
-                historyLocation.setIsBeginRun("no");
-
-
+                isRuning = "no";
             }else if("no".equals(lastHistoryLocationData.getIsBeginRun()) && distance > 40 ){
                 //进入这里表示开始运动 并且远离原点了
-                historyLocation.setIsBeginRun("yes");
+                isRuning = "yes";
             }else if(distance > MainPanel.getTrack_point() || "0".equals(lastHistoryLocationData.getCircleNum())){
                 //进入这里表示异常
                 DebugPrint.dPrint("SerialDataTemp:" + "距离异常，圈数异常");
             }
+            int heartRate = Integer.parseInt(serialPortData.getHeartRateData());
+            historyLocation.setLongitudeData(serialPortData.getGPSLongitudeData());
+            historyLocation.setLongitudeType(serialPortData.getGPSLongitudeType());
+            historyLocation.setLatitudeData(serialPortData.getGPSLatitudeData());
+            historyLocation.setLatitudeType(serialPortData.getGPSLatitudeType());
+            historyLocation.setSaveTime(new Timestamp(System.currentTimeMillis()).toString());
+            historyLocation.setCircleNum(circleNum+"");
+            historyLocation.setIsBeginRun(isRuning);
+            historyLocation.setHeartRate(serialPortData.getHeartRateData());
+            if(heartRate > MainPanel.getMax_heart() | heartRate < MainPanel.getMin_heart()){
+                AbnormalOper.add(historyLocation.getEquipmentId(),historyLocation.getEquipmentId(),"心率不正常",new Timestamp(System.currentTimeMillis()));
+            }
+            DebugPrint.dPrint(historyLocation.toString());
             serialDataTempMap.put(equitmentId,historyLocation);
         }else{//第一次存储
             historyLocation.setLongitudeData(serialPortData.getGPSLongitudeData());
@@ -84,16 +99,17 @@ public class SerialDataTemp {
             historyLocation.setSaveTime(new Timestamp(System.currentTimeMillis()).toString());
             historyLocation.setHeartRate(serialPortData.getHeartRateData());
             serialDataTempMap.put(equitmentId,historyLocation);
+            locationMap.put(equitmentId,serialPortData.getGPSLongitudeData()+"|"+serialPortData.getGPSLatitudeData());
         }
         //将historyLocation实例转换为currentbd
         Currentbd currentbd = CurrentbdOper.historyLocationToCurrentbd(historyLocation);
         DebugPrint.dPrint(currentbd.toString());
         CurrentbdOper.addOrUpdate("update",currentbd);
         historyLocationArrayDeque.push(historyLocation);
-        if(historyLocationArrayDeque.size() > 40){
+        if(historyLocationArrayDeque.size() > 2){
             HistoryLocationOperationUtils.insertData(historyLocationArrayDeque);
         }
-        DebugPrint.dPrint(locationMap.size());
+        DebugPrint.dPrint("SerialDataTemp->"+"locatiomMap.size:"+locationMap.size()+", historyLocationArrayDeque.size:"+historyLocationArrayDeque.size());
         //HistoryLocationOperationUtils.insertData(historyLocation);
         //DebugPrint.dPrint("add one data:"+historyLocation.toString());
 

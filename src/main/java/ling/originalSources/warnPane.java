@@ -73,9 +73,9 @@ public class warnPane {
         renderer.setBackground(red);
         renderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
         warnTB.setDefaultRenderer(Object.class, renderer);
-        wp.abnor_rowData(abnor_rowData, abnormalOper.getPgNum());
-        PgNum= abnormalOper.getPgNum();
-        PgNumJL.setText("跳转/共" + abnormalOper.getPgNum() + "页");
+        wp.abnor_rowData(abnor_rowData, AbnormalOper.getPgNum());
+        PgNum= AbnormalOper.getPgNum();
+        PgNumJL.setText("跳转/共" + AbnormalOper.getPgNum() + "页");
         warnTB.setEnabled(false);
         dPane.add(warnJP);
         dPane.add(PgdownJB);
@@ -91,7 +91,7 @@ public class warnPane {
 
         PgdownJB.addActionListener(e -> {
             PgNum++;
-            if (PgNum >= abnormalOper.getPgNum()) PgNum = abnormalOper.getPgNum();
+            if (PgNum >= AbnormalOper.getPgNum()) PgNum = AbnormalOper.getPgNum();
             wp.T_clear(abnor_rowData);
             wp.abnor_rowData(abnor_rowData, PgNum);
             dFrame.repaint();
@@ -105,7 +105,7 @@ public class warnPane {
         });
         selectJB.addActionListener(e -> {
             int num = Integer.valueOf(selectPgNumJF.getText());
-            if (num <= 0 || num > abnormalOper.getPgNum()) wp.RemindPgSelect("请根据总页数输入所跳转页数");
+            if (num <= 0 || num > AbnormalOper.getPgNum()) wp.RemindPgSelect("请根据总页数输入所跳转页数");
             else {
                 PgNum = num;
                 wp.T_clear(abnor_rowData);
@@ -146,7 +146,7 @@ public class warnPane {
     public void abnor_rowData(Object[][] abnor_rowData, int PgNum)//赋值报警第n页添加用户的表格
     {
         ArrayList<String> array = new ArrayList();
-        abnormalOper.select(PgNum, array);
+        AbnormalOper.select(PgNum, array);
         for (int i = 0; i < array.size(); i++) {
             int n = i ;
             if (array.size() != 0) {

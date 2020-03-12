@@ -22,7 +22,8 @@ public class WarningSounds extends Thread {
         while (true) {
             try {
                 play();
-                sleep(3000);
+                sleep(1000);
+                break;
             } catch (FileNotFoundException | JavaLayerException | InterruptedException e) {
                 e.printStackTrace();
                 break;

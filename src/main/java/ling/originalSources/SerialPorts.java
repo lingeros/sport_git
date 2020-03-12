@@ -165,7 +165,7 @@ public class SerialPorts {
             try {
                 if (outputStream != null) {
                     outputStream.close();
-                    outputStream = null;
+
                 }
             } catch (IOException e) {
                 DebugPrint.dPrint(e);

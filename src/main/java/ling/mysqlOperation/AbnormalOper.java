@@ -10,15 +10,15 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 public class AbnormalOper {
-    private Connection conn = null;
-    private PreparedStatement preparedStatement = null;
-    private ResultSet rs = null;
-    private String sql;
-    DatabaseInformation databaseInformation = new DatabaseInformation();
+    private static Connection connection = null;
+    private static PreparedStatement preparedStatement = null;
+    private static ResultSet resultSet = null;
+    private static String sql;
+    private static DatabaseInformation databaseInformation = new DatabaseInformation();
 
-    public void create() {
+    public static void create() {
         try {
-            conn = databaseInformation.getconn();
+            connection = databaseInformation.getconn();
             DebugPrint.dPrint("testa");
             sql = "CREATE TABLE abnormal (\r\n" +
                     "	num INTEGER NOT NULL auto_increment primary key,\r\n" +
@@ -27,19 +27,19 @@ public class AbnormalOper {
                     "	abnor varchar(255)NOT NULL,\r\n" +
                     "	time  timestamp DEFAULT CURRENT_TIMESTAMP)";
             DebugPrint.dPrint("testb");
-            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.execute();
         } catch (Exception e) {
         } finally {
-            databaseInformation.close(conn, preparedStatement, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
-    public void add(String equipment_id, String user_id, String abnor, Timestamp time) {
+    public static void add(String equipment_id, String user_id, String abnor, Timestamp time) {
         try {
-            conn = databaseInformation.getconn();
+            connection = databaseInformation.getconn();
             sql = "INSERT INTO abnormal (equipment_id , user_id ,abnor,time) VALUES (?,?,?,?)";
-            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, equipment_id);
             preparedStatement.setString(2, user_id);
             preparedStatement.setString(3, abnor);
@@ -48,56 +48,56 @@ public class AbnormalOper {
         } catch (Exception e) {
             DebugPrint.dPrint("报警错误信息:" + e);
         } finally {
-            databaseInformation.close(conn, preparedStatement, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
-    public void select(int PgNum, ArrayList<String> array) {
+    public static void select(int PgNum, ArrayList<String> array) {
         int b = 20 * (PgNum - 1);
         try {
-            conn = databaseInformation.getconn();
+            connection = databaseInformation.getconn();
             sql = "select *from abnormal order by time limit " + b + "," + 20;
-            preparedStatement = conn.prepareStatement(sql);
-            rs = preparedStatement.executeQuery(sql);
-            while (rs.next()) {
-                array.add(rs.getString(2) + "," +
-                        rs.getString(3) + "," +
-                        rs.getString(4) + "," +
-                        rs.getString(5));
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery(sql);
+            while (resultSet.next()) {
+                array.add(resultSet.getString(2) + "," +
+                        resultSet.getString(3) + "," +
+                        resultSet.getString(4) + "," +
+                        resultSet.getString(5));
             }
         } catch (Exception e) {
             DebugPrint.dPrint(e);
         } finally {
-            databaseInformation.close(conn, preparedStatement, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
-    public void selectAll(ArrayList<String> array) {//获取abnormal表的所有数据，存储到array中。
+    public static void selectAll(ArrayList<String> array) {//获取abnormal表的所有数据，存储到array中。
         try {
-            conn = databaseInformation.getconn();
+            connection = databaseInformation.getconn();
             sql = "select * from abnormal";
-            preparedStatement = conn.prepareStatement(sql);
-            rs = preparedStatement.executeQuery();
-            while (rs.next()) {
-                array.add(rs.getString(2) + ", " + rs.getString(3) + ", " +
-                        rs.getString(4) + ", " + rs.getString(5));
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                array.add(resultSet.getString(2) + ", " + resultSet.getString(3) + ", " +
+                        resultSet.getString(4) + ", " + resultSet.getString(5));
             }
         } catch (Exception e) {
             DebugPrint.dPrint(e);
         } finally {
-            databaseInformation.close(conn, preparedStatement, rs);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
-    public int getPgNum() {
+    public static int getPgNum() {
         int i = -1;
         try {
-            conn = databaseInformation.getconn();
+            connection = databaseInformation.getconn();
             sql = "SELECT COUNT(*) FROM abnormal";
-            preparedStatement = conn.prepareStatement(sql);
-            rs = preparedStatement.executeQuery();
-            while (rs.next())
-                i = rs.getInt(1);
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next())
+                i = resultSet.getInt(1);
             i = i / 20 + 1;
         } catch (Exception e) {
             DebugPrint.dPrint(e);

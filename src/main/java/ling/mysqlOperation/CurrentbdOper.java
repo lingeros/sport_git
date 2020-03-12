@@ -87,11 +87,14 @@ public class CurrentbdOper {
         String id = String.valueOf(now.getTime());
         currentbd.setId(id);
         currentbd.setUser_id(historyLocation.getEquipmentId());
-        currentbd.setUser_name(currentbdMap.get(historyLocation.getEquipmentId()).getUser_name());
+        Currentbd temp = currentbdMap.get(historyLocation.getEquipmentId());
+        if (temp != null) {
+            currentbd.setUser_name(temp.getUser_name());
+        }
         currentbd.setEquipment_id(historyLocation.getEquipmentId());
         currentbd.setCycle_num(historyLocation.getCircleNum());
         currentbd.setHearbeat(historyLocation.getHeartRate());
-        currentbd.setUser_long(historyLocation.getLatitudeData());
+        currentbd.setUser_long(historyLocation.getLongitudeData());
         currentbd.setLat(historyLocation.getLatitudeData());
         if ("yes".equals(historyLocation.getIsBeginRun())) {
             currentbd.setRun("true");
@@ -126,10 +129,10 @@ public class CurrentbdOper {
     }
 
     public static void add(String id, String user_id, String user_name,
-                    String equipment_id, String condition,
-                    String cycle_num, String hearbeat,
-                    String power, String lon, String lat,
-                    String totalTime, String run) {
+                           String equipment_id, String condition,
+                           String cycle_num, String hearbeat,
+                           String power, String lon, String lat,
+                           String totalTime, String run) {
         try {
             connection = databaseInformation.getconn();
             sql = "INSERT INTO currentbd(id,user_id,user_name"
@@ -197,9 +200,13 @@ public class CurrentbdOper {
         }
 
     }
+
     public static void addAll(String cycle_num) {
         try {
-
+            String[] ids = new String[100];
+            for (int i = 0; i < 100; i++) {
+                ids[i] = new Date().getTime() + i + "";
+            }
             connection = databaseInformation.getconn();
             connection.setAutoCommit(false);
             sql = "INSERT INTO currentbd(id,user_id,user_name,equipment_id,`user_condition`,cycle_num "
@@ -208,10 +215,9 @@ public class CurrentbdOper {
                     + "(?,?,?,?,?,?,?,?,?,?,?,?)";
 
             preparedStatement = connection.prepareStatement(sql);
-            for(int i = 0;i<100;i++){
-                String id = i+100+"";
-                String str = i+"";
-                preparedStatement.setString(1, id);
+            for (int i = 0; i < 100; i++) {
+                String str = i + "";
+                preparedStatement.setString(1, ids[i]);
                 preparedStatement.setString(2, str);
                 preparedStatement.setString(3, str);
                 preparedStatement.setString(4, str);
@@ -224,12 +230,10 @@ public class CurrentbdOper {
                 preparedStatement.setString(11, "");
                 preparedStatement.setString(12, "true");
                 preparedStatement.execute();
-                Currentbd currentbd = new Currentbd(id, str, str, str, "正常", cycle_num, "", "正常", "", "", "", "true");
+                Currentbd currentbd = new Currentbd(str, str, str, str, "正常", cycle_num, "", "正常", "", "", "", "true");
                 currentbdMap.put(str, currentbd);
             }
             connection.commit();
-
-
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "add:" + e.toString());
         } finally {
@@ -374,14 +378,14 @@ public class CurrentbdOper {
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.executeUpdate();
             currentbdMap.clear();
+            DebugPrint.dPrint("CurrentbdOper delete all success");
         } catch (Exception e) {
             e.printStackTrace();
+            DebugPrint.dPrint("CurrentbdOper delete all error");
         } finally {
             DatabaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
-
-
 
 
     public static boolean isUserIdAndEquipmentIdExit(String userId, String equipmentId) {
@@ -473,7 +477,11 @@ public class CurrentbdOper {
     public static String select_id(String eid) {
         String reEid = eid.replace(" ", "");
         String s = "";
-        s = currentbdMap.get(eid).getId();
+        Currentbd currentbd = currentbdMap.get(eid);
+        if (currentbd != null) {
+            s = currentbd.getId();
+        }
+
         if ("".equals(s)) {
             try {
                 connection = databaseInformation.getconn();

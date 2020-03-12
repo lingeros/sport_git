@@ -86,11 +86,13 @@ public class HistoryLocationOperationUtils {
 
     public static ArrayDeque<HistoryLocation> selectByEquitmentId(String equitmentId) {
         connection = DatabaseInformation.getConnection();
+        String eid = equitmentId.trim();
+
         ArrayDeque<HistoryLocation> historyLocations = new ArrayDeque<>();
         if (connection != null) {
             try {
                 preparedStatement = connection.prepareStatement(selectByEquitmentIdSql);
-                preparedStatement.setString(1, equitmentId);
+                preparedStatement.setString(1, eid);
                 resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()) {
                     String equipmentId = resultSet.getString("equipment_id");
