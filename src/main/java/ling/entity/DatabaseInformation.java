@@ -1,7 +1,7 @@
 package ling.entity;
 
-import ling.utils.DebugPrint;
 import ling.utils.DatabaseInfoFileUtils;
+import ling.utils.DebugPrint;
 
 import java.sql.*;
 
@@ -13,7 +13,7 @@ public class DatabaseInformation {
     private static String driver = "com.mysql.jdbc.Driver";
     private static String url_before = "jdbc:mysql://";
     private static String url_after = "/bracelet?connectTimeout=3000&useUnicode=true&characterEncoding=utf-8&useSSL=false";
-    private static String mysqlUrl = "jdbc:mysql://192.168.0.106:3306/bracelet?useUnicode=true&characterEncoding=utf-8&useSSL=false";
+    private static String mysqlUrl = "jdbc:mysql://192.168.0.105:3306/bracelet?useUnicode=true&characterEncoding=utf-8&useSSL=false";
     private static String default_port = "3306";
     private static String username = "root";
     private static String password = "lingeros";

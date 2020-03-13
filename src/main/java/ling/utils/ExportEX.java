@@ -14,12 +14,14 @@ import java.util.Date;
  * 输出xls文件类
  */
 public class ExportEX {
+    public static String outputFileName;
 
-    public void wExcel(ArrayList<String> array, String[] a) {
+    public static void wExcel(ArrayList<String> array, String[] a) {
         Date now = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月dd日HH点mm分ss秒");
         String id = formatter.format(now);//用时间创建文件名
         String path = "D:/" + id + ".xls";
+        outputFileName = path;
         HSSFWorkbook book = new HSSFWorkbook();
         HSSFSheet sheet = book.createSheet("UserData");
         HSSFRow row0 = sheet.createRow(0);//

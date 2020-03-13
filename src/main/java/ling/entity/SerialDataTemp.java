@@ -6,10 +6,11 @@ import ling.originalSources.MainPanel;
 import ling.utils.CalculateUtils;
 import ling.utils.DebugPrint;
 import ling.utils.HistoryLocationOperationUtils;
-import sun.applet.Main;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 暂存所有数据的类
@@ -74,6 +75,7 @@ public class SerialDataTemp {
                 DebugPrint.dPrint("SerialDataTemp:" + "距离异常，圈数异常");
             }
             int heartRate = Integer.parseInt(serialPortData.getHeartRateData());
+            String equipmentId = historyLocation.getEquipmentId();
             historyLocation.setLongitudeData(serialPortData.getGPSLongitudeData());
             historyLocation.setLongitudeType(serialPortData.getGPSLongitudeType());
             historyLocation.setLatitudeData(serialPortData.getGPSLatitudeData());
@@ -82,9 +84,21 @@ public class SerialDataTemp {
             historyLocation.setCircleNum(circleNum+"");
             historyLocation.setIsBeginRun(isRuning);
             historyLocation.setHeartRate(serialPortData.getHeartRateData());
+            //判断心率是否正常
             if(heartRate > MainPanel.getMax_heart() | heartRate < MainPanel.getMin_heart()){
-                AbnormalOper.add(historyLocation.getEquipmentId(),historyLocation.getEquipmentId(),"心率不正常",new Timestamp(System.currentTimeMillis()));
+                //不正常  插入数据到数据库
+                AbnormalOper.add(equipmentId,equipmentId,"心率不正常",new Timestamp(System.currentTimeMillis()));
+                //同时保存一份数据到AbnormalOper.abnormalMap中
+                AbnormalOper.abnormalMap.put(equipmentId,serialPortData.getHeartRateData());
             }
+            //如果需要删除心率数据，也就是说当心率出现正常后再删除原来不正常的数据就需要下面的代码
+            /*else{//心率正常
+                //则删除数据
+                if(AbnormalOper.abnormalMap.get(equipmentId) != null){
+                    AbnormalOper.abnormalMap.remove(equipmentId);
+                    AbnormalOper.deleteByEquipmentId(equipmentId);
+                }
+            }*/
             DebugPrint.dPrint(historyLocation.toString());
             serialDataTempMap.put(equitmentId,historyLocation);
         }else{//第一次存储

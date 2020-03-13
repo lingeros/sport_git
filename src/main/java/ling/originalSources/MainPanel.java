@@ -1,21 +1,10 @@
 package ling.originalSources;
 
-import com.eltima.components.ui.DatePicker;
-import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
-import ling.App;
 import ling.customFrame.RemindFrame;
 import ling.customFrame.SelectFrame;
-import ling.entity.DatabaseInformation;
 import ling.entity.HistoryLocation;
-import ling.entity.SerialPortData;
 import ling.mysqlOperation.*;
-import ling.utils.CalculateUtils;
-import ling.utils.DebugPrint;
 import ling.utils.*;
-import ling.utils.UIFontUtil;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -23,11 +12,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -994,6 +978,7 @@ public class MainPanel {
                     dataTable.setValueAt(false, i, 0);
                 Sarray.clear();
                 selectFrame.dispose();
+                JOptionPane.showMessageDialog(null, "数据已导出为:"+ExportEX.outputFileName, "提示", JOptionPane.INFORMATION_MESSAGE);
             });
             selectFrame.centainButton.addActionListener(e15 -> {
                 String[] a = {"序列号", "用户编号", "姓名", "设备号", "佩戴状态", "剩余圈数", "心跳", "电量", "经纬度", "录入时间"};
@@ -1008,6 +993,7 @@ public class MainPanel {
                 DTarray.clear();
                 SDTarray.clear();
                 selectFrame.dispose();
+                JOptionPane.showMessageDialog(null, "数据已导出为:"+ExportEX.outputFileName, "提示", JOptionPane.INFORMATION_MESSAGE);
             });
             jCheckBox.setSelected(false);
             thirdPane.repaint();

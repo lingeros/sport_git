@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AbnormalOper {
     private static Connection connection = null;
@@ -15,6 +17,8 @@ public class AbnormalOper {
     private static ResultSet resultSet = null;
     private static String sql;
     private static DatabaseInformation databaseInformation = new DatabaseInformation();
+    //这个是用来判断有哪些设备是心率不正常的 以便于删除
+    public static Map<String, String> abnormalMap = new HashMap<>();
 
     public static void create() {
         try {
@@ -103,6 +107,26 @@ public class AbnormalOper {
             DebugPrint.dPrint(e);
         }
         return i;
+    }
+
+    public static void deleteByEquipmentId(String equipmentId) {
+        try {
+            connection = databaseInformation.getconn();
+            sql = "delete from abnormal where equipment_id = ?";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1,equipmentId);
+            boolean result = preparedStatement.execute();
+            if(result){
+                DebugPrint.dPrint("abnormalOper delete one data success");
+            }
+
+        } catch (Exception e) {
+            DebugPrint.dPrint("abnormalOper:"+"deleteByEquipmentId error:"+e.toString());
+        } finally {
+            databaseInformation.close(connection, preparedStatement, null);
+        }
+
+
     }
 }
 
