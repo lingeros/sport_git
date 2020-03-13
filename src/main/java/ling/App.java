@@ -10,7 +10,7 @@ import ling.originalSources.MainPanel;
  */
 public class App 
 {
-    public static String workingType = "debug";
+    public static String workingType = "test";
 
     public static void main( String[] args )
     {
