@@ -1,15 +1,19 @@
 package ling.entity;
 
+import ling.mysqlOperation.DruidOper;
 import ling.utils.DatabaseInfoFileUtils;
 import ling.utils.DebugPrint;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * 数据库信息类
- *
  */
 public class DatabaseInformation {
+    private static final String TAG = "DatabaseInformation:";
     private static String driver = "com.mysql.jdbc.Driver";
     private static String url_before = "jdbc:mysql://";
     private static String url_after = "/bracelet?connectTimeout=3000&useUnicode=true&characterEncoding=utf-8&useSSL=false";
@@ -22,19 +26,23 @@ public class DatabaseInformation {
     private static String host;
     private static DatabaseInformation databaseInformation;
     private static Connection connection;
-    public static DatabaseInformation getInstance(){
-        if(databaseInformation == null){
+
+    public static DatabaseInformation getInstance() {
+        if (databaseInformation == null) {
             databaseInformation = new DatabaseInformation();
         }
         return databaseInformation;
 
     }
 
-    public static Connection getConnection(){
-        getconn();
+    public static Connection getConnection() {
+        if (connection == null) {
+            getconn();
+        }
         return connection;
     }
-    public DatabaseInformation() {
+
+    private DatabaseInformation() {
 
         try {
             Class.forName(driver);
@@ -47,7 +55,8 @@ public class DatabaseInformation {
     }
 
     public static Connection getconn() {
-        String[] strings = DatabaseInfoFileUtils.readInfo();
+
+        /*String[] strings = DatabaseInfoFileUtils.readInfo();
         default_port = strings[1];
         setMysqlUrl(strings[0]);
         username = strings[2];
@@ -60,6 +69,11 @@ public class DatabaseInformation {
         }
         if (connection != null) {
             connectionState = true;
+        }
+        return connection;*/
+        connection = DruidOper.getConnection();
+        if(connection !=null){
+            DatabaseInformation.connectionState = true;
         }
         return connection;
     }
@@ -81,12 +95,10 @@ public class DatabaseInformation {
         if (mysqlInfo[2] != null) {
             setUsername(mysqlInfo[2]);
         }
-
         //设置密码
         if (mysqlInfo[3] != null) {
             setPassword(mysqlInfo[3]);
         }
-
         DebugPrint.dPrint("地址：" + mysqlUrl + ",用户名：" + username + ",密码：" + password);
         DatabaseInfoFileUtils.updateInfo(mysqlInfo[0], mysqlInfo[1], mysqlInfo[2], mysqlInfo[3]);
     }
@@ -96,30 +108,35 @@ public class DatabaseInformation {
             if (resultSet != null) {
                 resultSet.close();
             }
-            resultSet = null;
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
             if (statement != null) {
                 statement.close();
             }
-            statement = null;
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
-            if (conn != null) {
+            if(conn != null){
                 conn.close();
             }
-            conn = null;
+
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            DebugPrint.dPrint(TAG + "close error :" + e.toString());
         }
+
     }
+
+    /*public static void close(Statement statement, ResultSet resultSet) {
+        try {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
+
+        } catch (SQLException e) {
+            DebugPrint.dPrint(TAG + "close error :" + e.toString());
+
+        }
+
+
+    }*/
 
 
     public static String getUsername() {
@@ -150,8 +167,6 @@ public class DatabaseInformation {
         }
 
     }
-
-
 
 
 }

@@ -14,12 +14,12 @@ public class EquiOperater {
     private static PreparedStatement preparedStatement = null;
     private static ResultSet resultSet = null;
     private static String sql;
-    private static DatabaseInformation databaseInformation = new DatabaseInformation();
+    private static DatabaseInformation databaseInformation = DatabaseInformation.getInstance();
 
     public static int getNum() {
         int i = 0;
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "SELECT COUNT(*) FROM equipmendata";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -35,7 +35,7 @@ public class EquiOperater {
     public static void create() {
         try {
 
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "CREATE TABLE if not exists equipmendata(equipment_id varchar(16))";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.executeUpdate();
@@ -43,14 +43,14 @@ public class EquiOperater {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            databaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public static void add(String eid) {
 
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "INSERT INTO equipmendata(equipment_id ) VALUES(?)";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, eid);
@@ -63,12 +63,12 @@ public class EquiOperater {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            databaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
     public static void addAll(){
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             connection.setAutoCommit(false);
             sql = "INSERT INTO equipmendata(equipment_id ) VALUES(?)";
             preparedStatement = connection.prepareStatement(sql);
@@ -86,7 +86,7 @@ public class EquiOperater {
 
     public static void deleteAll(){
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "delete from equipmendata";
             preparedStatement = connection.prepareStatement(sql);
             boolean i = preparedStatement.execute();
@@ -97,13 +97,13 @@ public class EquiOperater {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            databaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public static void select(ArrayList<String> array) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from equipmendata";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -114,14 +114,14 @@ public class EquiOperater {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            databaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public static int select(int PgNum) {
         int i = 0;
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = " SELECT COUNT(*) from equipmendata limit " + 80 * (PgNum - 1) + "," + 80;
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -140,7 +140,7 @@ public class EquiOperater {
 
     public static void select(int PgNum, ArrayList<String> array) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from equipmendata limit " + 80 * (PgNum - 1) + "," + 80;
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -151,13 +151,13 @@ public class EquiOperater {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            databaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public static void delete(String eid) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "DELETE FROM equipmendata WHERE equipment_id = ?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, eid);
@@ -168,14 +168,14 @@ public class EquiOperater {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            databaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public static int getPgNum() {
         int i = -1;
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "SELECT COUNT(*) FROM equipmendata";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -188,7 +188,7 @@ public class EquiOperater {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            databaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
         return i;
     }
@@ -196,7 +196,7 @@ public class EquiOperater {
     public static boolean jdugeE(String eid) {
         boolean jduge = false;
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from equipmendata ";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();

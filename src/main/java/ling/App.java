@@ -1,8 +1,8 @@
 package ling;
 
+import ling.customFrame.LoginPanel;
+import ling.customFrame.MainPanel;
 import ling.mysqlOperation.CurrentbdOper;
-import ling.originalSources.LoginPanel;
-import ling.originalSources.MainPanel;
 
 /**
  *
@@ -10,7 +10,7 @@ import ling.originalSources.MainPanel;
  */
 public class App 
 {
-    public static String workingType = "test";
+    public static String workingType = "debug";
 
     public static void main( String[] args )
     {
@@ -19,11 +19,13 @@ public class App
 //            UserdataOperate.addAll();
 //            EquiOperater.deleteAll();
 //            EquiOperater.addAll();
-//            CurrentbdOper.deleteAll();
+            CurrentbdOper.deleteAll();
             CurrentbdOper.addAll(MainPanel.getSettingCycle());
         }
         LoginPanel loginPanel = LoginPanel.getInstance();
         loginPanel.login();
+
+
 
     }
 

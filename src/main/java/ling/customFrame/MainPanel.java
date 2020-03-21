@@ -1,9 +1,10 @@
-package ling.originalSources;
+package ling.customFrame;
 
-import ling.customFrame.RemindFrame;
-import ling.customFrame.SelectFrame;
 import ling.entity.HistoryLocation;
 import ling.mysqlOperation.*;
+import ling.originalSources.SerialPorts;
+import ling.originalSources.ShowMap;
+import ling.originalSources.detailPane;
 import ling.utils.*;
 
 import javax.swing.*;
@@ -38,8 +39,8 @@ public class MainPanel {
     private static CurrentbdOper currentbdOper = new CurrentbdOper();
     private static AbnormalOper abnormalOper = new AbnormalOper();
     private static HistorybdOper historybdOper = new HistorybdOper();
-    private static detailPane detailPane = new detailPane();
-    private static warnPane warnPane = new warnPane();
+    private static ling.originalSources.detailPane detailPane = new detailPane();
+    private static WarnPanel warnPane = new WarnPanel();
     private static ExportEX exportEX = new ExportEX();
     private static SurperAdminOper surperAdminOper = SurperAdminOper.getInstance();
     private static AdminOper adminOper = new AdminOper();
@@ -55,7 +56,7 @@ public class MainPanel {
     private static JTable bdUserT = new JTable(bdUserT_rowData, bdUserT_columnNames);
 
     private static Map<String, String> alltrailData = new HashMap<>();//存储手环传过来的数据
-    private static String settingCycle = "0";
+    private static String settingCycle = "3";
     private static int min_heart = 60;
     private static int max_heart = 100;
     //这个变量用于设定一个圈数的阈值 也就是当一个人的位置大于这个距离就表示点的位置是错的
@@ -66,18 +67,13 @@ public class MainPanel {
     private static Font font12 = new Font("微软雅黑", Font.PLAIN, 12);
     private static Font font16 = new Font("微软雅黑", Font.PLAIN, 16);
     private static boolean isBegin = false;
-
+    //启动线程
+    ExtoTxt extoTxt = new ExtoTxt();
+    Thread eThread = new Thread(extoTxt);
     void mainpane() {
 
         //设置字体格式
         mainPanel.setUIFont();
-
-        //获取串口
-        ArrayList<String> portList = SerialTool.findPort();
-        for (String portName : portList
-        ) {
-            System.out.println(portName);
-        }
         //设置界面
         JPanel mainPane = new JPanel();
         JPanel backColorPane = new JPanel();
@@ -105,6 +101,7 @@ public class MainPanel {
         final JButton addnewequipment = new JButton("确定");
         final JButton bd = new JButton("确定");
         final JButton refreshButton = new JButton("刷新");
+        final JButton refreshDataButton = new JButton("数据初始化");
         JButton redClose = new JButton();
         JButton redSmallest = new JButton();
         JButton redBiggest = new JButton();
@@ -207,8 +204,9 @@ public class MainPanel {
         addnewequipment.setBounds(580, 22, 70, 25);
         bdUser.setBounds(190, 28, 80, 20);
         bdequipment.setBounds(430, 28, 80, 20);
-        bd.setBounds(700, 28, 80, 25);
-        refreshButton.setBounds(800, 28, 80, 25);
+        bd.setBounds(650, 28, 80, 25);
+        refreshButton.setBounds(750, 28, 80, 25);
+        refreshDataButton.setBounds(850, 28, 120, 25);
         final JComboBox<String> bdUBox = new JComboBox();
         bdUBox.setBounds(250, 26, 145, 25);
         final JComboBox<String> bdEBox = new JComboBox();
@@ -257,7 +255,7 @@ public class MainPanel {
         mainPanel.setbdUserT(bdUserT_rowData, bdUserPgNum);
         bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
         thirdPane.add(bdUserJP);
-        panelAlls(secondPane, bdUser, bdUBox, bdequipment, bdEBox, bd,refreshButton);
+        panelAlls(secondPane, bdUser, bdUBox, bdequipment, bdEBox, bd, refreshButton, refreshDataButton);
         mainPanel.bdUserTB_clear(bdUserT_rowData);
         mainPanel.setbdUserT(bdUserT_rowData, bdUserPgNum);
         TableColumn column8 = bdUserT.getColumnModel().getColumn(8);
@@ -621,7 +619,7 @@ public class MainPanel {
         bindingJB.addActionListener(e -> {
             secondPane.removeAll();
             thirdPane.removeAll();
-            panelAlls(secondPane, borders[0], bdUser, bdUBox, bdequipment, bdEBox, bd,refreshButton);
+            panelAlls(secondPane, borders[0], bdUser, bdUBox, bdequipment, bdEBox, bd, refreshButton, refreshDataButton);
             secondPane.repaint();
             MainPanel p18 = new MainPanel();
             p18.Box(bdUBox, bdEBox);
@@ -665,6 +663,19 @@ public class MainPanel {
 
         //手动刷新数据
         refreshButton.addActionListener(e -> {
+            thirdPane.removeAll();
+            MainPanel p19 = new MainPanel();
+            p19.bdUserTB_clear(bdUserT_rowData);
+            p19.setbdUserT(bdUserT_rowData, bdUserPgNum);
+            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            secondPane.add(borders[0]);
+            panelAlls(thirdPane, borders[1], borders[2], borders[3], bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
+            thirdPane.repaint();
+        });
+
+        refreshDataButton.addActionListener(e -> {
+            CurrentbdOper.deleteAll();
+            CurrentbdOper.addAll(MainPanel.getSettingCycle());
             thirdPane.removeAll();
             MainPanel p19 = new MainPanel();
             p19.bdUserTB_clear(bdUserT_rowData);
@@ -745,12 +756,12 @@ public class MainPanel {
                             DebugPrint.dPrint("eid是" + eid);
                             //查询以eid的所有经纬度信息
                             ArrayDeque<HistoryLocation> historyLocations = HistoryLocationOperationUtils.selectByEquitmentId(eid);
-                            for (HistoryLocation historyLocation:historyLocations) {
+                            for (HistoryLocation historyLocation : historyLocations) {
                                 longitudeArray.add(historyLocation.getLongitudeData());
                                 latitudeArray.add(historyLocation.getLatitudeData());
                             }
                             //historybdOper.select(aaa, bbb, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
-                            DebugPrint.dPrint("longitudeArray size:"+longitudeArray.size()+",latitudeArray size:"+latitudeArray.size());
+                            DebugPrint.dPrint("longitudeArray size:" + longitudeArray.size() + ",latitudeArray size:" + latitudeArray.size());
                             StringBuilder points = new StringBuilder();
                             if ((longitudeArray.size() > 0) && latitudeArray.size() > 0) {
                                 points = new StringBuilder("new AMap.LngLat(" + longitudeArray.get(0) + "," + latitudeArray.get(0) + ")"); // 原点
@@ -784,27 +795,26 @@ public class MainPanel {
             public void mouseClicked(MouseEvent e) {
                 int c = e.getButton();
                 int row = warnPane.warnTB.getSelectedRow();
-                DebugPrint.dPrint("点击的是哪一行" + row);
+                DebugPrint.dPrint("点击了：" + row + "行");
                 int col = warnPane.warnTB.getSelectedColumn();
-                String dbjduge = "true";
+
                 if (c == MouseEvent.BUTTON1) {//左键点击
                     if (col == 2) {//第3列，即"心率异常"列
-                        ArrayList<String> aaa = new ArrayList();
-                        ArrayList<String> bbb = new ArrayList();
-                        ArrayList<String> array = new ArrayList(200);
-                        abnormalOper.selectAll(array);  //获取所有wp表的数据，存储在array里
+                        ArrayList<String> longitudeArray = new ArrayList();
+                        ArrayList<String> latitudeArray = new ArrayList();
+                        ArrayList<String> array = abnormalOper.selectAll();  //获取所有wp表的数据，存储在array里
                         DebugPrint.dPrint("获取报警的数组是" + array);
                         String recode = array.get((abnormalOper.getPgNum() - 1) * 20 + row);    //根据点击的行，返回那行数据
                         DebugPrint.dPrint("报警表相应的记录是：" + recode);
                         String[] recodeArray = recode.split(",");
                         String eid = recodeArray[0];                           //这里点击需要获取行的eid
                         DebugPrint.dPrint("报警表eid是" + eid);
-                        historybdOper.select(aaa, bbb, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
-                        DebugPrint.dPrint("报警表aaa:" + aaa);
-                        DebugPrint.dPrint("报警表bbb:" + bbb);
-                        StringBuilder points = new StringBuilder("new AMap.LngLat(" + aaa.get(0) + "," + bbb.get(0) + ")"); // 原点
-                        for (int i = 1; i < aaa.size() && i < bbb.size(); i++) {
-                            points.append("," + "new AMap.LngLat(").append(aaa.get(i)).append(",").append(bbb.get(i)).append(")");
+                        historybdOper.select(longitudeArray, latitudeArray, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
+                        DebugPrint.dPrint("报警表longitude array:" + longitudeArray);
+                        DebugPrint.dPrint("报警表latitude array:" + latitudeArray);
+                        StringBuilder points = new StringBuilder("new AMap.LngLat(" + longitudeArray.get(0) + "," + latitudeArray.get(0) + ")"); // 原点
+                        for (int i = 1; i < longitudeArray.size() && i < latitudeArray.size(); i++) {
+                            points.append("," + "new AMap.LngLat(").append(longitudeArray.get(i)).append(",").append(latitudeArray.get(i)).append(")");
                         }
                         HashMap<String, Object> map1 = new HashMap<>();
                         map1.put("points", points.toString());
@@ -978,7 +988,7 @@ public class MainPanel {
                     dataTable.setValueAt(false, i, 0);
                 Sarray.clear();
                 selectFrame.dispose();
-                JOptionPane.showMessageDialog(null, "数据已导出为:"+ExportEX.outputFileName, "提示", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "数据已导出为:" + ExportEX.outputFileName, "提示", JOptionPane.INFORMATION_MESSAGE);
             });
             selectFrame.centainButton.addActionListener(e15 -> {
                 String[] a = {"序列号", "用户编号", "姓名", "设备号", "佩戴状态", "剩余圈数", "心跳", "电量", "经纬度", "录入时间"};
@@ -993,7 +1003,7 @@ public class MainPanel {
                 DTarray.clear();
                 SDTarray.clear();
                 selectFrame.dispose();
-                JOptionPane.showMessageDialog(null, "数据已导出为:"+ExportEX.outputFileName, "提示", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "数据已导出为:" + ExportEX.outputFileName, "提示", JOptionPane.INFORMATION_MESSAGE);
             });
             jCheckBox.setSelected(false);
             thirdPane.repaint();
@@ -1062,6 +1072,9 @@ public class MainPanel {
                 ii31 = new ImageIcon(temp31);
                 ALLstartJB.setIcon(ii31);
             } else if (ASR == 2) {
+                CurrentbdOper.initShowMsgMap();
+
+                eThread.start();
                 try {
                     if (!isBegin) {
                         isBegin = true;
@@ -1089,6 +1102,8 @@ public class MainPanel {
         // 一键停止相关
         AllcloseJB.addActionListener(e -> {
             if (AST == 1) {
+                eThread.stop();
+                DebugPrint.dPrint("ExtoTxt thread stop");
                 AST = 2;
                 try {
                     if (isBegin) {
@@ -1119,7 +1134,6 @@ public class MainPanel {
                 try {
                     String str = "C";
                     byte[] sb = str.getBytes();
-                    //TODO
                     HistoryLocationOperationUtils.deletaAllData();
                     AST = 1;
                     ImageIcon ii21 = new ImageIcon("src/ima/end.png");

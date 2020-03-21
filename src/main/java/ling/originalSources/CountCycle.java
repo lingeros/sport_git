@@ -1,5 +1,7 @@
 package ling.originalSources;
+
 import ling.entity.DatabaseInformation;
+import ling.mysqlOperation.DruidOper;
 import ling.utils.CalculateUtils;
 
 import java.sql.Connection;
@@ -7,32 +9,31 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-public class countCycle {
+public class CountCycle {
     private double EARTH_RADIUS = 6378.137;
-    private Connection conn = null;
-    private PreparedStatement ps = null;
-    private ResultSet rs = null;
+    private Connection connection = null;
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
     private static String sql;
-    countCycle cc = new countCycle();
-    DatabaseInformation d = new DatabaseInformation();
+    DatabaseInformation databaseInformation = DatabaseInformation.getInstance();
 
     public double countD(String id) {
         double i = 0;
 
         ArrayList<String> array = new ArrayList();
         try {
-            conn = d.getconn();
+            connection = DruidOper.getConnection();
             sql = "SELECT COUNT(*) FROM historybd where run='false' and id= ? order by set_time ";
-            ps = conn.prepareStatement(sql);
-            ps.setString(1,id);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                array.add(rs.getString(10) + "," + rs.getString(11));
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, id);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                array.add(resultSet.getString(10) + "," + resultSet.getString(11));
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
         for (int j = 0; j < array.size() && array.get(j + 1) != null; j++) {
 
@@ -45,22 +46,23 @@ public class countCycle {
         }
         return i;
     }
+
     public int cycleNum(String id) {
         int i = 0;
         double lat, lng;
         ArrayList<String> array = new ArrayList();
         try {
-            conn = d.getconn();
+            connection = DruidOper.getConnection();
             sql = "SELECT COUNT(*) FROM historybd	where run='false' order by set_time ";
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                array.add(rs.getString(10) + "," + rs.getString(11));
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                array.add(resultSet.getString(10) + "," + resultSet.getString(11));
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            d.close(conn, ps, rs);
+            databaseInformation.close( connection,preparedStatement, resultSet);
         }
         String[] s = array.get(1).split(",");
         lat = Double.valueOf(s[0]);

@@ -1,7 +1,6 @@
 package ling.utils;
 
 
-import ling.entity.HistoryLocation;
 import ling.entity.SerialDataTemp;
 import ling.entity.SerialPortData;
 
@@ -22,6 +21,7 @@ public class SerialPortDataList {
     private static Thread receiveThread;
 
     //
+    private static SerialPortData[] serialPortData;
 
 
     /**
@@ -63,8 +63,10 @@ public class SerialPortDataList {
      */
     public static void startReceiveThread() {
         receiveThread = new Thread(() -> {
+            int count = 0;
             while (true) {
-                SerialPortData[] serialPortData = SerialPortDataList.getData();
+                serialPortData = null;
+                serialPortData = SerialPortDataList.getData();
                 /**
                  *     private String equitmentID;
                  *     private String GPSLongitudeData;//经度数据
@@ -77,8 +79,13 @@ public class SerialPortDataList {
                     // HistoryLocation(String equipmentId, String longitudeType, String longitudeData, String latitudeType, String latitudeData, String saveTime, String distanceFromLastLocation, String isBeginRun, String totalTime, String circleNum)
                     SerialDataTemp.addOneData(data);
                 }
+                count++;
+                if (count >= 5) {
+                    DebugPrint.dPrint("receiveThread is alive;");
+                    count = 0;
+                }
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(250);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

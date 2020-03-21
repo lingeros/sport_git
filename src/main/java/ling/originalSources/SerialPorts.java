@@ -18,6 +18,8 @@ import java.util.Map;
  * 自定义串口类 可以直接开4条线程  直接调用SerialPorts.startThreads();就可以
  */
 public class SerialPorts {
+    //
+    private static final String TAG = "SerialPorts:";
     //串口队列 用来保存所有的串口，每次使用一个就弹出一个
     private static ArrayDeque<String> serialPortQueuel = new ArrayDeque<String>();
 
@@ -44,7 +46,7 @@ public class SerialPorts {
         String temp = "";
         while (portList.hasMoreElements()) {
             temp = portList.nextElement().getName();
-            DebugPrint.dPrint("find a serial port :" + temp);
+            DebugPrint.dPrint(TAG+"find a serial port :" + temp);
             serialPortQueuel.push(temp);
         }
         //
@@ -63,7 +65,7 @@ public class SerialPorts {
                 return serialPort;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            DebugPrint.dPrint(TAG+"open serial port error:"+e.toString());
         }
         return null;
     }
@@ -122,7 +124,7 @@ public class SerialPorts {
                 }
 
                 for (int i = 0; i < threadMap.size(); i++) {
-                    DebugPrint.dPrint("现在运行的线程有：" + threadMap.get(threadName[i]).getName());
+                    DebugPrint.dPrint(TAG+"现在运行的线程有：" + threadMap.get(threadName[i]).getName());
                 }
 
 
@@ -135,7 +137,7 @@ public class SerialPorts {
     }
 
     public static void closeThreads() {
-        DebugPrint.dPrint("开始关闭线程");
+        DebugPrint.dPrint(TAG+"开始关闭线程");
         if (threadMap.size() != 0) {
             for (int i = 0; i < threadMap.size(); i++) {
                 Thread thread = threadMap.get(threadName[i]);
@@ -143,7 +145,7 @@ public class SerialPorts {
                 //先关闭串口
                 if (serialPort != null) {
                     serialPort.close();
-                    DebugPrint.dPrint("串口" + serialPort.getName() + "已释放");
+                    DebugPrint.dPrint(TAG+"串口" + serialPort.getName() + "已释放");
                     SerialPortThread.usedSerialPortMap.remove(thread.getName());
                 }
                 //再暂停串口所在线程
@@ -183,13 +185,16 @@ public class SerialPorts {
     }
 
     static class SerialPortThread implements Runnable {
+        //
+        private static final String TAG= "SerialPortThread:";
+        //
         private static ArrayDeque<String> serialPortThreadQueuel = new ArrayDeque<String>();
         //用来存放当前运行的线程和与之对应的串口名
         public static Map<String, SerialPort> usedSerialPortMap = new HashMap<>();
 
         @Override
         public void run() {
-            DebugPrint.dPrint("new Thread start:" + Thread.currentThread().getId());
+            DebugPrint.dPrint(TAG+"new Thread start:" + Thread.currentThread().getId());
             String portName = SerialPortThread.serialPortThreadQueuel.pop();
             if (portName != null) {
                 SerialPort serialPort = openSerialPort(portName, 460800);//460800
@@ -198,7 +203,7 @@ public class SerialPorts {
                 if (serialPort != null) {
                     try {
                         usedSerialPortMap.put(Thread.currentThread().getName(), serialPort);
-                        DebugPrint.dPrint("open serial port is :" + portName);
+                        DebugPrint.dPrint(TAG+"open serial port is :" + portName);
                         InputStream inputStream = new BufferedInputStream(serialPort.getInputStream(), 1024);
                         OutputStream outputStream = serialPort.getOutputStream();
                         serialPort.addEventListener(new SerialPortListener(inputStream, outputStream, serialPort));
@@ -209,7 +214,7 @@ public class SerialPorts {
                     }
 
                 } else {
-                    System.out.println("没有打开串口");
+                    DebugPrint.dPrint(TAG+"没有打开串口");
                 }
                 try {
                     Thread.sleep(1000);

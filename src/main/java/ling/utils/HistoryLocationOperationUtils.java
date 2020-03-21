@@ -1,15 +1,14 @@
 package ling.utils;
 
-import ling.entity.HistoryLocation;
 import ling.entity.DatabaseInformation;
+import ling.entity.HistoryLocation;
+import ling.mysqlOperation.DruidOper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
 
 public class HistoryLocationOperationUtils {
     //
@@ -27,7 +26,7 @@ public class HistoryLocationOperationUtils {
     private static ResultSet resultSet;
 
     public static void insertData(HistoryLocation historyLocation){
-        connection = DatabaseInformation.getConnection();
+        connection = DruidOper.getConnection();
         if(connection != null){
             try{
                 preparedStatement = connection.prepareStatement(insertNewDataSql);
@@ -48,13 +47,13 @@ public class HistoryLocationOperationUtils {
             }catch(Exception e){
                 DebugPrint.dPrint(TAG+"insert data error:"+e.toString());
             }finally {
-                DatabaseInformation.close(connection, preparedStatement, resultSet);
+                DatabaseInformation.close(connection,preparedStatement, resultSet);
             }
         }
     }
 
     public static void insertData(ArrayDeque<HistoryLocation> queue){
-        connection = DatabaseInformation.getConnection();
+        connection = DruidOper.getConnection();
 
         if(connection != null){
             try{
@@ -79,13 +78,13 @@ public class HistoryLocationOperationUtils {
             }catch(Exception e){
                 DebugPrint.dPrint(TAG+"insert data error:"+e.toString());
             }finally {
-                DatabaseInformation.close(connection, preparedStatement, resultSet);
+                DatabaseInformation.close(connection,preparedStatement, resultSet);
             }
         }
     }
 
     public static ArrayDeque<HistoryLocation> selectByEquitmentId(String equitmentId) {
-        connection = DatabaseInformation.getConnection();
+        connection = DruidOper.getConnection();
         String eid = equitmentId.trim();
 
         ArrayDeque<HistoryLocation> historyLocations = new ArrayDeque<>();
@@ -112,23 +111,24 @@ public class HistoryLocationOperationUtils {
             } catch (Exception e) {
                 DebugPrint.dPrint(TAG + e.toString());
             } finally {
-                DatabaseInformation.close(connection, preparedStatement, resultSet);
+                DatabaseInformation.close(connection,preparedStatement, resultSet);
             }
         }
         return historyLocations;
     }
 
     public static void deletaAllData(){
-        connection = DatabaseInformation.getConnection();
+        connection = DruidOper.getConnection();
         if(connection != null){
             try {
                 preparedStatement = connection.prepareStatement("delete from t_history_location");
                 preparedStatement.execute();
+                DebugPrint.dPrint(TAG+"delete all success!");
             } catch (SQLException e) {
                 DebugPrint.dPrint(TAG + e.toString());
             }
             finally {
-                DatabaseInformation.close(connection, preparedStatement, resultSet);
+                DatabaseInformation.close(connection,preparedStatement, resultSet);
             }
 
         }

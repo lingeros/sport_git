@@ -1,7 +1,7 @@
-package ling.originalSources;
+package ling.customFrame;
 
-import ling.customFrame.RemindFrame;
 import ling.mysqlOperation.AbnormalOper;
+import ling.originalSources.WarningSounds;
 import ling.utils.DebugPrint;
 
 import javax.swing.*;
@@ -13,14 +13,14 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 
-public class warnPane {
-    private final String TAG = "warnPane:";
+public class WarnPanel {
+    private final String TAG = "WarnPanel:";
     private Color nyellow = new Color(204, 238, 118);
 
     private int PgNum = 1;
     private static WarningSounds warningSounds;
     AbnormalOper abnormalOper = new AbnormalOper();
-    private static warnPane wp = new warnPane();
+    private static WarnPanel wp = new WarnPanel();
     Object[] abnor_columnNames = new Object[]{"设备编号", "用户编号", "异常项", "时间"};
     Object[][] abnor_rowData = new Object[20][4];
     JTable warnTB = new JTable(abnor_rowData, abnor_columnNames);

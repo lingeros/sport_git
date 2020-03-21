@@ -1,8 +1,8 @@
 package ling.entity;
 
+import ling.customFrame.MainPanel;
 import ling.mysqlOperation.AbnormalOper;
 import ling.mysqlOperation.CurrentbdOper;
-import ling.originalSources.MainPanel;
 import ling.utils.CalculateUtils;
 import ling.utils.DebugPrint;
 import ling.utils.HistoryLocationOperationUtils;
@@ -61,10 +61,12 @@ public class SerialDataTemp {
                         //如果剩余一圈，并且准备跑完了
                         historyLocation.setTotalTime(CalculateUtils.getTime(MainPanel.getStartTime()));
                         circleNum = 0;
+
                     }else{
                         circleNum = circleNum -1 ;
 
                     }
+                    CurrentbdOper.setChangeQueue(historyLocation.getEquipmentId()+"|"+circleNum);
                 }
                 isRuning = "no";
             }else if("no".equals(lastHistoryLocationData.getIsBeginRun()) && distance > 40 ){
@@ -120,7 +122,7 @@ public class SerialDataTemp {
         DebugPrint.dPrint(currentbd.toString());
         CurrentbdOper.addOrUpdate("update",currentbd);
         historyLocationArrayDeque.push(historyLocation);
-        if(historyLocationArrayDeque.size() > 2){
+        if(historyLocationArrayDeque.size() > 10){
             HistoryLocationOperationUtils.insertData(historyLocationArrayDeque);
         }
         DebugPrint.dPrint("SerialDataTemp->"+"locatiomMap.size:"+locationMap.size()+", historyLocationArrayDeque.size:"+historyLocationArrayDeque.size());

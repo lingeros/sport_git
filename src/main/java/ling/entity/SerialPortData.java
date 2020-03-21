@@ -40,9 +40,6 @@ public class SerialPortData {
     private String HeartRateData;//心率
 
 
-
-
-
     /**
      * 对数据进行初始化 也就是进行分割
      *
@@ -64,7 +61,13 @@ public class SerialPortData {
                 String equitmentIDStr = "0";//设备号id的字符串格式
 
                 if (str2 != null) {
-                    equitmentIDStr = str2.substring(0, 2);
+                    if (str2.contains("E")) {
+                        equitmentIDStr = str2.split("E")[0];
+                        ;
+                    } else {
+                        equitmentIDStr = str2.split("W")[0];
+                        ;
+                    }
                     try {
                         equitmentID = Integer.decode(equitmentIDStr);//获得设备号id
                     } catch (Exception e) {

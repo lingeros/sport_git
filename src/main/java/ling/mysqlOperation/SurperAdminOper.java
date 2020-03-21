@@ -8,11 +8,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class SurperAdminOper {
-    private Connection conn = null;
-    private PreparedStatement ps = null;
-    private ResultSet rs = null;
+    private Connection connection = null;
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
     private String sql;
-    DatabaseInformation databaseInformation = new DatabaseInformation();
+    DatabaseInformation databaseInformation = DatabaseInformation.getInstance();
 
     private static SurperAdminOper surperAdminOperInstance = null;
 
@@ -31,20 +31,20 @@ public class SurperAdminOper {
     {
         boolean judge = false;
         try {
-            conn = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select admin_key from surperadmin limit 1";
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
 
-            while (rs.next()) {
-                String ss = rs.getString(1);
+            while (resultSet.next()) {
+                String ss = resultSet.getString(1);
                 judge = ss.equals(s);
             }
 
         } catch (Exception e) {
             DebugPrint.dPrint(e);
         } finally {
-            databaseInformation.close(conn, ps, rs);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
         return judge;
     }
@@ -52,14 +52,16 @@ public class SurperAdminOper {
     public String getKey() {
         String key = "";
         try {
-            conn = databaseInformation.getconn();
-
+            connection = DruidOper.getConnection();
+            if(connection != null){
+                DatabaseInformation.connectionState = true;
+            }
             sql = "select admin_key from surperadmin limit 1";
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
 
-            while (rs.next()) {
-                key = rs.getString(1);
+            while (resultSet.next()) {
+                key = resultSet.getString(1);
             }
         } catch (Exception e) {
 
@@ -72,11 +74,11 @@ public class SurperAdminOper {
 
     public void add(String s) {
         try {
-            conn = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "INSERT INTO surperadmin(admin_key)VALUES(?)";
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, s);
-            int i = ps.executeUpdate();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, s);
+            int i = preparedStatement.executeUpdate();
             if (i != 0) {
                 DebugPrint.dPrint("SurperAdminOper add success");
             }
@@ -84,23 +86,23 @@ public class SurperAdminOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            databaseInformation.close(conn, ps, rs);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
 
     }
 
     public void set_surperadmin() {
         try {
-            conn = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "create table if not exists surperadmin(admin_key varchar(64) PRIMARY KEY)";
-            ps = conn.prepareStatement(sql);
-            ps.executeUpdate();
-            int t = ps.executeUpdate();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+            int t = preparedStatement.executeUpdate();
             DebugPrint.dPrint(t);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            databaseInformation.close(conn, ps, rs);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 

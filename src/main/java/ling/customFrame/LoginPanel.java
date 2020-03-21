@@ -1,12 +1,11 @@
-package ling.originalSources;
+package ling.customFrame;
 
-import ling.customFrame.SqlConfigFrame;
 import ling.entity.DatabaseInformation;
 import ling.mysqlOperation.SurperAdminOper;
+import ling.originalSources.SerialTool;
 import ling.utils.CustomFrame;
 import ling.utils.DebugPrint;
 import ling.utils.UIFontUtil;
-
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,9 +23,9 @@ public class LoginPanel {
     private JButton closeButton;
     private JProgressBar progressBar = new JProgressBar();
     private static LoginPanel loginPanelInstance = null;
+    private static final String TAG = "LoginPanel:";
 
     private LoginPanel() {
-
     }
 
     public static LoginPanel getInstance() {
@@ -38,6 +37,7 @@ public class LoginPanel {
     }
 
     public void login() {
+        SerialTool.findPort();
         UIFontUtil.setUIFont();
         loginFrame = new CustomFrame("登陆");
         loginPane = new JPanel();
@@ -66,26 +66,25 @@ public class LoginPanel {
         loginPane.add(titleLaybel);
         loginPane.add(passwordTXTField);
         loginFrame.add(loginPane);
-        loginFrame.init(0,0,380,180);
+        loginFrame.init(0, 0, 380, 180);
         enterButton.addActionListener(e -> {
             //获取到输入的密码
             String s = String.valueOf(passwordTXTField.getPassword());
             //
             SurperAdminOper surperAdminOper = SurperAdminOper.getInstance();
             String key = surperAdminOper.getKey();
-            if(!DatabaseInformation.connectionState){//判断连接状态 该标志位只要在连接上才为真
-                JOptionPane.showConfirmDialog(null,"数据库连接错误，请重新设置数据库信息！","警告",JOptionPane.DEFAULT_OPTION);
+            if (!DatabaseInformation.connectionState) {//判断连接状态 该标志位只要在连接上才为真
+                JOptionPane.showConfirmDialog(null, "数据库连接错误，请重新设置数据库信息！", "警告", JOptionPane.DEFAULT_OPTION);
                 SqlConfigFrame sqlConfigFrame = new SqlConfigFrame();
                 sqlConfigFrame.init(sqlConfigFrame);
-            }else if((s!=null) && (key!= null) && (s.equals(key))){//判断密码是否与数据库的一样 // Todo
-                DebugPrint.dPrint("输入的密码是："+s+",数据库获得的密码是："+key);
+            } else if ((s != null) && (key != null) && (s.equals(key))) {//判断密码是否与数据库的一样 //
+                DebugPrint.dPrint(TAG + "输入的密码是：" + s + ",数据库获得的密码是：" + key);
                 mainPanel = new MainPanel();
                 mainPanel.mainpane();
-                //SerialPorts.startThreads();
                 loginFrame.dispose();
                 loginFrame = null;
-            }else {
-                JOptionPane.showConfirmDialog(null,"密码错误！","警告",JOptionPane.DEFAULT_OPTION);
+            } else {
+                JOptionPane.showConfirmDialog(null, "密码错误！", "警告", JOptionPane.DEFAULT_OPTION);
                 //mainPanel.RemindPgSelect("       口令错误");
             }
 
@@ -99,7 +98,6 @@ public class LoginPanel {
         });
 
     }
-
 
 
 }

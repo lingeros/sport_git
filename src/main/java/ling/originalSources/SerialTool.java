@@ -21,6 +21,7 @@ public class SerialTool {
      */
     public static Map<String,Integer> serialStatus = new HashMap<>();
 
+    public static final String TAG = "SerialTool:";
 
 
     /**
@@ -37,6 +38,7 @@ public class SerialTool {
         //将可用串口名添加到List并返回该List
         while (portList.hasMoreElements()) {
             String portName = portList.nextElement().getName();
+            DebugPrint.dPrint(TAG+"find port:"+portName);
             portNameList.add(portName);
             serialStatus.put(portName,0);
         }
@@ -70,23 +72,23 @@ public class SerialTool {
                 } catch (UnsupportedCommOperationException e) {
                     //throw new SerialPortParameterFailure();
                 }
-                DebugPrint.dPrint("Open " + portName + " sucessfully !");
+                DebugPrint.dPrint(TAG+"Open " + portName + " sucessfully !");
                 serialStatus.put(serialPort.getName(),1);
                 return serialPort;
             
             }        
             else {
                 //不是串口
-                DebugPrint.dPrint("不是串口");
+                DebugPrint.dPrint(TAG+"不是串口");
                 serialStatus.put(commPort.getName(),2);
             }
             
         } catch (NoSuchPortException e1) {
          // throw new NoSuchPort();
-            DebugPrint.dPrint("找不到串口异常");
+            DebugPrint.dPrint(TAG+"找不到串口异常");
         } catch (PortInUseException e2) {
            //throw new PortInUse();
-            DebugPrint.dPrint("串口占用异常");
+            DebugPrint.dPrint(TAG+"串口占用异常");
         }
         return null;
     }
@@ -119,15 +121,15 @@ public class SerialTool {
             outputStream.flush();
             
         } catch (IOException e) {
-           // throw new SendDataToSerialPortFailure();
+           DebugPrint.dPrint(TAG+"send to port error:"+e.toString());
         } finally {
             try {
                 if (outputStream != null) {
                     outputStream.close();
-                    outputStream = null;
+
                 }                
             } catch (IOException e) {
-                //throw new SerialPortOutputStreamCloseFailure();
+                DebugPrint.dPrint(TAG+"send to port error:"+e.toString());
             }
         }
         
@@ -155,7 +157,7 @@ public class SerialTool {
                 bufflenth = in.available();
             } 
         } catch (IOException e) {
-            //throw new ReadDataFromSerialPortFailure();
+            DebugPrint.dPrint(TAG+"read from port error:"+e.toString());
         } finally {
             try {
                 if (in != null) {
@@ -163,7 +165,7 @@ public class SerialTool {
                     in = null;
                 }
             } catch(IOException e) {
-                //throw new SerialPortInputStreamCloseFailure();
+                DebugPrint.dPrint(TAG+"read from port error:"+e.toString());
             }
 
         }
@@ -190,7 +192,7 @@ public class SerialTool {
             port.notifyOnBreakInterrupt(true);
 
         } catch (TooManyListenersException e) {
-           // throw new TooManyListeners();
+            DebugPrint.dPrint(TAG+"add listener error:"+e.toString());
         }
     }
     

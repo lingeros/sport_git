@@ -17,13 +17,13 @@ public class HistorybdOper {
     private PreparedStatement preparedStatement = null;
     private ResultSet resultSet = null;
     private String sql;
-    private DatabaseInformation databaseInformation = new DatabaseInformation();
+    private DatabaseInformation databaseInformation = DatabaseInformation.getInstance();
     private final String TAG = "HistorybdOper:";
 
     public void create() {
         try {
 
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "CREATE TABLE if not exists historybd(num integer not null auto_increment primary key,id varchar(25)not null ,user_id varchar(16)NOT NULL,user_name varchar(16),\r\n" +
                     "	equipment_id varchar(16)NOT NULL,user_condition varchar(16),cycle_num varchar(4),hearbeat varchar(16),watch_power varchar(4),user_long varchar(16),\r\n" +
                     "	lat varchar(16),set_time timestamp DEFAULT CURRENT_TIMESTAMP)";
@@ -33,13 +33,13 @@ public class HistorybdOper {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public void add(String id, String user_id, String user_name, String equipment_id, String condition, String cycle_num, String hearbeat, String power, String lon, String lat, Timestamp set_time) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "INSERT INTO historybd(id,user_id,user_name,equipment_id,user_condition,cycle_num,hearbeat,watch_power,user_long,lat,set_time) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, id);
@@ -60,14 +60,14 @@ public class HistorybdOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     //查询某个同学的所有手环数据，添加到array
     public void select(String id, ArrayList<String> array) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from historybd where id=?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, id);
@@ -79,9 +79,9 @@ public class HistorybdOper {
                         resultSet.getString(11) + "," + resultSet.getString(12));
             }
         } catch (Exception e) {
-            DebugPrint.dPrint(TAG+"select:"+e.toString());
+            DebugPrint.dPrint(TAG + "select:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
 
         }
     }
@@ -91,10 +91,10 @@ public class HistorybdOper {
         try {
             int i = 0;
             int j = 0;
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from historybd where id =?";
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1,id);
+            preparedStatement.setString(1, id);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 if (!resultSet.getString("long").equals("") && !resultSet.getString("lat").equals("")) {
@@ -105,9 +105,9 @@ public class HistorybdOper {
                 j++;
             }
         } catch (Exception e) {
-            DebugPrint.dPrint(TAG+"select:"+e.toString());
+            DebugPrint.dPrint(TAG + "select:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
 
         }
     }
@@ -115,7 +115,7 @@ public class HistorybdOper {
     public int getPgNum() {
         int i = -1;
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "SELECT COUNT(*) FROM historybd";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -132,33 +132,33 @@ public class HistorybdOper {
     public void delete(String id) {
         try {
             String sql = "delete from historybd where id= ?";
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1,id);
+            preparedStatement.setString(1, id);
             preparedStatement.executeUpdate();
         } catch (Exception e) {
-            DebugPrint.dPrint(TAG+"deletc:"+e.toString());
+            DebugPrint.dPrint(TAG + "deletc:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public void deleteAll() {
         try {
             String sql = "delete from historybd";
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.executeUpdate();
         } catch (Exception e) {
-            DebugPrint.dPrint(TAG+"deleteAll:"+e.toString());
+            DebugPrint.dPrint(TAG + "deleteAll:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public void command(String sql, ArrayList<String> array) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -168,15 +168,15 @@ public class HistorybdOper {
                         resultSet.getString(10) + "/ " + resultSet.getString(11) + ")" + ", " + resultSet.getString(12));
             }
         } catch (Exception e) {
-            DebugPrint.dPrint(TAG+"command:"+e.toString());
+            DebugPrint.dPrint(TAG + "command:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public void Update_power(String power, String e_id) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "update currentbd set `power`  =? where equipment_id =? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, power);
@@ -185,16 +185,16 @@ public class HistorybdOper {
             int t = preparedStatement.executeUpdate();
             DebugPrint.dPrint(t);
         } catch (Exception e) {
-            DebugPrint.dPrint(TAG+"Update_power:"+e.toString());
+            DebugPrint.dPrint(TAG + "Update_power:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public void Update_lat_lng(String lng, String lat, String id, String uid, String eid) {
 
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "INSERT INTO  historybd (id,user_id,equipment_id,`long`,lat)VALUES(?,?,?,?,?) ";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, id);
@@ -209,7 +209,7 @@ public class HistorybdOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
 
 

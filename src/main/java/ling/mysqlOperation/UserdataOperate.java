@@ -13,12 +13,12 @@ public class UserdataOperate {
     private static PreparedStatement preparedStatement = null;
     private static ResultSet resultSet = null;
     private static String sql;
-    private static  DatabaseInformation databaseInformation = new DatabaseInformation();
+    private static  DatabaseInformation databaseInformation = DatabaseInformation.getInstance();
     private static final String TAG = "UserdataOperate:";
 
     public static void create() {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
             sql = "CREATE TABLE if not exists userdata(user_id varchar(16) PRIMARY KEY ,user_name varchar(16),user_sex varchar(4),user_phone varchar(25))";
@@ -27,14 +27,14 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "create:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public static boolean jduge(String uid) {
         boolean jduge = false;
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from userdata where user_id=?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, uid);
@@ -46,14 +46,14 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "jduge:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
         return jduge;
     }
 
     public static void addAll(){
         try{
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "INSERT INTO userdata(user_id,user_name,user_sex,user_phone )VALUES (?,?,?,?)";
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(sql);
@@ -69,14 +69,14 @@ public class UserdataOperate {
         }catch(Exception e){
             DebugPrint.dPrint(TAG+"add all error:"+e.toString());
         }finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
 
     }
 
     public static void add(String user_id, String user_name, String user_sex, String user_phone) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "INSERT INTO userdata(user_id,user_name,user_sex,user_phone )VALUES (?,?,?,?)";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, user_id);
@@ -90,14 +90,14 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "add:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
 
     }
 
     public static void update(String uid, String uname, String usex, String uphone) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "UPDATE userdata set user_name=?,user_sex=? ,user_phone=? where user_id=?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, uname);
@@ -111,13 +111,13 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "update:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public static void select(ArrayList<String> array) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from userdata";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -128,13 +128,13 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "select:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public static void delete(String uid) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "DELETE FROM userdata WHERE user_id= ?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, uid);
@@ -145,13 +145,13 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "delete:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public static void deleteAll() {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "DELETE FROM userdata";
             preparedStatement = connection.prepareStatement(sql);
             int i = preparedStatement.executeUpdate();
@@ -161,15 +161,15 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "deleteAll:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public int getPgNum() {
         int i = -1;
         try {
-            connection = databaseInformation.getconn();
-            sql = "select*from userdata";
+            connection = DruidOper.getConnection();
+            sql = "select * from userdata";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -186,7 +186,7 @@ public class UserdataOperate {
     public String select(String s) {
         String a = "";
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select*from userdata where user_id =?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, s);
@@ -198,14 +198,14 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "select:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
         return a;
     }
 
     public void selectID(ArrayList<String> array) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from userdata";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -217,14 +217,14 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "selectID:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
     }
 
     public String selectName(String s) {
         String a = "";
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select user_name  from userdata where user_id =? limit 1";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, s);
@@ -237,7 +237,7 @@ public class UserdataOperate {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "selectName:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection,preparedStatement, resultSet);
         }
         return a;
     }

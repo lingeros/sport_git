@@ -4,12 +4,13 @@ import ling.entity.Currentbd;
 import ling.entity.DatabaseInformation;
 import ling.entity.HistoryLocation;
 import ling.utils.DebugPrint;
-import org.omg.CORBA.Current;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class CurrentbdOper {
     private final static String TAG = "CurrentbdOper:";
@@ -17,10 +18,80 @@ public class CurrentbdOper {
     private static PreparedStatement preparedStatement = null;
     private static ResultSet resultSet = null;
     private static String sql;
-    private static DatabaseInformation databaseInformation = new DatabaseInformation();
+    private static DatabaseInformation databaseInformation = DatabaseInformation.getInstance();
     //存放currentbd实例 可减少操作数据库  key为equipmentid
     private static Map<String, Currentbd> currentbdMap = new HashMap<>();
 
+    //存储用来显示的信息 key是编号 value是剩余圈数
+    public static Map<String, String> showMsgMap = new HashMap<>();
+    //变化队列 用来存储圈数发生改变的信息 string格式：equipmentID|cycle_num
+    private static ArrayDeque<String> changeQueue = new ArrayDeque<>();
+    //增加锁  用来防止同时修改changeQueue
+    private static Lock lock = new ReentrantLock(true);
+
+    //
+    public static void setChangeQueue(String str) {
+        lock.lock();
+        changeQueue.push(str);
+        lock.unlock();
+    }
+
+    public static String[] getChangeQueue() {
+        if (changeQueue.size() > 0) {
+
+            lock.lock();
+            String[] strings = new String[100];
+            for (int i = 0; i < changeQueue.size(); i++) {
+                strings[i] = changeQueue.pop();
+            }
+            lock.unlock();
+            return strings;
+        } else {
+            return null;
+        }
+
+    }
+
+    /**
+     * 做这一步的目的就是为了更新showMsgMap 也就是说无论有没有数据，都要不断输出showMsgMap
+     * 获取更新的数据 currentbdOper.getChangeQueue
+     * 判断是否有数据 如果有则分别将数据拆分 然后更新showMsgMap
+     * 如果没有 则继续输出
+     */
+    public static void updateShowMsgMap(){
+        String[] changes = getChangeQueue();
+        if(changes != null){
+            for (int i = 0; i < changes.length; i++) {
+                String[] split = changes[i].split("|");
+                String equipmentId = split[0];
+                String cycleNum = split[1];
+                showMsgMap.put(equipmentId,cycleNum);
+            }
+        }
+    }
+
+
+    /**
+     * 初始化圈数map
+     */
+    public static void initShowMsgMap() {
+        try {
+            connection = DruidOper.getConnection();
+            sql = "SELECT equipment_id,cycle_num FROM currentbd LIMIT 0,100;";
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String equipmentId = resultSet.getString("equipment_id");
+                String cycleNum = resultSet.getString("cycle_num");
+                showMsgMap.put(equipmentId, cycleNum);
+            }
+            DebugPrint.dPrint(TAG + "init show message map success,map size is:" + showMsgMap.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            databaseInformation.close(connection, preparedStatement, resultSet);
+        }
+    }
 
     /**
      * 添加或者更新
@@ -30,7 +101,7 @@ public class CurrentbdOper {
      */
     public static void addOrUpdate(String addOrUpd, Currentbd currentbd) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
 
             String sqlString = null;
             if ("add".equals(addOrUpd)) {
@@ -40,7 +111,7 @@ public class CurrentbdOper {
                 preparedStatement = connection.prepareStatement(sqlString);
                 preparedStatement.setString(1, currentbd.getId());
                 preparedStatement.setString(2, currentbd.getUser_id());
-                preparedStatement.setString(3, currentbd.getUser_name());
+                preparedStatement.setString(3, currentbd.getUser_id());
                 preparedStatement.setString(4, currentbd.getEquipment_id());
                 preparedStatement.setString(5, currentbd.getUser_condition());
                 preparedStatement.setString(6, currentbd.getCycle_num());
@@ -53,7 +124,7 @@ public class CurrentbdOper {
             } else if ("update".equals(addOrUpd)) {//更新
                 sqlString = "UPDATE  currentbd SET user_name = ?,user_condition = ?,cycle_num = ?,hearbeat = ?,watch_power = ?,user_long = ?,lat = ?,totalTime = ?,run = ? where user_id =? and equipment_id =?";
                 preparedStatement = connection.prepareStatement(sqlString);
-                preparedStatement.setString(1, currentbd.getUser_name());
+                preparedStatement.setString(1, currentbd.getUser_id());
                 preparedStatement.setString(2, currentbd.getUser_condition());
                 preparedStatement.setString(3, currentbd.getCycle_num());
                 preparedStatement.setString(4, currentbd.getHearbeat());
@@ -76,7 +147,7 @@ public class CurrentbdOper {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "add:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
@@ -96,6 +167,8 @@ public class CurrentbdOper {
         currentbd.setHearbeat(historyLocation.getHeartRate());
         currentbd.setUser_long(historyLocation.getLongitudeData());
         currentbd.setLat(historyLocation.getLatitudeData());
+        currentbd.setUser_name(historyLocation.getEquipmentId());
+        currentbd.setHearbeat(historyLocation.getHeartRate());
         if ("yes".equals(historyLocation.getIsBeginRun())) {
             currentbd.setRun("true");
         } else {
@@ -112,7 +185,7 @@ public class CurrentbdOper {
 
     public static void create() {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             /*sql = "CREATE TABLE if not exists currentbd(id varchar(25) PRIMARY KEY ,\r\n" +
                     "	user_id varchar(16)NOT NULL,user_name varchar(16),equipment_id varchar(16)NOT NULL,\r\n" +
                     "	user_condition varchar(16),cycle_num varchar(4),hearbeat varchar(16),watch_power varchar(4),\r\n" +
@@ -124,7 +197,7 @@ public class CurrentbdOper {
         } catch (Exception e) {
             DebugPrint.dPrint(e);
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
@@ -134,7 +207,7 @@ public class CurrentbdOper {
                            String power, String lon, String lat,
                            String totalTime, String run) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "INSERT INTO currentbd(id,user_id,user_name"
                     + "equipment_id,user_condition,cycle_num,hearbeat,"
                     + "watch_power,user_long,lat,totalTime,run)"
@@ -161,14 +234,14 @@ public class CurrentbdOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
 
     public static void add(String id, String uid, String uname, String eid, String cycle_num) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "INSERT INTO currentbd(id,user_id,user_name,equipment_id,`user_condition`,cycle_num "
                     + ",hearbeat,watch_power,user_long,lat,totalTime,"
                     + "run ) VALUES"
@@ -196,7 +269,7 @@ public class CurrentbdOper {
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "add:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
 
     }
@@ -207,9 +280,9 @@ public class CurrentbdOper {
             for (int i = 0; i < 100; i++) {
                 ids[i] = new Date().getTime() + i + "";
             }
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             connection.setAutoCommit(false);
-            sql = "INSERT INTO currentbd(id,user_id,user_name,equipment_id,`user_condition`,cycle_num "
+            sql = "INSERT INTO currentbd(id,user_id,user_name,equipment_id,user_condition,cycle_num "
                     + ",hearbeat,watch_power,user_long,lat,totalTime,"
                     + "run ) VALUES"
                     + "(?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -217,27 +290,28 @@ public class CurrentbdOper {
             preparedStatement = connection.prepareStatement(sql);
             for (int i = 0; i < 100; i++) {
                 String str = i + "";
-                preparedStatement.setString(1, ids[i]);
-                preparedStatement.setString(2, str);
-                preparedStatement.setString(3, str);
-                preparedStatement.setString(4, str);
-                preparedStatement.setString(5, "正常");
-                preparedStatement.setString(6, cycle_num);
-                preparedStatement.setString(7, "");
-                preparedStatement.setString(8, "正常");
-                preparedStatement.setString(9, "");
-                preparedStatement.setString(10, "");
-                preparedStatement.setString(11, "");
-                preparedStatement.setString(12, "true");
+                preparedStatement.setString(1, ids[i]);//id
+                preparedStatement.setString(2, str);//user_id
+                preparedStatement.setString(3, str);//user_name
+                preparedStatement.setString(4, str);//equipment_id
+                preparedStatement.setString(5, "正常");//user_condition
+                preparedStatement.setString(6, cycle_num);//cycle_num
+                preparedStatement.setString(7, "");//hearbeat
+                preparedStatement.setString(8, "正常");//watch_power
+                preparedStatement.setString(9, "");//user_long
+                preparedStatement.setString(10, "");//lat
+                preparedStatement.setString(11, "");//totalTime
+                preparedStatement.setString(12, "true");//run
                 preparedStatement.execute();
                 Currentbd currentbd = new Currentbd(str, str, str, str, "正常", cycle_num, "", "正常", "", "", "", "true");
                 currentbdMap.put(str, currentbd);
             }
             connection.commit();
+            DebugPrint.dPrint(TAG + "add all success!");
         } catch (Exception e) {
             DebugPrint.dPrint(TAG + "add:" + e.toString());
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
 
     }
@@ -245,7 +319,7 @@ public class CurrentbdOper {
     public static void select(ArrayList<String> array) {//  获取cp表的所有数据，存储到array中。
 
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from currentbd";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -259,7 +333,7 @@ public class CurrentbdOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
 
     }
@@ -267,7 +341,7 @@ public class CurrentbdOper {
     public static void updateRun(String uid, String eid)//
     {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "update currentbd set run='false' where user_id =? and equipment_id =?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, uid);
@@ -283,14 +357,14 @@ public class CurrentbdOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
     public static int getPgNumF() {
         int i = -1;
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "SELECT COUNT(*) FROM currentbd where run='false'";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -301,7 +375,7 @@ public class CurrentbdOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
         return i;
     }
@@ -309,7 +383,7 @@ public class CurrentbdOper {
     public static int getPgNum() {
         int i = -1;
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "SELECT COUNT(*) FROM currentbd where run='true'";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -320,14 +394,14 @@ public class CurrentbdOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
         return i;
     }
 
     public static void command(String sql, ArrayList<String> array) {//
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -339,14 +413,14 @@ public class CurrentbdOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
     public static void delete(String id) {
         try {
             String sql = "select equipment_id from currentbd where id=?";
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -366,7 +440,7 @@ public class CurrentbdOper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
@@ -374,7 +448,7 @@ public class CurrentbdOper {
     public static void deleteAll() {
         try {
             String sql = "delete from currentbd";
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.executeUpdate();
             currentbdMap.clear();
@@ -383,7 +457,7 @@ public class CurrentbdOper {
             e.printStackTrace();
             DebugPrint.dPrint("CurrentbdOper delete all error");
         } finally {
-            DatabaseInformation.close(connection, preparedStatement, resultSet);
+            databaseInformation.close(connection, preparedStatement, resultSet);
         }
     }
 
@@ -393,7 +467,7 @@ public class CurrentbdOper {
         //从map中找
         if (currentbdMap.get(equipmentId) == null) {//map中找不到记录，则从数据库找 并保存到map
             try {
-                connection = databaseInformation.getconn();
+                connection = DruidOper.getConnection();
                 sql = "select * from currentbd  where  run ='true'";
                 preparedStatement = connection.prepareStatement(sql);
                 resultSet = preparedStatement.executeQuery();
@@ -435,7 +509,7 @@ public class CurrentbdOper {
         }
         if (!jduge) {
             try {
-                connection = databaseInformation.getconn();
+                connection = DruidOper.getConnection();
                 sql = "select user_id from currentbd  where  run ='true'";
                 preparedStatement = connection.prepareStatement(sql);
                 resultSet = preparedStatement.executeQuery();
@@ -457,7 +531,7 @@ public class CurrentbdOper {
             jduge = true;
         } else {
             try {
-                connection = databaseInformation.getconn();
+                connection = DruidOper.getConnection();
                 sql = "select equipment_id from currentbd where  run ='true'";
                 preparedStatement = connection.prepareStatement(sql);
                 resultSet = preparedStatement.executeQuery();
@@ -484,7 +558,7 @@ public class CurrentbdOper {
 
         if ("".equals(s)) {
             try {
-                connection = databaseInformation.getconn();
+                connection = DruidOper.getConnection();
                 sql = "select id from currentbd where equipment_id =? and run='true'";
                 preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.setString(1, reEid);
@@ -506,7 +580,7 @@ public class CurrentbdOper {
         s = currentbdMap.get(eid).getUser_id();
         if ("".equals(s)) {
             try {
-                connection = databaseInformation.getconn();
+                connection = DruidOper.getConnection();
                 sql = "select user_id  from currentbd where equipment_id =? and run='true'";
                 preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.setString(1, eid);
@@ -525,7 +599,7 @@ public class CurrentbdOper {
 
         /*public void Update_condition(String condition, String e_id) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "update currentbd set user_condition =? where equipment_id =? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, condition);
@@ -544,7 +618,7 @@ public class CurrentbdOper {
         String reEid = eid.replace(" ", "");
         String s = "";
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from currentbd where equipment_id =? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, reEid);
@@ -564,7 +638,7 @@ public class CurrentbdOper {
         String reEid = eid.replace(" ", "");
         String cycle = "";
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select cycle_num from currentbd where equipment_id =?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, reEid);
@@ -582,7 +656,7 @@ public class CurrentbdOper {
 
     /*public void UpdateCycle_num(String cycle_num, String e_id) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "update currentbd set cycle_num =? where equipment_id =? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, cycle_num);
@@ -599,7 +673,7 @@ public class CurrentbdOper {
 
     /*public void UpdateTotalTime(String totalTime, String eid) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             DebugPrint.dPrint("即将修改的用时是：" + totalTime + "eid是：" + eid);
             sql = "update currentbd set totalTime =? where equipment_id=? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
@@ -618,7 +692,7 @@ public class CurrentbdOper {
 
     /*public void Update_hearbeat(String hearbeat, String e_id) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "update currentbd set hearbeat =? where equipment_id =? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, hearbeat);
@@ -635,7 +709,7 @@ public class CurrentbdOper {
 
     /*public void Update_power(String power, String e_id) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "update currentbd set watch_power  =? where equipment_id =? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, power);
@@ -652,7 +726,7 @@ public class CurrentbdOper {
 
     /*public void Update_long(String lng, String e_id) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "update currentbd set lng =? where equipment_id =? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, lng);
@@ -669,7 +743,7 @@ public class CurrentbdOper {
 
    /* public void Update_lat(String lat, String e_id) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "update currentbd set lat =? where equipment_id =? and run='true'";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, lat);

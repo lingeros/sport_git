@@ -2,17 +2,16 @@ package ling.originalSources;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 
 public class WarningSounds extends Thread {
     private File file;
-    WarningSounds(File file) {
+    public WarningSounds(File file) {
         this.file = file;
     }
 

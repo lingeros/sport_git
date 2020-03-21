@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class SerialPortListener implements SerialPortEventListener {
-    private final String TAG = "SerialPortListener";
+    private final String TAG = "SerialPortListener:";
     //串口传进来的
     private InputStream inputStream;
     private OutputStream outputStream;
@@ -30,34 +30,34 @@ public class SerialPortListener implements SerialPortEventListener {
     public void serialEvent(SerialPortEvent serialPortEvent) {
         switch (serialPortEvent.getEventType()) {
             case SerialPortEvent.BI:
-                DebugPrint.dPrint("串口通讯中断");
+                DebugPrint.dPrint(TAG+"串口通讯中断");
                 break;
             case SerialPortEvent.OE:
-                DebugPrint.dPrint("溢出错误");
+                DebugPrint.dPrint(TAG+"溢出错误");
 
             case SerialPortEvent.FE:
-                DebugPrint.dPrint("帧错误");
+                DebugPrint.dPrint(TAG+"帧错误");
 
             case SerialPortEvent.PE:
-                DebugPrint.dPrint("奇偶校验错误");
+                DebugPrint.dPrint(TAG+"奇偶校验错误");
 
             case SerialPortEvent.CD:
-                DebugPrint.dPrint("载波检测");
+                DebugPrint.dPrint(TAG+"载波检测");
 
             case SerialPortEvent.CTS:
-                DebugPrint.dPrint("清除待发送数据");
+                DebugPrint.dPrint(TAG+"清除待发送数据");
 
             case SerialPortEvent.DSR:
-                DebugPrint.dPrint("待发送数据准备好了");
+                DebugPrint.dPrint(TAG+"待发送数据准备好了");
 
             case SerialPortEvent.RI:
-                DebugPrint.dPrint("振铃指示");
+                DebugPrint.dPrint(TAG+"振铃指示");
 
             case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
-                DebugPrint.dPrint("输出缓冲区已清空");
+                DebugPrint.dPrint(TAG+"输出缓冲区已清空");
                 break;
             case SerialPortEvent.DATA_AVAILABLE:
-                DebugPrint.dPrint("串口存在可用数据");
+
                 //接收数据
                 SerialPortData serialPortData = receiveData();
                 if(serialPortData != null){
@@ -78,10 +78,8 @@ public class SerialPortListener implements SerialPortEventListener {
                     break;
                 }
             }
-            DebugPrint.dPrint(currentSerialPort.getName() +":一次读取数据结束！");
-            DebugPrint.dPrint(new String(readBuffer));
             serialPortData = new SerialPortData(new String(readBuffer));
-            DebugPrint.dPrint("转换成串口数据："+serialPortData.toString());
+            DebugPrint.dPrint(TAG+"转换成串口数据："+serialPortData.toString());
         }catch (Exception e){
             DebugPrint.dPrint(TAG ,e.toString());
         }

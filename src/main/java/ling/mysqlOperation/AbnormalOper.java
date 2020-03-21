@@ -16,13 +16,13 @@ public class AbnormalOper {
     private static PreparedStatement preparedStatement = null;
     private static ResultSet resultSet = null;
     private static String sql;
-    private static DatabaseInformation databaseInformation = new DatabaseInformation();
+    private static DatabaseInformation databaseInformation = DatabaseInformation.getInstance();
     //这个是用来判断有哪些设备是心率不正常的 以便于删除
     public static Map<String, String> abnormalMap = new HashMap<>();
 
     public static void create() {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             DebugPrint.dPrint("testa");
             sql = "CREATE TABLE abnormal (\r\n" +
                     "	num INTEGER NOT NULL auto_increment primary key,\r\n" +
@@ -41,7 +41,7 @@ public class AbnormalOper {
 
     public static void add(String equipment_id, String user_id, String abnor, Timestamp time) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "INSERT INTO abnormal (equipment_id , user_id ,abnor,time) VALUES (?,?,?,?)";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, equipment_id);
@@ -59,7 +59,7 @@ public class AbnormalOper {
     public static void select(int PgNum, ArrayList<String> array) {
         int b = 20 * (PgNum - 1);
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select *from abnormal order by time limit " + b + "," + 20;
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery(sql);
@@ -76,9 +76,10 @@ public class AbnormalOper {
         }
     }
 
-    public static void selectAll(ArrayList<String> array) {//获取abnormal表的所有数据，存储到array中。
+    public static ArrayList<String> selectAll() {//获取abnormal表的所有数据，存储到array中。
+        ArrayList<String> array = new ArrayList<>();
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "select * from abnormal";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -90,13 +91,14 @@ public class AbnormalOper {
             DebugPrint.dPrint(e);
         } finally {
             databaseInformation.close(connection, preparedStatement, resultSet);
+            return array;
         }
     }
 
     public static int getPgNum() {
         int i = -1;
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "SELECT COUNT(*) FROM abnormal";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -111,17 +113,17 @@ public class AbnormalOper {
 
     public static void deleteByEquipmentId(String equipmentId) {
         try {
-            connection = databaseInformation.getconn();
+            connection = DruidOper.getConnection();
             sql = "delete from abnormal where equipment_id = ?";
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1,equipmentId);
+            preparedStatement.setString(1, equipmentId);
             boolean result = preparedStatement.execute();
-            if(result){
+            if (result) {
                 DebugPrint.dPrint("abnormalOper delete one data success");
             }
 
         } catch (Exception e) {
-            DebugPrint.dPrint("abnormalOper:"+"deleteByEquipmentId error:"+e.toString());
+            DebugPrint.dPrint("abnormalOper:" + "deleteByEquipmentId error:" + e.toString());
         } finally {
             databaseInformation.close(connection, preparedStatement, null);
         }
