@@ -20,6 +20,7 @@ public class SerialPortDataList {
     //内建一条接收数据的线程
     private static Thread receiveThread;
 
+
     //
     private static SerialPortData[] serialPortData;
 

@@ -19,7 +19,7 @@ public class DruidOper {
                dataSource = new DruidDataSource();
                //
                dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-               dataSource.setUrl("jdbc:mysql://106.53.85.245:3306/bracelet?useUnicode=true&characterEncoding=utf-8&useSSL=false");
+               dataSource.setUrl("jdbc:mysql://192.168.0.105:3306/bracelet?useUnicode=true&characterEncoding=utf-8&useSSL=false");
                dataSource.setUsername("root");
                dataSource.setPassword("lingeros");
                //

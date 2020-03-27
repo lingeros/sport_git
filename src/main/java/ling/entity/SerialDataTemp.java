@@ -23,8 +23,10 @@ public class SerialDataTemp {
     //用来保存全部设备的  key存放的是设备号  value参数存放的是数据
     public static Map<String, HistoryLocation> serialDataTempMap = new HashMap<>();
 
-    //
+    //存放历史数据队列
     public static ArrayDeque<HistoryLocation> historyLocationArrayDeque = new ArrayDeque<>();
+    //用来存储起始点 key:设备号   value:latitudeData | longitudeData
+    public static Map<String,String> startPointMap = new HashMap<>();
 
 
     public static void addOneData(SerialPortData serialPortData){
@@ -73,6 +75,12 @@ public class SerialDataTemp {
                 //进入这里表示开始运动 并且远离原点了
                 isRuning = "yes";
             }else if(distance > MainPanel.getTrack_point() || "0".equals(lastHistoryLocationData.getCircleNum())){
+                String startPoint = startPointMap.get(historyLocation.getEquipmentId());
+                String[] datas = startPoint.split("|");
+                double distanceFromStartPoint = CalculateUtils.getDistance(newLatitudeData, newLongitudeData, Double.parseDouble(datas[0]), Double.parseDouble(datas[2]));
+                if(distanceFromStartPoint > 400){
+                    return;
+                }
                 //进入这里表示异常
                 DebugPrint.dPrint("SerialDataTemp:" + "距离异常，圈数异常");
             }
@@ -104,6 +112,10 @@ public class SerialDataTemp {
             DebugPrint.dPrint(historyLocation.toString());
             serialDataTempMap.put(equitmentId,historyLocation);
         }else{//第一次存储
+            if(startPointMap.get(historyLocation.getEquipmentId()) == null){
+                String startPoint = serialPortData.getGPSLatitudeData() +"|"+serialPortData.getGPSLongitudeData();
+                startPointMap.put(historyLocation.getEquipmentId(),startPoint);
+            }
             historyLocation.setLongitudeData(serialPortData.getGPSLongitudeData());
             historyLocation.setLongitudeType(serialPortData.getGPSLongitudeType());
             historyLocation.setLatitudeData(serialPortData.getGPSLatitudeData());
