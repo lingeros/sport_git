@@ -324,7 +324,7 @@ public class CurrentbdOper {
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                if ("true".equals(resultSet.getString("run")))
+                if ("true".equals(resultSet.getString("run")) | (resultSet.getString("totalTime") != null))
                     array.add(resultSet.getString(2) + ", " + resultSet.getString(3) + ", " +
                             resultSet.getString(4) + ", " + resultSet.getString(5) + ", " + resultSet.getString(6) + ", " +
                             resultSet.getString(7) + ", " + resultSet.getString(8) + ", " + resultSet.getString(9) + "xx" +

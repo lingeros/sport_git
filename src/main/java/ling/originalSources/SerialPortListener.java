@@ -78,7 +78,7 @@ public class SerialPortListener implements SerialPortEventListener {
                     break;
                 }
             }
-            serialPortData = new SerialPortData(new String(readBuffer));
+            serialPortData = new SerialPortData((new String(readBuffer)).replaceAll("\\r|\\n",""));
             DebugPrint.dPrint(TAG+"转换成串口数据："+serialPortData.toString());
         }catch (Exception e){
             DebugPrint.dPrint(TAG ,e.toString());

@@ -56,7 +56,7 @@ public class MainPanel {
     private static JTable bdUserT = new JTable(bdUserT_rowData, bdUserT_columnNames);
 
     private static Map<String, String> alltrailData = new HashMap<>();//存储手环传过来的数据
-    private static String settingCycle = "3";
+    private static String settingCycle = "1";
     private static int min_heart = 60;
     private static int max_heart = 100;
     //这个变量用于设定一个圈数的阈值 也就是当一个人的位置大于这个距离就表示点的位置是错的

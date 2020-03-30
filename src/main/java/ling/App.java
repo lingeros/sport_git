@@ -5,11 +5,16 @@ import ling.customFrame.MainPanel;
 import ling.mysqlOperation.CurrentbdOper;
 import ling.utils.DebugPrint;
 
+
 /**
  *
  */
 public class App {
+
+
+
     public static String workingType = "test";
+
 
     public static void main(String[] args) {
         if ("debug".equals(App.workingType)) {
