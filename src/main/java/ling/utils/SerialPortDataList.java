@@ -81,7 +81,7 @@ public class SerialPortDataList {
                     SerialDataTemp.addOneData(data);
                 }
                 count++;
-                if (count >= 5) {
+                if (count >= 8) {
                     DebugPrint.dPrint("receiveThread is alive;");
                     count = 0;
                 }

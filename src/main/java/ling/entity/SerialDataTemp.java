@@ -142,7 +142,7 @@ public class SerialDataTemp {
             DebugPrint.dPrint(currentbd.toString());
             CurrentbdOper.addOrUpdate("update", currentbd);
             historyLocationArrayDeque.push(historyLocation);
-            if (historyLocationArrayDeque.size() > 10) {
+            if (historyLocationArrayDeque.size() > 5) {
                 HistoryLocationOperationUtils.insertData(historyLocationArrayDeque);
             }
             DebugPrint.dPrint("SerialDataTemp->" + "locatiomMap.size:" + locationMap.size() + ", historyLocationArrayDeque.size:" + historyLocationArrayDeque.size());

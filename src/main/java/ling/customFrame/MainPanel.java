@@ -16,6 +16,8 @@ import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static ling.entity.SerialDataTemp.historyLocationArrayDeque;
+
 
 public class MainPanel {
 
@@ -40,14 +42,14 @@ public class MainPanel {
     private static AbnormalOper abnormalOper = new AbnormalOper();
     private static HistorybdOper historybdOper = new HistorybdOper();
     private static ling.originalSources.detailPane detailPane = new detailPane();
-    private static WarnPanel warnPane = new WarnPanel();
+    private static WarnPanel warnPane = WarnPanel.getInstance();
     private static ExportEX exportEX = new ExportEX();
     private static SurperAdminOper surperAdminOper = SurperAdminOper.getInstance();
     private static AdminOper adminOper = new AdminOper();
     private static ArrayList<String> Sarray = new ArrayList();
     private static ArrayList<String> DTarray = new ArrayList();
     private static ArrayList<String> SDTarray = new ArrayList();
-    private static JPanel thirdPane = new JPanel();
+    private static CustomLoginPanel thirdPane = new CustomLoginPanel();
     private static JFrame mainframe = new JFrame("监控系统");
     private static Object[] bdUserT_columnNames = new Object[]{"用户编号", "姓名", "设备号", "佩戴状态", "剩余圈数", "心跳", "电量", "轨迹",
             "用时", "开始", "结束"};
@@ -70,13 +72,15 @@ public class MainPanel {
     //启动线程
     ExtoTxt extoTxt = new ExtoTxt();
     Thread eThread = new Thread(extoTxt);
+
     void mainpane() {
 
         //设置字体格式
         mainPanel.setUIFont();
         //设置界面
-        JPanel mainPane = new JPanel();
-        JPanel backColorPane = new JPanel();
+        //
+        CustomLoginPanel mainPane = new CustomLoginPanel();
+        CustomLoginPanel backColorPane = new CustomLoginPanel();
         backColorPane.setBackground(nblue);
         ImageIcon Iconi = new ImageIcon("src/ima/dataHandle.PNG");
         JLabel bgJL = new JLabel();
@@ -676,6 +680,8 @@ public class MainPanel {
         refreshDataButton.addActionListener(e -> {
             CurrentbdOper.deleteAll();
             CurrentbdOper.addAll(MainPanel.getSettingCycle());
+            AbnormalOper.deletaAllData();
+            HistoryLocationOperationUtils.deletaAllData();
             thirdPane.removeAll();
             MainPanel p19 = new MainPanel();
             p19.bdUserTB_clear(bdUserT_rowData);
@@ -771,8 +777,9 @@ public class MainPanel {
                             }
 
                             HashMap<String, Object> map1 = new HashMap<>();
+                            System.out.println(points.toString());
                             map1.put("points", points.toString());
-                            String message = ShowMap.processTemplate(ShowMap.readToString("src/ima/map_show.html"), map1);
+                            String message = ShowMap.processTemplate(ShowMap.readToString("src/ima/html/map_show.html"), map1);
                             ShowMap.paintMap(message);
                         }
                     }
@@ -791,16 +798,15 @@ public class MainPanel {
                 }
             }
         });
+        //报警界面
         warnPane.warnTB.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                int c = e.getButton();
-                int row = warnPane.warnTB.getSelectedRow();
-                DebugPrint.dPrint("点击了：" + row + "行");
-                int col = warnPane.warnTB.getSelectedColumn();
-
-                if (c == MouseEvent.BUTTON1) {//左键点击
-                    if (col == 2) {//第3列，即"心率异常"列
-                        ArrayList<String> longitudeArray = new ArrayList();
+                try {
+                    int c = e.getButton();
+                    int row = warnPane.warnTB.getSelectedRow();
+                    int col = warnPane.warnTB.getSelectedColumn();
+                    if (c == MouseEvent.BUTTON1) {//左键点击
+                        /*ArrayList<String> longitudeArray = new ArrayList();
                         ArrayList<String> latitudeArray = new ArrayList();
                         ArrayList<String> array = abnormalOper.selectAll();  //获取所有wp表的数据，存储在array里
                         DebugPrint.dPrint("获取报警的数组是" + array);
@@ -809,7 +815,7 @@ public class MainPanel {
                         String[] recodeArray = recode.split(",");
                         String eid = recodeArray[0];                           //这里点击需要获取行的eid
                         DebugPrint.dPrint("报警表eid是" + eid);
-                        historybdOper.select(longitudeArray, latitudeArray, currentbdOper.select_id(eid));//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
+                        historybdOper.select(longitudeArray, latitudeArray, eid);//返回该条运动记录的所有轨迹点(东经、北纬各为1个数组)，10001可能是假数据或默认值(已换)
                         DebugPrint.dPrint("报警表longitude array:" + longitudeArray);
                         DebugPrint.dPrint("报警表latitude array:" + latitudeArray);
                         StringBuilder points = new StringBuilder("new AMap.LngLat(" + longitudeArray.get(0) + "," + latitudeArray.get(0) + ")"); // 原点
@@ -819,13 +825,33 @@ public class MainPanel {
                         HashMap<String, Object> map1 = new HashMap<>();
                         map1.put("points", points.toString());
                         String message = ShowMap.processTemplate(ShowMap.readToString("src/ima/map_show.html"), map1);
-                        ShowMap.paintMap(message);
+                        ShowMap.paintMap(message);*/
+                        if (AbnormalOper.getCount() != 0) {
+                            //获取当前位置
+                            ArrayList<String> array = abnormalOper.selectAll();
+                            String recode = array.get((abnormalOper.getPgNum() - 1) * 20 + row);
+                            String[] recodeArray = recode.split(",");
+                            String eid = recodeArray[0];
+                            String position = CurrentbdOper.getCurrentPosition(eid);
+                            if (!("|".equals(position))) {
+                                //修改marker.js文件
+                                ChangeJsFile.changeJsFile(eid, position);
+                                //显示
+                                ShowMap.browseShowPoint("src/ima/html/show_point.html");
+                            } else {
+                                ShowMap.browseShowPoint("src/ima/html/Error.html");
+                            }
+                        }
                     }
+                } catch (Exception e2) {
+                    DebugPrint.dPrint("Warn Pane Mouse Listener Exception:" + e.toString());
                 }
             }
+
         });
         // 数据处理相关
-        dataJB.addActionListener(e -> {
+        dataJB.addActionListener(e ->
+        {
             historybdOper.create();
             jduge = 1;
             dataPgNum = 1;
@@ -843,7 +869,8 @@ public class MainPanel {
             mainPanel.BindTable(dataTable, DataArray);
             addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
         });
-        dataSelectJB.addActionListener(e -> {
+        dataSelectJB.addActionListener(e ->
+        {
             Sarray.clear();
             jduge = 2;
             dataPgNum = 1;
@@ -869,7 +896,8 @@ public class MainPanel {
             mainPanel.BindTable(dataTable, Sarray);
             jCheckBox.setSelected(false);
         });
-        addDataPgdownJB.addActionListener(e -> {
+        addDataPgdownJB.addActionListener(e ->
+        {
             dataPgNum++;
             if (jduge == 1) {
                 if (dataPgNum >= currentbdOper.getPgNumF())
@@ -891,7 +919,9 @@ public class MainPanel {
             }
             jCheckBox.setSelected(false);
         });
-        addDataPgupJB.addActionListener(e -> {
+        addDataPgupJB.addActionListener(e ->
+
+        {
             dataPgNum--;
             if (dataPgNum <= 0)
                 dataPgNum = 1;
@@ -914,7 +944,9 @@ public class MainPanel {
             jCheckBox.setSelected(false);
         });
         //根据输入的页码，跳转至目标页
-        addDataPgSelectJB.addActionListener(e -> {
+        addDataPgSelectJB.addActionListener(e ->
+
+        {
             int i = Integer.valueOf(addDataPgSelectTF.getText());
             if (jduge == 1) {
                 if (i <= 0 || i > currentbdOper.getPgNumF())
@@ -976,7 +1008,9 @@ public class MainPanel {
                 }
             }
         });
-        dataExporttJB.addActionListener(e -> {
+        dataExporttJB.addActionListener(e ->
+
+        {
             final SelectFrame selectFrame = new SelectFrame();
             selectFrame.setjLabelTitle("是否导出所选序列的所有子信息?");
             selectFrame.init();
@@ -1008,7 +1042,9 @@ public class MainPanel {
             jCheckBox.setSelected(false);
             thirdPane.repaint();
         });
-        datadelectJB.addActionListener(e -> {
+        datadelectJB.addActionListener(e ->
+
+        {
             final SelectFrame selectFrame = new SelectFrame();
             selectFrame.setjLabelTitle("删除不可恢复，是否继续?");
             selectFrame.init();
@@ -1056,13 +1092,21 @@ public class MainPanel {
         });
         // 报警提示相关
 
-        warningJB.addActionListener(e -> {
+        warningJB.addActionListener(e ->
+
+        {
             int a = 1;
             exists = true;
+            if (warnPane == null) {
+                warnPane = WarnPanel.getInstance();
+            }
             warnPane.Pane(mainframe);
+
         });
         // 一键准备相关
-        ALLstartJB.addActionListener(e -> {
+        ALLstartJB.addActionListener(e ->
+
+        {
 
             if (ASR == 1) {
                 ASR = 2;
@@ -1073,7 +1117,9 @@ public class MainPanel {
                 ALLstartJB.setIcon(ii31);
             } else if (ASR == 2) {
                 CurrentbdOper.initShowMsgMap();
-
+                if (eThread == null) {
+                    eThread = new Thread(extoTxt);
+                }
                 eThread.start();
                 try {
                     if (!isBegin) {
@@ -1100,10 +1146,16 @@ public class MainPanel {
             }
         });
         // 一键停止相关
-        AllcloseJB.addActionListener(e -> {
+        AllcloseJB.addActionListener(e ->
+
+        {
             if (AST == 1) {
                 eThread.stop();
                 DebugPrint.dPrint("ExtoTxt thread stop");
+                eThread = null;
+                if (historyLocationArrayDeque.size() > 0) {
+                    HistoryLocationOperationUtils.insertData(historyLocationArrayDeque);
+                }
                 AST = 2;
                 try {
                     if (isBegin) {
@@ -1135,6 +1187,7 @@ public class MainPanel {
                     String str = "C";
                     byte[] sb = str.getBytes();
                     HistoryLocationOperationUtils.deletaAllData();
+                    AbnormalOper.deletaAllData();
                     AST = 1;
                     ImageIcon ii21 = new ImageIcon("src/ima/end.png");
                     Image temp21 = ii21.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(), ii21.getImage().SCALE_DEFAULT);
@@ -1147,7 +1200,9 @@ public class MainPanel {
             }
         });
         // 设置相关
-        setJB.addActionListener(e -> {
+        setJB.addActionListener(e ->
+
+        {
             secondPane.removeAll();
             panelAlls(secondPane, new_admin, surAdminJL, surAdminJF);
             thirdPane.removeAll();
@@ -1156,7 +1211,9 @@ public class MainPanel {
             thirdPane.repaint();
         });
 
-        confirmJB.addActionListener(e -> {
+        confirmJB.addActionListener(e ->
+
+        {
             String surAdminJFPassword = String.valueOf(surAdminJF.getPassword());
             String adminJFPassword = String.valueOf(adminJF.getPassword());
             String RadminJFPassword = String.valueOf(RadminJF.getPassword());
@@ -1177,7 +1234,9 @@ public class MainPanel {
                 mainPanel.RemindPgSelect("           请填完信息");
             }
         });
-        updateJB.addActionListener(e -> {
+        updateJB.addActionListener(e ->
+
+        {
             String password = String.valueOf(surAdminJF.getPassword());
             String addPassword1 = String.valueOf(adminJF.getPassword());
             String addPassword2 = String.valueOf(RadminJF.getPassword());
@@ -1198,12 +1257,16 @@ public class MainPanel {
                 mainPanel.RemindPgSelect("请填完信息");
             }
         });
-        deleteJB.addActionListener(e -> {
+        deleteJB.addActionListener(e ->
+
+        {
             userdataOperate.deleteAll();
             currentbdOper.deleteAll();
             historybdOper.deleteAll();
         });
-        confirmCJB.addActionListener(e -> {
+        confirmCJB.addActionListener(e ->
+
+        {
             String heart_orange = HeartJF.getText();
             if (heart_orange.length() > 0) {
                 String[] heart_list = heart_orange.split("-");
@@ -1211,13 +1274,17 @@ public class MainPanel {
                 max_heart = Integer.parseInt(heart_list[1]);
             }
         });
-        confirmCJB2.addActionListener(e -> {
+        confirmCJB2.addActionListener(e ->
+
+        {
             String cycle = CnumJF.getText();
             if (cycle.length() > 0) {
                 settingCycle = cycle;
             }
         });
-        confirmCJB3.addActionListener(e -> {
+        confirmCJB3.addActionListener(e ->
+
+        {
             String trackPoint = AbnormalJF.getText();
             if (trackPoint.length() > 0) {
                 track_point = Integer.parseInt(trackPoint);
@@ -1492,6 +1559,7 @@ public class MainPanel {
         public Class getColumnClass(int columnIndex) {
             return typeArray[columnIndex];// 返回每一列的数据类型
         }
+
     }
 
 

@@ -3,15 +3,13 @@ package ling.mysqlOperation;
 import ling.entity.DatabaseInformation;
 import ling.utils.DebugPrint;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AbnormalOper {
+    private static final String TAG = "AbnormalOper:";
     private static Connection connection = null;
     private static PreparedStatement preparedStatement = null;
     private static ResultSet resultSet = null;
@@ -127,9 +125,47 @@ public class AbnormalOper {
         } finally {
             databaseInformation.close(connection, preparedStatement, null);
         }
-
-
     }
+
+    public static void deletaAllData(){
+        connection = DruidOper.getConnection();
+        if(connection != null){
+            try {
+                preparedStatement = connection.prepareStatement("delete from abnormal");
+                preparedStatement.execute();
+                DebugPrint.dPrint(TAG+"delete all success!");
+            } catch (SQLException e) {
+                DebugPrint.dPrint(TAG + e.toString());
+            }
+            finally {
+                DatabaseInformation.close(connection,preparedStatement, resultSet);
+            }
+
+        }
+    }
+    public static int getCount(){
+        connection = DruidOper.getConnection();
+        int count = 0;
+        if(connection != null){
+            try {
+                preparedStatement = connection.prepareStatement("SELECT COUNT(*)  FROM abnormal;");
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()){
+                    count = resultSet.getInt("COUNT(*)");
+                }
+            } catch (SQLException e) {
+                DebugPrint.dPrint(TAG + e.toString());
+            }
+            finally {
+                DatabaseInformation.close(connection,preparedStatement, resultSet);
+
+            }
+
+        }
+        return count;
+    }
+
+
 }
 
 

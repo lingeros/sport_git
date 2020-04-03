@@ -134,5 +134,28 @@ public class HistoryLocationOperationUtils {
         }
     }
 
+    public static String getCurrentPosition(String equipmentId){
+        String result = "";
+        connection = DruidOper.getConnection();
+        if(connection !=null){
+            try {
+                String sql = "select longitude_data,latitude_data from t_history_location where equipment_id= ? order by save_time desc limit 1;";
+                preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setString(1,equipmentId);
+                resultSet = preparedStatement.executeQuery();
+                while(resultSet.next()){
+                    String longitudeData = resultSet.getString("longitude_data");
+                    String latitudeData = resultSet.getString("latitude_data");
+                    result = longitudeData + "|" +latitudeData;
+                }
+
+            }catch(Exception e){
+                DebugPrint.dPrint(TAG+e);
+            }
+
+        }
+        return result;
+    }
+
 
 }

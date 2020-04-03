@@ -16,28 +16,41 @@ import java.util.ArrayList;
 public class WarnPanel {
     private final String TAG = "WarnPanel:";
     private Color nyellow = new Color(204, 238, 118);
-
+    private static WarnPanel warnPanel = new WarnPanel();
     private int PgNum = 1;
     private static WarningSounds warningSounds;
     AbnormalOper abnormalOper = new AbnormalOper();
-    private static WarnPanel wp = new WarnPanel();
+
     Object[] abnor_columnNames = new Object[]{"设备编号", "用户编号", "异常项", "时间"};
     Object[][] abnor_rowData = new Object[20][4];
     JTable warnTB = new JTable(abnor_rowData, abnor_columnNames);
 
+    private WarnPanel() {
 
+    }
+
+    public static WarnPanel getInstance() {
+        if (warnPanel == null) {
+            warnPanel = new WarnPanel();
+        }
+        return warnPanel;
+    }
 
     public void Pane(JFrame mainframe) {
-        try {
-            String path = "src/ima/warning_sound.mp3";
-            File f = new File(path);
-            warningSounds = new WarningSounds(f);
-            warningSounds.start();
-        } catch (Exception e) {
-           DebugPrint.dPrint(e);
+        if (AbnormalOper.getCount() != 0) {
+
+            try {
+                String path = "src/ima/warning_sound.mp3";
+                File f = new File(path);
+                warningSounds = new WarningSounds(f);
+                warningSounds.start();
+            } catch (Exception e) {
+                DebugPrint.dPrint(e);
+            }
         }
+
         final JDialog dFrame = new JDialog(mainframe, "异常数据", false);
-        JPanel dPane = new JPanel();
+        final JPanel dPane = new JPanel();
         dFrame.setLayout(null);
         dPane.setLayout(null);
         JButton PgdownJB = new JButton("下一页");
@@ -73,10 +86,10 @@ public class WarnPanel {
         renderer.setBackground(red);
         renderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
         warnTB.setDefaultRenderer(Object.class, renderer);
-        wp.abnor_rowData(abnor_rowData, AbnormalOper.getPgNum());
-        PgNum= AbnormalOper.getPgNum();
+        warnPanel.abnor_rowData(abnor_rowData, AbnormalOper.getPgNum());
+        PgNum = AbnormalOper.getPgNum();
         PgNumJL.setText("跳转/共" + AbnormalOper.getPgNum() + "页");
-        warnTB.setEnabled(false);
+        warnTB.setEnabled(true);
         dPane.add(warnJP);
         dPane.add(PgdownJB);
         dPane.add(PgupJB);
@@ -92,24 +105,24 @@ public class WarnPanel {
         PgdownJB.addActionListener(e -> {
             PgNum++;
             if (PgNum >= AbnormalOper.getPgNum()) PgNum = AbnormalOper.getPgNum();
-            wp.T_clear(abnor_rowData);
-            wp.abnor_rowData(abnor_rowData, PgNum);
+            warnPanel.T_clear(abnor_rowData);
+            warnPanel.abnor_rowData(abnor_rowData, PgNum);
             dFrame.repaint();
         });
         PgupJB.addActionListener(e -> {
             PgNum--;
             if (PgNum <= 0) PgNum = 0;
-            wp.T_clear(abnor_rowData);
-            wp.abnor_rowData(abnor_rowData, PgNum);
+            warnPanel.T_clear(abnor_rowData);
+            warnPanel.abnor_rowData(abnor_rowData, PgNum);
             dFrame.repaint();
         });
         selectJB.addActionListener(e -> {
             int num = Integer.valueOf(selectPgNumJF.getText());
-            if (num <= 0 || num > AbnormalOper.getPgNum()) wp.RemindPgSelect("请根据总页数输入所跳转页数");
+            if (num <= 0 || num > AbnormalOper.getPgNum()) warnPanel.RemindPgSelect("请根据总页数输入所跳转页数");
             else {
                 PgNum = num;
-                wp.T_clear(abnor_rowData);
-                wp.abnor_rowData(abnor_rowData, PgNum);
+                warnPanel.T_clear(abnor_rowData);
+                warnPanel.abnor_rowData(abnor_rowData, PgNum);
                 dFrame.repaint();
             }
 
@@ -118,8 +131,10 @@ public class WarnPanel {
             public void windowClosing(WindowEvent we) {
                 dFrame.dispose();
                 MainPanel.exists = false;
-                DebugPrint.dPrint(TAG+"close window");
-                warningSounds.interrupt();
+                DebugPrint.dPrint(TAG + "close window");
+                if (warningSounds != null) {
+                    warningSounds.interrupt();
+                }
                 dFrame.dispose();
             }
         });
@@ -128,9 +143,8 @@ public class WarnPanel {
     }
 
 
-
     public void RemindPgSelect(String showMessage) {
-        final RemindFrame remindFrame = new RemindFrame("提示",showMessage);
+        final RemindFrame remindFrame = new RemindFrame("提示", showMessage);
         remindFrame.init();
 
     }
@@ -148,7 +162,7 @@ public class WarnPanel {
         ArrayList<String> array = new ArrayList();
         AbnormalOper.select(PgNum, array);
         for (int i = 0; i < array.size(); i++) {
-            int n = i ;
+            int n = i;
             if (array.size() != 0) {
                 String[] a = array.get(i).split(",");
                 for (int j = 0; j < 4; j++)

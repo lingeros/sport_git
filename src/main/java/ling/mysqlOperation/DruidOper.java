@@ -47,6 +47,7 @@ public class DruidOper {
             connection = dataSource.getConnection();
         }catch (Exception e){
             DebugPrint.dPrint("DruidOper:getConnection error:"+e.toString());
+            return null;
         }
         return connection;
     }

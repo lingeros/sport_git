@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <style type="text/css">
+        body, html, #container {
+            height: 100%;
+            margin: 0;
+            font: 12px Arial;
+        }
+
+        .taiwan {
+            border: solid 1px red;
+            color: red;
+            float: left;
+            width: 50px;
+            background-color: rgba(255, 0, 0, 0.1)
+        }
+    </style>
+    <title>Show Position</title>
+</head>
+<body>
+<div id="container" tabindex="0"></div>
+<script src="../js/marker.js"></script>
+<script src="https://webapi.amap.com/maps?v=1.4.15&key=56452020d32767c0bd1ac3da6446a19f"></script>
+<script type="text/javascript">
+
+    var map = new AMap.Map('container', {resizeEnable: true, zoom: 4});
+    var markers = [];
+    for (var i = 0; i < locations.length; i += 1) {
+        var marker;
+
+        marker = new AMap.Marker({
+            position: locations[i].center.split(','),
+            title: locations[i].name,
+            map: map
+        });
+
+
+        markers.push(marker);
+    }
+    map.setFitView();
+</script>
+<script type="text/javascript" src="../js/liteToolbar.js"></script>
+</body>
+</html>

@@ -38,13 +38,14 @@ public class ExtoTxt implements Runnable {
                     bufferedWriter.write(temp[0]+temp[1]);
                 }
                 bufferedWriter.close();
-                DebugPrint.dPrint(TAG + "write once finish:"+count);
+
                 Thread.sleep(300);
                 //为了计时
                 if(count>=100){
                     //每隔3秒更新一次数据
                     CurrentbdOper.updateShowMsgMap();
                     count = 0;
+                    DebugPrint.dPrint(TAG + "update");
                 }
             } catch (Exception e) {
                 DebugPrint.dPrint(TAG + "write file error:" + e.toString());

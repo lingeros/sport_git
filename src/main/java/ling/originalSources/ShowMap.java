@@ -87,6 +87,15 @@ public class ShowMap extends JPanel {
 
     }
 
+    public static void browseShowPoint(String url){
+        try {
+            Runtime.getRuntime().exec("cmd /c start " + url);//启用cmd运行默认浏览器
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
 
 }

@@ -92,14 +92,14 @@ public class HistorybdOper {
             int i = 0;
             int j = 0;
             connection = DruidOper.getConnection();
-            sql = "select * from historybd where id =?";
+            sql = "select longitude_data,latitude_data from t_history_location where equipment_id =?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, id);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                if (!resultSet.getString("long").equals("") && !resultSet.getString("lat").equals("")) {
-                    Aarray.add(resultSet.getString("long"));
-                    Barray.add(resultSet.getString("lat"));
+                if (!resultSet.getString("longitude_data").equals("") && !resultSet.getString("latitude_data").equals("")) {
+                    Aarray.add(resultSet.getString("longitude_data"));
+                    Barray.add(resultSet.getString("latitude_data"));
                 }
                 i++;
                 j++;

@@ -444,6 +444,28 @@ public class CurrentbdOper {
         }
     }
 
+    public static String getCurrentPosition(String equipmentId){
+        String result = "";
+        connection = DruidOper.getConnection();
+        if(connection !=null){
+            try {
+                String sql = "select user_long,lat from currentbd where equipment_id= ? ;";
+                preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setString(1,equipmentId);
+                resultSet = preparedStatement.executeQuery();
+                while(resultSet.next()){
+                    String longitudeData = resultSet.getString("user_long");
+                    String latitudeData = resultSet.getString("lat");
+                    result = longitudeData + "|" +latitudeData;
+                }
+
+            }catch(Exception e){
+                DebugPrint.dPrint(TAG+e);
+            }
+
+        }
+        return result;
+    }
 
     public static void deleteAll() {
         try {
