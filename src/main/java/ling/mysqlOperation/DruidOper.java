@@ -23,9 +23,9 @@ public class DruidOper {
                dataSource.setUsername("root");
                dataSource.setPassword("lingeros");
                //
-               dataSource.setInitialSize(5);
-               dataSource.setMinIdle(5);
-               dataSource.setMaxActive(10);
+               dataSource.setInitialSize(30);
+               dataSource.setMinIdle(20);
+               dataSource.setMaxActive(100);
                //
                dataSource.setRemoveAbandoned(true);
                dataSource.setRemoveAbandonedTimeout(3000000);

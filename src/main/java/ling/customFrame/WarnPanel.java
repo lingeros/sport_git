@@ -15,11 +15,11 @@ import java.util.ArrayList;
 
 public class WarnPanel {
     private final String TAG = "WarnPanel:";
-    private Color nyellow = new Color(204, 238, 118);
-    private static WarnPanel warnPanel = new WarnPanel();
+
+    private static WarnPanel warnPanel;
     private int PgNum = 1;
     private static WarningSounds warningSounds;
-    AbnormalOper abnormalOper = new AbnormalOper();
+
 
     Object[] abnor_columnNames = new Object[]{"设备编号", "用户编号", "异常项", "时间"};
     Object[][] abnor_rowData = new Object[20][4];
@@ -48,7 +48,9 @@ public class WarnPanel {
                 DebugPrint.dPrint(e);
             }
         }
-
+        if (warnPanel == null) {
+            warnPanel = new WarnPanel();
+        }
         final JDialog dFrame = new JDialog(mainframe, "异常数据", false);
         final JPanel dPane = new JPanel();
         dFrame.setLayout(null);
@@ -56,6 +58,7 @@ public class WarnPanel {
         JButton PgdownJB = new JButton("下一页");
         JButton PgupJB = new JButton("上一页");
         JButton selectJB = new JButton("确定");
+        JButton refreshJB = new JButton("刷新");
         JLabel PgNumJL = new JLabel("跳转/共n页");
         final JTextField selectPgNumJF = new JTextField();
         Color red = new Color(255, 0, 0);
@@ -67,6 +70,7 @@ public class WarnPanel {
         PgNumJL.setBounds(300, 525, 80, 25);
         selectPgNumJF.setBounds(370, 525, 100, 25);
         selectJB.setBounds(475, 525, 60, 25);
+        refreshJB.setBounds(545, 525, 60, 25);
         JScrollPane warnJP = new JScrollPane();
         warnJP.setBounds(5, 1, 620, 525);
         warnJP.setViewportView(warnTB);//这句很重要
@@ -94,6 +98,7 @@ public class WarnPanel {
         dPane.add(PgdownJB);
         dPane.add(PgupJB);
         dPane.add(selectJB);
+        dPane.add(refreshJB);
         dPane.add(PgNumJL);
         dPane.add(selectPgNumJF);
         dFrame.add(dPane);
