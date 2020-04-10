@@ -6,6 +6,7 @@ import ling.mysqlOperation.CurrentbdOper;
 import ling.utils.CalculateUtils;
 import ling.utils.DebugPrint;
 import ling.utils.HistoryLocationOperationUtils;
+import ling.utils.SaveAsJsonThread;
 
 import java.sql.Timestamp;
 import java.util.ArrayDeque;
@@ -119,6 +120,7 @@ public class SerialDataTemp {
             }*/
                 DebugPrint.dPrint(historyLocation.toString());
                 serialDataTempMap.put(equitmentId, historyLocation);
+                SaveAsJsonThread.historyLocationMap.put(historyLocation.getEquipmentId(),historyLocation);
             } else {//第一次存储
                 if (startPointMap.get(historyLocation.getEquipmentId()) == null) {
                     String startPoint = serialPortData.getGPSLatitudeData() + "|" + serialPortData.getGPSLongitudeData();
@@ -135,6 +137,7 @@ public class SerialDataTemp {
                 historyLocation.setSaveTime(new Timestamp(System.currentTimeMillis()).toString());
                 historyLocation.setHeartRate(serialPortData.getHeartRateData());
                 serialDataTempMap.put(equitmentId, historyLocation);
+                SaveAsJsonThread.historyLocationMap.put(historyLocation.getEquipmentId(),historyLocation);
                 locationMap.put(equitmentId, serialPortData.getGPSLongitudeData() + "|" + serialPortData.getGPSLatitudeData());
             }
             //将historyLocation实例转换为currentbd
@@ -146,6 +149,8 @@ public class SerialDataTemp {
                 HistoryLocationOperationUtils.insertData(historyLocationArrayDeque);
             }
             DebugPrint.dPrint("SerialDataTemp->" + "locatiomMap.size:" + locationMap.size() + ", historyLocationArrayDeque.size:" + historyLocationArrayDeque.size());
+
+
             //HistoryLocationOperationUtils.insertData(historyLocation);
             //DebugPrint.dPrint("add one data:"+historyLocation.toString());
         } catch (Exception e) {

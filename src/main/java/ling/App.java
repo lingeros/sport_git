@@ -4,6 +4,7 @@ package ling;
 import ling.customFrame.LoginPanel;
 import ling.customFrame.MainPanel;
 import ling.mysqlOperation.CurrentbdOper;
+import ling.utils.SaveAsJsonThread;
 
 
 /**
@@ -23,9 +24,13 @@ public class App {
 
         LoginPanel loginPanel = LoginPanel.getInstance();
         loginPanel.login();
+        SaveAsJsonThread saveAsJsonThread =new SaveAsJsonThread();
+        Thread thread = new Thread(saveAsJsonThread);
+        thread.start();
 
 
     }
+
 
 
 }

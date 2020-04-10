@@ -29,7 +29,7 @@ public class MainPanel {
     private int addUserPgNum = 1;
     private static int bdUserPgNum = 1;
     private static int dataPgNum = 1;
-
+    public static int totalPageNum = CurrentbdOper.getPgNum();
     private static int jduge = 1;
     private int ASR = 1;
     private int AST = 1;
@@ -49,7 +49,7 @@ public class MainPanel {
     private static ArrayList<String> Sarray = new ArrayList();
     private static ArrayList<String> DTarray = new ArrayList();
     private static ArrayList<String> SDTarray = new ArrayList();
-    private static CustomLoginPanel thirdPane = new CustomLoginPanel();
+    private static JPanel thirdPane = new JPanel();
     private static JFrame mainframe = new JFrame("监控系统");
     private static Object[] bdUserT_columnNames = new Object[]{"用户编号", "姓名", "设备号", "佩戴状态", "剩余圈数", "心跳", "电量", "轨迹",
             "用时", "开始", "结束"};
@@ -257,7 +257,7 @@ public class MainPanel {
         bdUserT.setDefaultRenderer(Object.class, bdUserR);
         mainPanel.bdUserTB_clear(bdUserT_rowData);
         mainPanel.setbdUserT(bdUserT_rowData, bdUserPgNum);
-        bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+        bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
         thirdPane.add(bdUserJP);
         panelAlls(secondPane, bdUser, bdUBox, bdequipment, bdEBox, bd, refreshButton, refreshDataButton);
         mainPanel.bdUserTB_clear(bdUserT_rowData);
@@ -266,7 +266,7 @@ public class MainPanel {
         column8.setPreferredWidth(160);
         TableColumn column9 = bdUserT.getColumnModel().getColumn(9);
         column9.setPreferredWidth(160);
-        bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+        bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
         //添加多个控件
         panelAlls(thirdPane, bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
         secondPane.repaint();
@@ -629,7 +629,7 @@ public class MainPanel {
             p18.Box(bdUBox, bdEBox);
             p18.bdUserTB_clear(bdUserT_rowData);
             p18.setbdUserT(bdUserT_rowData, bdUserPgNum);
-            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
             panelAlls(thirdPane, borders[1], borders[2], borders[3], bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
             thirdPane.repaint();
 
@@ -659,7 +659,7 @@ public class MainPanel {
             MainPanel p19 = new MainPanel();
             p19.bdUserTB_clear(bdUserT_rowData);
             p19.setbdUserT(bdUserT_rowData, bdUserPgNum);
-            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
             secondPane.add(borders[0]);
             panelAlls(thirdPane, borders[1], borders[2], borders[3], bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
             thirdPane.repaint();
@@ -671,13 +671,15 @@ public class MainPanel {
             MainPanel p19 = new MainPanel();
             p19.bdUserTB_clear(bdUserT_rowData);
             p19.setbdUserT(bdUserT_rowData, bdUserPgNum);
-            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            bdUserSelectLabel.setText("跳转/共" +totalPageNum + "页");
             secondPane.add(borders[0]);
             panelAlls(thirdPane, borders[1], borders[2], borders[3], bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
             thirdPane.repaint();
         });
 
         refreshDataButton.addActionListener(e -> {
+            UserdataOperate.deleteAll();
+            UserdataOperate.addAll();
             CurrentbdOper.deleteAll();
             CurrentbdOper.addAll(MainPanel.getSettingCycle());
             AbnormalOper.deletaAllData();
@@ -686,7 +688,7 @@ public class MainPanel {
             MainPanel p19 = new MainPanel();
             p19.bdUserTB_clear(bdUserT_rowData);
             p19.setbdUserT(bdUserT_rowData, bdUserPgNum);
-            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
             secondPane.add(borders[0]);
             panelAlls(thirdPane, borders[1], borders[2], borders[3], bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
             thirdPane.repaint();
@@ -699,26 +701,27 @@ public class MainPanel {
             MainPanel p110 = new MainPanel();
             p110.bdUserTB_clear(bdUserT_rowData);
             p110.setbdUserT(bdUserT_rowData, bdUserPgNum);
-            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
             secondPane.add(borders[0]);
             panelAlls(thirdPane, borders[1], borders[2], borders[3], bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
             thirdPane.repaint();
         });
         bdUserPgdownJB.addActionListener(e -> {
             bdUserPgNum++;
-            if (bdUserPgNum >= currentbdOper.getPgNum())
-                bdUserPgNum = currentbdOper.getPgNum();
+            if(bdUserPgNum >= totalPageNum) {
+                bdUserPgNum = totalPageNum;
+            }
             MainPanel p114 = new MainPanel();
             p114.bdUserTB_clear(bdUserT_rowData);
             p114.setbdUserT(bdUserT_rowData, bdUserPgNum);
-            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
             panelAlls(thirdPane, bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
             thirdPane.repaint();
         });
         bdUserPgSelectJB.addActionListener(e -> {
             try {
                 int n = Integer.valueOf(bdUserPgSelectTF.getText());
-                if (n <= 0 || n > currentbdOper.getPgNum())
+                if (n <= 0 || n > totalPageNum)
                     mainPanel.RemindPgSelect(" 请根据总页数输入跳转页");
                 else {
                     bdUserPgNum = n;
@@ -729,7 +732,7 @@ public class MainPanel {
             MainPanel p111 = new MainPanel();
             p111.bdUserTB_clear(bdUserT_rowData);
             p111.setbdUserT(bdUserT_rowData, bdUserPgNum);
-            bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+            bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
             secondPane.add(borders[0]);
             panelAlls(thirdPane, borders[1], borders[2], borders[3], bdUserPgupJB, bdUserPgdownJB, bdUserSelectLabel, bdUserPgSelectTF, bdUserPgSelectJB, bdUserJP);
             thirdPane.repaint();
@@ -792,7 +795,7 @@ public class MainPanel {
                         MainPanel p = new MainPanel();
                         p.bdUserTB_clear(bdUserT_rowData);
                         p.setbdUserT(bdUserT_rowData, bdUserPgNum);
-                        bdUserSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+                        bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
                         thirdPane.repaint();
                     }
                 }
@@ -913,7 +916,7 @@ public class MainPanel {
             if (jduge == 2) {
                 if (dataPgNum >= mainPanel.getPgNumArray(Sarray))
                     dataPgNum = mainPanel.getPgNumArray(Sarray);
-                addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+                addDataPgSelectLabel.setText("跳转/共" + totalPageNum + "页");
                 mainPanel.DataT_clear(dataTable);
                 mainPanel.setDataT_starT(dataTable, Sarray, dataPgNum);
             }
@@ -959,7 +962,7 @@ public class MainPanel {
                 sql = " SELECT * FROM  currentbd limit " + se + "," + sa;
                 Sarray.clear();
                 currentbdOper.command(sql, Sarray);
-                addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNum() + "页");
+                addDataPgSelectLabel.setText("跳转/共" + totalPageNum + "页");
                 mainPanel.BindTable(dataTable, Sarray);
             }
 
@@ -1258,7 +1261,6 @@ public class MainPanel {
             }
         });
         deleteJB.addActionListener(e ->
-
         {
             userdataOperate.deleteAll();
             currentbdOper.deleteAll();

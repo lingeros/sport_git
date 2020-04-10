@@ -68,18 +68,69 @@ public class SerialPortListener implements SerialPortEventListener {
     }
 
     private SerialPortData receiveData(){
-        byte[] readBuffer = new byte[35];
+//        byte[] readBuffer = new byte[35];
         SerialPortData serialPortData = null;
         try{
-            int read_length = -1;
-            while(inputStream.available()>0){
-                read_length = inputStream.read(readBuffer);
-                if(read_length == -1){
+            StringBuilder cmd = new StringBuilder();
+            while (true) {
+                char Byte = (char)inputStream.read();
+                cmd.append(Byte);
+                if (Byte == '\n')
+                {
+                    cmd.append(Byte);
+                    String tmp = cmd.toString().replace("\0", "");
+                    DebugPrint.dPrint(tmp);
+                    if (tmp.length() > 15) {
+                        serialPortData = new SerialPortData(cmd.toString().replaceAll("\\r|\\n",""));
+                        DebugPrint.dPrint(TAG+"转换成串口数据："+serialPortData.toString());
+                    }
                     break;
                 }
             }
-            serialPortData = new SerialPortData((new String(readBuffer)).replaceAll("\\r|\\n",""));
-            DebugPrint.dPrint(TAG+"转换成串口数据："+serialPortData.toString());
+
+//            int read_length = -1;
+//            while(inputStream.available() > 0){
+//                read_length = inputStream.read(readBuffer);
+//                if(read_length == -1){
+//                    break;
+//                }
+//            }
+
+//
+//            while(true) {
+//
+//                int read_length = -1;
+//                while(inputStream.available() > 0){
+//                    read_length = inputStream.read(readBuffer);
+//                    if(read_length == -1){
+//                        break;
+//                    }
+//                }
+//
+//                String tmp = new String(readBuffer);
+//
+//                if (cmd.length() < 7) {
+//                    cmd = cmd + tmp;
+//                }
+//                else if (cmd.charAt(0) == 'A') {
+//                    break;
+//                } else if (cmd.length() > 9) {
+//                    throw new Exception("溢出，放弃");
+//                }
+//            }
+//            serialPortData = new SerialPortData(cmd.replaceAll("\\r|\\n",""));
+//            DebugPrint.dPrint(TAG+"转换成串口数据："+serialPortData.toString());
+
+//            int read_length = -1;
+//            while(inputStream.available()>0){
+//                read_length = inputStream.read(readBuffer);
+//                if(read_length == -1){
+//                    break;
+//                }
+//            }
+//
+//            serialPortData = new SerialPortData((new String(readBuffer)).replaceAll("\\r|\\n",""));
+//            DebugPrint.dPrint(TAG+"转换成串口数据："+serialPortData.toString());
         }catch (Exception e){
             DebugPrint.dPrint(TAG ,e.toString());
         }

@@ -3,23 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <title>Index</title>
+    <style type="text/css">
+        body, html, #container {
+            height: 100%;
+            margin: 0;
+            font: 12px Arial;
+        }
+    </style>
 </head>
 <body>
 
-<button id="button2">button2</button>
+<button id="button">刷新</button>
+<div id="container" tabindex="0"></div>
 </body>
+<script src="https://webapi.amap.com/maps?v=1.4.15&key=56452020d32767c0bd1ac3da6446a19f"></script>
 <script type="text/javascript" src="../js/jquery-3.4.1.js"></script>
+<script type="text/javascript" src="../js/liteToolbar.js"></script>
 <script type="text/javascript">
-window.json_data = "null";
+
 $(document).ready(function(){
-    $.get("http://127.0.0.1:9999/demo.json",function(data){
-        window.json_data = data;
-        console.log('ready');
+    var map = new AMap.Map("container", {
+        resizeEnable: true,
+        zoom: 16
     });
+    var markers = [];
+    let data_list = [];
+
+    function getPoint(){
+
+        $.get("http://127.0.0.1:9999/demo.json",function(data,status){
+            $.each($.parseJSON(data),function (idx,obj) {
+                let one_point = [];
+                one_point.push(obj.longitudeData);
+                one_point.push(obj.latitudeData);
+                data_list.push(one_point);
+                //alert(data_list);
+            });
+            console.log(data);
+        });
+    }
+
+
+    $('#button').click(function () {
+        refreshMap();
+    });
+
+    setInterval(function () {
+        getPoint();
+    },5000);
+    setInterval(function () {
+        refreshMap();
+    },5000);
+
+    function refreshMap(){
+        console.log("刷新了");
+        markers = [];
+        for(var i=0;i<data_list.length;i++){
+            var marker = new AMap.Marker({
+                // position:new AMap.LngLat(parseFloat(data_list[i][1]),parseFloat(data_list[i][0])),
+                position:new AMap.LngLat(data_list[i][0],data_list[i][1]),
+                map:map
+            });
+            markers.push(marker);
+        }
+        map.setFitView();
+    }
 });
-$("#button2").click(function(){
-		console.log(window.json_data);
-});
+
 
 </script>
 </html>

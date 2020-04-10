@@ -362,16 +362,16 @@ public class CurrentbdOper {
     }
 
     public static int getPgNumF() {
-        int i = -1;
+        int i = 1;
         try {
             connection = DruidOper.getConnection();
-            sql = "SELECT COUNT(*) FROM currentbd where run='false'";
+            sql = "SELECT COUNT(*) FROM currentbd";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 i = resultSet.getInt(1);
             }
-            i = i / 20 + 1;
+            i = i / 20;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -381,16 +381,16 @@ public class CurrentbdOper {
     }
 
     public static int getPgNum() {
-        int i = -1;
+        int i = 1;
         try {
             connection = DruidOper.getConnection();
-            sql = "SELECT COUNT(*) FROM currentbd where run='true'";
+            sql = "SELECT COUNT(*) FROM currentbd";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 i = resultSet.getInt(1);
             }
-            i = i / 20 + 1;
+            i = i / 20;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
