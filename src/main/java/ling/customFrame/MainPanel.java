@@ -72,6 +72,8 @@ public class MainPanel {
     //启动线程
     ExtoTxt extoTxt = new ExtoTxt();
     Thread eThread = new Thread(extoTxt);
+    SaveAsJsonThread st =new SaveAsJsonThread();
+    Thread saveAsJsonThread = new Thread(st);
 
     void mainpane() {
 
@@ -1124,6 +1126,10 @@ public class MainPanel {
                     eThread = new Thread(extoTxt);
                 }
                 eThread.start();
+                if(saveAsJsonThread == null){
+                    saveAsJsonThread = new Thread(st);
+                }
+                saveAsJsonThread.start();
                 try {
                     if (!isBegin) {
                         isBegin = true;

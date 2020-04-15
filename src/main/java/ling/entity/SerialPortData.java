@@ -2,6 +2,9 @@ package ling.entity;
 
 import ling.utils.DebugPrint;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 串口传输的数据封装
  */
@@ -18,7 +21,7 @@ public class SerialPortData {
     private byte dataTail;
 
     //设备号id 一般为一个数字 从0-99
-    private int equitmentID;
+    private String equitmentID;
 
     //串口传入的所有数据 A12E11321.7995N23.9.2798H0B
     private String allData;
@@ -39,7 +42,20 @@ public class SerialPortData {
     private String GPSLatitudeType;//纬度类型
     private String HeartRateData;//心率
 
+    private Map<String,String> ids = new HashMap<>();
 
+    {
+        ids.put("00","0");
+        ids.put("01","1");
+        ids.put("02","2");
+        ids.put("03","3");
+        ids.put("04","4");
+        ids.put("05","5");
+        ids.put("06","6");
+        ids.put("07","7");
+        ids.put("08","8");
+        ids.put("09","9");
+    }
     /**
      * 对数据进行初始化 也就是进行分割
      *
@@ -47,54 +63,55 @@ public class SerialPortData {
      */
     public String initData() {
         String tempData = allData;
-        if (allData == null) {
+        boolean isStartsWithA = tempData.startsWith("A");
+        if (!(isStartsWithA)) {
             return DATA_ERROE;
-        } else {
-            boolean isStartsWithA = tempData.startsWith("A");
-            if (!(isStartsWithA)) {
-                return DATA_ERROE;
-            } else {
-                //A12E11321.7995N23.9.2798H0B
-                String str1 = tempData.split("A")[1];//去掉A 12E11321.7995N23.9.2798H0B
-                String str2 = str1.split("B")[0];//去掉B 12E11321.7995N2309.2798H0
-                equitmentData = str2;
-                String equitmentIDStr = "0";//设备号id的字符串格式
-
-                if (str2 != null) {
-                    if (str2.contains("E")) {
-                        equitmentIDStr = str2.split("E")[0];
-                        ;
-                    } else {
-                        equitmentIDStr = str2.split("W")[0];
-                        ;
-                    }
-                    try {
-                        equitmentID = Integer.decode(equitmentIDStr);//获得设备号id
-                    } catch (Exception e) {
-                        DebugPrint.dPrint("SerialPortData:" + "dealData error:" + e.toString());
-                        return DATA_ERROE;
-                    }
-                    String temp = dealData(str2);
-                    String[] strings = temp.split(",");
-                    GPSLongitudeData = strings[0];
-                    GPSLatitudeData = strings[1];
-                    HeartRateData = strings[2];
-                    if (str2.contains("E")) {
-                        GPSLongitudeType = "E";
-                    } else {
-                        GPSLongitudeType = "W";
-                    }
-                    if (str2.contains("S")) {
-                        GPSLatitudeType = "S";
-                    } else {
-                        GPSLatitudeType = "N";
-                    }
-                } else {
-                    return DATA_ERROE;
-                }
-                return SUCCESS;
-            }
         }
+
+        //A12E11321.7995N23.9.2798H0B
+        String str1 = tempData.split("A")[1];//去掉A 12E11321.7995N23.9.2798H0B
+        String str2 = str1.split("B")[0];//去掉B 12E11321.7995N2309.2798H0
+        equitmentData = str2;
+        String equitmentIDStr = "0";//设备号id的字符串格式
+
+        if (str2 != null) {
+            if (str2.contains("E")) {
+                equitmentIDStr = str2.split("E")[0];
+                ;
+            } else {
+                equitmentIDStr = str2.split("W")[0];
+                ;
+            }
+            try {
+//                equitmentID = equitmentIDStr;//获得设备号id
+                if(ids.get(equitmentIDStr) != null){
+                    equitmentID = ids.get(equitmentIDStr);
+                }
+
+            } catch (Exception e) {
+                DebugPrint.dPrint("SerialPortData:" + "dealData error:" + e.toString());
+                return DATA_ERROE;
+            }
+            String temp = dealData(str2);
+            String[] strings = temp.split(",");
+            GPSLongitudeData = strings[0];
+            GPSLatitudeData = strings[1];
+            HeartRateData = strings[2];
+            if (str2.contains("E")) {
+                GPSLongitudeType = "E";
+            } else {
+                GPSLongitudeType = "W";
+            }
+            if (str2.contains("S")) {
+                GPSLatitudeType = "S";
+            } else {
+                GPSLatitudeType = "N";
+            }
+        } else {
+            return DATA_ERROE;
+        }
+        return SUCCESS;
+
 
     }
 
@@ -295,7 +312,9 @@ public class SerialPortData {
 
     public SerialPortData(String allData) {
         this.allData = allData;
-        initData();
+        if (this.allData != null) {
+            initData();
+        }
     }
 
 
@@ -330,11 +349,11 @@ public class SerialPortData {
         this.dataTail = dataTail;
     }
 
-    public int getEquitmentID() {
+    public String getEquitmentID() {
         return equitmentID;
     }
 
-    public void setEquitmentID(int equitmentID) {
+    public void setEquitmentID(String equitmentID) {
         this.equitmentID = equitmentID;
     }
 

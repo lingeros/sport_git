@@ -26,6 +26,10 @@ public class CurrentbdOper {
     public static Map<String, String> showMsgMap = new HashMap<>();
     //变化队列 用来存储圈数发生改变的信息 string格式：equipmentID|cycle_num
     private static ArrayDeque<String> changeQueue = new ArrayDeque<>();
+
+    //用来记录哪个设备已经完成跑圈，然后就不用接收该设备的数据了
+    public static Map<String, Boolean> runOutMap = new HashMap<>();
+
     //增加锁  用来防止同时修改changeQueue
     private static Lock lock = new ReentrantLock(true);
 
@@ -58,14 +62,14 @@ public class CurrentbdOper {
      * 判断是否有数据 如果有则分别将数据拆分 然后更新showMsgMap
      * 如果没有 则继续输出
      */
-    public static void updateShowMsgMap(){
+    public static void updateShowMsgMap() {
         String[] changes = getChangeQueue();
-        if(changes != null){
+        if (changes != null) {
             for (int i = 0; i < changes.length; i++) {
                 String[] split = changes[i].split("|");
                 String equipmentId = split[0];
                 String cycleNum = split[1];
-                showMsgMap.put(equipmentId,cycleNum);
+                showMsgMap.put(equipmentId, cycleNum);
             }
         }
     }
@@ -174,7 +178,12 @@ public class CurrentbdOper {
         } else {
             currentbd.setRun("false");
         }
-        currentbd.setTotalTime(historyLocation.getTotalTime());
+        if (historyLocation.getTotalTime() == null || "null".equals(historyLocation.getTotalTime())) {
+            currentbd.setTotalTime("0");
+        } else {
+
+            currentbd.setTotalTime(historyLocation.getTotalTime());
+        }
         currentbd.setUser_condition("正常");
         currentbd.setWatch_power("正常");
         return currentbd;
@@ -444,23 +453,23 @@ public class CurrentbdOper {
         }
     }
 
-    public static String getCurrentPosition(String equipmentId){
+    public static String getCurrentPosition(String equipmentId) {
         String result = "";
         connection = DruidOper.getConnection();
-        if(connection !=null){
+        if (connection != null) {
             try {
                 String sql = "select user_long,lat from currentbd where equipment_id= ? ;";
                 preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setString(1,equipmentId);
+                preparedStatement.setString(1, equipmentId);
                 resultSet = preparedStatement.executeQuery();
-                while(resultSet.next()){
+                while (resultSet.next()) {
                     String longitudeData = resultSet.getString("user_long");
                     String latitudeData = resultSet.getString("lat");
-                    result = longitudeData + "|" +latitudeData;
+                    result = longitudeData + "|" + latitudeData;
                 }
 
-            }catch(Exception e){
-                DebugPrint.dPrint(TAG+e);
+            } catch (Exception e) {
+                DebugPrint.dPrint(TAG + e);
             }
 
         }

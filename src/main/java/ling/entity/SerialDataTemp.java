@@ -34,6 +34,10 @@ public class SerialDataTemp {
         try {
             HistoryLocation historyLocation = new HistoryLocation();
             String equitmentId = "" + serialPortData.getEquitmentID();
+            //判断当前设备是否已经跑完了，如果跑完了就不用记录数据了
+            if (CurrentbdOper.runOutMap.get(equitmentId) != null && CurrentbdOper.runOutMap.get(equitmentId)) {
+                return;
+            }
             historyLocation.setEquipmentId(equitmentId);
             String lastLocation = locationMap.get(equitmentId);
             if (lastLocation != null) {//不是第一次存储
@@ -65,9 +69,11 @@ public class SerialDataTemp {
                             //如果剩余一圈，并且准备跑完了
                             historyLocation.setTotalTime(CalculateUtils.getTime(MainPanel.getStartTime()));
                             circleNum = 0;
+                            CurrentbdOper.runOutMap.put(historyLocation.getEquipmentId(), true);
 
                         } else {
                             circleNum = circleNum - 1;
+                            historyLocation.setTotalTime("0");
 
                         }
                         CurrentbdOper.setChangeQueue(historyLocation.getEquipmentId() + "|" + circleNum);
@@ -99,6 +105,7 @@ public class SerialDataTemp {
                 historyLocation.setLongitudeType(serialPortData.getGPSLongitudeType());
                 historyLocation.setLatitudeData(serialPortData.getGPSLatitudeData());
                 historyLocation.setLatitudeType(serialPortData.getGPSLatitudeType());
+
                 historyLocation.setSaveTime(new Timestamp(System.currentTimeMillis()).toString());
                 historyLocation.setCircleNum(circleNum + "");
                 historyLocation.setIsBeginRun(isRuning);
@@ -120,7 +127,7 @@ public class SerialDataTemp {
             }*/
                 DebugPrint.dPrint(historyLocation.toString());
                 serialDataTempMap.put(equitmentId, historyLocation);
-                SaveAsJsonThread.historyLocationMap.put(historyLocation.getEquipmentId(),historyLocation);
+                SaveAsJsonThread.historyLocationMap.put(historyLocation.getEquipmentId(), historyLocation);
             } else {//第一次存储
                 if (startPointMap.get(historyLocation.getEquipmentId()) == null) {
                     String startPoint = serialPortData.getGPSLatitudeData() + "|" + serialPortData.getGPSLongitudeData();
@@ -137,7 +144,8 @@ public class SerialDataTemp {
                 historyLocation.setSaveTime(new Timestamp(System.currentTimeMillis()).toString());
                 historyLocation.setHeartRate(serialPortData.getHeartRateData());
                 serialDataTempMap.put(equitmentId, historyLocation);
-                SaveAsJsonThread.historyLocationMap.put(historyLocation.getEquipmentId(),historyLocation);
+                CurrentbdOper.runOutMap.put(equitmentId, false);
+                SaveAsJsonThread.historyLocationMap.put(historyLocation.getEquipmentId(), historyLocation);
                 locationMap.put(equitmentId, serialPortData.getGPSLongitudeData() + "|" + serialPortData.getGPSLatitudeData());
             }
             //将historyLocation实例转换为currentbd
@@ -145,7 +153,7 @@ public class SerialDataTemp {
             DebugPrint.dPrint(currentbd.toString());
             CurrentbdOper.addOrUpdate("update", currentbd);
             historyLocationArrayDeque.push(historyLocation);
-            if (historyLocationArrayDeque.size() > 5) {
+            if (historyLocationArrayDeque.size() >= 1) {
                 HistoryLocationOperationUtils.insertData(historyLocationArrayDeque);
             }
             DebugPrint.dPrint("SerialDataTemp->" + "locatiomMap.size:" + locationMap.size() + ", historyLocationArrayDeque.size:" + historyLocationArrayDeque.size());
