@@ -75,6 +75,33 @@ public class MainPanel {
     SaveAsJsonThread st =new SaveAsJsonThread();
     Thread saveAsJsonThread = new Thread(st);
 
+    public void config_timer(final JButton refreshButton) {
+        // run in a second
+        // 每一秒钟执行一次
+        final long timeInterval = 1000;
+        Runnable runnable = new Runnable() {
+            public void run() {
+                while (true) {
+                    // ------- code for task to run
+                    // ------- 要运行的任务代码
+                    //System.out.println("Hello, stranger");
+                    // ------- ends here
+                    try {
+                        refreshButton.doClick();
+                        // sleep()：同步延迟数据，并且会阻塞线程
+                        Thread.sleep(timeInterval);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        //创建定时器
+        Thread thread = new Thread(runnable);
+        //开始执行
+        thread.start();
+    }
+
     void mainpane() {
 
         //设置字体格式
@@ -107,6 +134,7 @@ public class MainPanel {
         final JButton addnewequipment = new JButton("确定");
         final JButton bd = new JButton("确定");
         final JButton refreshButton = new JButton("刷新");
+        config_timer(refreshButton);
         final JButton refreshDataButton = new JButton("数据初始化");
         JButton redClose = new JButton();
         JButton redSmallest = new JButton();
@@ -211,8 +239,8 @@ public class MainPanel {
         bdUser.setBounds(190, 28, 80, 20);
         bdequipment.setBounds(430, 28, 80, 20);
         bd.setBounds(650, 28, 80, 25);
-        refreshButton.setBounds(750, 28, 80, 25);
-        refreshDataButton.setBounds(850, 28, 120, 25);
+//        refreshButton.setBounds(750, 28, 80, 25);
+        refreshDataButton.setBounds(750, 28, 120, 25);
         final JComboBox<String> bdUBox = new JComboBox();
         bdUBox.setBounds(250, 26, 145, 25);
         final JComboBox<String> bdEBox = new JComboBox();
@@ -261,7 +289,8 @@ public class MainPanel {
         mainPanel.setbdUserT(bdUserT_rowData, bdUserPgNum);
         bdUserSelectLabel.setText("跳转/共" + totalPageNum + "页");
         thirdPane.add(bdUserJP);
-        panelAlls(secondPane, bdUser, bdUBox, bdequipment, bdEBox, bd, refreshButton, refreshDataButton);
+//        panelAlls(secondPane, bdUser, bdUBox, bdequipment, bdEBox, bd, refreshButton, refreshDataButton);
+        panelAlls(secondPane, bdUser, bdUBox, bdequipment, bdEBox, bd,  refreshDataButton);
         mainPanel.bdUserTB_clear(bdUserT_rowData);
         mainPanel.setbdUserT(bdUserT_rowData, bdUserPgNum);
         TableColumn column8 = bdUserT.getColumnModel().getColumn(8);
@@ -625,7 +654,8 @@ public class MainPanel {
         bindingJB.addActionListener(e -> {
             secondPane.removeAll();
             thirdPane.removeAll();
-            panelAlls(secondPane, borders[0], bdUser, bdUBox, bdequipment, bdEBox, bd, refreshButton, refreshDataButton);
+//            panelAlls(secondPane, borders[0], bdUser, bdUBox, bdequipment, bdEBox, bd, refreshButton, refreshDataButton);
+            panelAlls(secondPane, borders[0], bdUser, bdUBox, bdequipment, bdEBox, bd,  refreshDataButton);
             secondPane.repaint();
             MainPanel p18 = new MainPanel();
             p18.Box(bdUBox, bdEBox);
@@ -909,7 +939,7 @@ public class MainPanel {
                     dataPgNum = currentbdOper.getPgNumF();
                 int se = 20 * (dataPgNum - 1);
                 int sa = 20;
-                sql = " SELECT * FROM  currentbd where run='false' limit " + se + "," + sa;
+                sql = " SELECT * FROM  currentbd  limit " + se + "," + sa;
                 Sarray.clear();
                 currentbdOper.command(sql, Sarray);
                 addDataPgSelectLabel.setText("跳转/共" + currentbdOper.getPgNumF() + "页");
@@ -1194,9 +1224,10 @@ public class MainPanel {
                 ASR = 1;
                 try {
                     String str = "C";
-                    byte[] sb = str.getBytes();
+
                     HistoryLocationOperationUtils.deletaAllData();
                     AbnormalOper.deletaAllData();
+
                     AST = 1;
                     ImageIcon ii21 = new ImageIcon("src/ima/end.png");
                     Image temp21 = ii21.getImage().getScaledInstance(addUser.getWidth(), addUser.getHeight(), ii21.getImage().SCALE_DEFAULT);
